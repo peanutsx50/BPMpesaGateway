@@ -22,6 +22,9 @@ class BPMG_Registration {
 
     //add custom fields to registration form
     public function bpmg_add_custom_registration_fields() {
-        echo '<h1>working</h1>';
+        $template_path = BPMG_PLUGIN_PATH . 'includes/templates/registration-fields.php';
+        if (file_exists($template_path)) {
+            include $template_path;
+        }
     }
 }

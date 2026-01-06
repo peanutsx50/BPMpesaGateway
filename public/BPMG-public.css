@@ -1,0 +1,64 @@
+/* BPMpesaGateway Custom Registration Styles */
+.bpmg_custom_registration_container {
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 20px;
+  margin: 20px 0;
+  max-width: 500px;
+}
+
+.bpmg_custom_registration_container h2 {
+  color: #333;
+  font-size: 18px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.bpmg_custom_registration_container p {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+.bpmg_custom_registration_container label {
+  display: block;
+  color: #333;
+  font-weight: 500;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.bpmg_custom_registration_container input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.bpmg_custom_registration_container input:focus {
+  border-color: #00a651;
+  outline: none;
+  box-shadow: 0 0 0 1px rgba(0, 166, 81, 0.2);
+}
+
+.bpmg_mpesa_amount {
+  background: #f0f9f3;
+  border-left: 3px solid #00a651;
+  padding: 10px 15px;
+  margin: 15px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.bpmg_mpesa_note {
+  font-size: 12px;
+  color: #777;
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* End of BPMpesaGateway Custom Registration Styles */
