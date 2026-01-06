@@ -30,15 +30,28 @@
 
 namespace Inc\base;
 
+use Inc\core\BPMG_Registration;
+
 class BPMG
 {
     // Constructor to set up hooks
-    public function __construct()
+    public function __construct() {
+        $this->register();
+        $this->load_core_classes();
+    }
+
+    // register hooks
+    public function register()
     {
         // enqueue hooks: admin and public, loads CSS and js files
         add_action('init', [BPMG_Post_Types::class, 'register_custom_post_type']);
         add_action('admin_menu', [BPMG_Admin_Pages::class, 'add_admin_pages']);
         add_action('admin_enqueue_scripts', [BPMG_Enqueue_Admin::class, 'bpmg_enqueue_admin']);
         add_action('wp_enqueue_scripts', [BPMG_Enqueue_Public::class, 'bpmg_enqueue_public']);
+    }
+
+    // Load core classes
+    private function load_core_classes(){
+        $registration = new BPMG_Registration();
     }
 }
