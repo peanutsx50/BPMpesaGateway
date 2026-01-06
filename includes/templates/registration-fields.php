@@ -21,7 +21,7 @@ if (! defined('ABSPATH')) {
     </div>
     <div class="bpmg_mpesa_form">
         <label for="bpmg_mpesa_phone">Enter M-Pesa Phone Number:</label>
-        <input type="tel" id="bpmg_mpesa_phone" name="bpmg_mpesa_phone" value="" placeholder="e.g., 0712 345 678" />
+        <input type="tel" id="bpmg_mpesa_phone" name="bpmg_mpesa_phone" value="" placeholder="e.g., +254 712 345 678" />
     </div>
     <div class="bpmg_mpesa_note">
         A payment request will be sent to this number. Use the PIN prompt on your phone to complete payment.
