@@ -21,7 +21,7 @@ class BPMG_Activator {
      */
     public static function activate() {
         // Activation code goes here.
-        Test_Plugin_Post_Types::register_custom_post_type();
+        BPMG_Post_Types::register_custom_post_type();
         flush_rewrite_rules();
     }
 }
