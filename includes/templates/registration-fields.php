@@ -26,4 +26,7 @@ if (! defined('ABSPATH')) {
     <div class="bpmg_mpesa_note">
         A payment request will be sent to this number. Use the PIN prompt on your phone to complete payment.
     </div>
+    <div class="bpmg_mpesa_button">
+        <button type="button" id="bpmg_send_mpesa_request">Send M-Pesa Payment Request</button>
+    </div>
 </div>

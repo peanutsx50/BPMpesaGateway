@@ -61,4 +61,8 @@
   font-style: italic;
 }
 
+.bpmg_mpesa_button {
+  margin-top: 10px;
+}
+
 /* End of BPMpesaGateway Custom Registration Styles */
