@@ -20,7 +20,7 @@
  * Update URI:        https://example.com/my-plugin/
  * Text Domain:       bpmpesagateway
  * Domain Path:       /languages
- * Requires Plugins:  BuddyPress
+ * Requires Plugins:  buddypress
  */
 
 // Exit if accessed directly

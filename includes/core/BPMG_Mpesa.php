@@ -13,6 +13,8 @@ class BPMG_Mpesa
     private $access_token;
     private $timestamp;
     private $environment = 'sandbox'; //sandbox or production
+    private $account_reference;
+    private $transaction_description;
     private $err;
     private $url;
 
@@ -23,10 +25,12 @@ class BPMG_Mpesa
         // Initialize Mpesa properties from settings
         $this->consumer_key        = getenv('bpmg_consumer_key');
         $this->consumer_secret     = getenv('bpmg_consumer_secret');
-        $this->shortcode           = getenv('bpmg_paybill');
+        $this->shortcode           = getenv('bpmg_shortcode');
         $this->passkey             = getenv('bpmg_passkey');
         $this->access_token = $this->generate_access_token($this->consumer_key, $this->consumer_secret);
         $this->password            = $this->generate_password();
+        $this->account_reference   = get_option('bpmpesa_account_reference');
+        $this->transaction_description = get_option('bpmpesa_transaction_reference');
         $this->timestamp            = date('YmdHis');
         $this->url = $this->environment === 'production' ?
             'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest' :
@@ -36,6 +40,10 @@ class BPMG_Mpesa
     // Mpesa STK push request function
     public function send_stk_push_request($phone_number)
     {
+        // check if consumer_key, consumer_secret, shortcode, passkey is empty
+        if ($this->validate_config()) {
+            return ['status' => 'error', 'message' => 'Missing required Mpesa configuration'];
+        }
         try {
             $data = [
                 "BusinessShortCode" => $this->shortcode, // paybill number
@@ -46,8 +54,8 @@ class BPMG_Mpesa
                 "PartyA" => $phone_number, // phone number making payment
                 "PartyB" => $this->shortcode, // paybill number
                 "PhoneNumber" => $phone_number,
-                "AccountReference" => get_option('bpmpesa_account_reference'), // check if empty and provide default
-                "TransactionDesc" => get_option('bpmpesa_transaction_reference'), // check if empty and provide default
+                "AccountReference" => $this->account_reference,
+                "TransactionDesc" => $this->transaction_description,
                 "CallBackURL" => home_url('/callback'),
             ];
             // send request to mpesa api
@@ -83,5 +91,18 @@ class BPMG_Mpesa
         $data_to_encode = $this->shortcode . $this->passkey . $this->timestamp;
         $password = base64_encode($data_to_encode);
         return $password;
+    }
+
+    //validate all the field values are not empty
+    private function validate_config()
+    {
+        $required_fields = ['consumer_key', 'consumer_secret', 'shortcode', 'passkey', 'account_reference', 'transaction_description'];
+
+        foreach ($required_fields as $field) {
+            if (empty($this->$field)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
