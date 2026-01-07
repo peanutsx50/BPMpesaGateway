@@ -50,11 +50,12 @@ class BPMG_Registration
      * @return void Outputs JSON response and terminates execution.
      */
 
-    private function handle_mpesa_request()
+    public function handle_mpesa_request()
     {
         // Check nonce for security
         if (!isset($_POST['bpmg_nonce']) || !wp_verify_nonce($_POST['bpmg_nonce'], 'bpmg_mpesa_nonce')) {
             wp_send_json_error(['message' => 'Invalid request']); // deny request if nonce is invalid
+            wp_die();
         }
         $phone = sanitize_text_field($_POST['phone']); // this code receives phone number from ajax request via post
         // send the request to mpesa api
@@ -65,6 +66,7 @@ class BPMG_Registration
         } else {
             wp_send_json_error(['message' => 'Failed to send payment request. Please try again.']);
         }
+        wp_die();
     }
 
     //send mpesa payment request

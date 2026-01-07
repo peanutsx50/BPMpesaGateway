@@ -38,6 +38,7 @@ document.addEventListener("DOMContentLoaded", function () {
         bpmg_send_mpesa_request(button);
       } catch (error) {
         e.preventDefault();
+        console.error("Error:", error);
         button.disabled = false;
         button.textContent = "Send M-Pesa Payment Request";
         errorDiv.textContent =
@@ -73,7 +74,7 @@ function bpmg_send_mpesa_request(button) {
         button.disabled = false;
         button.textContent = "Send M-Pesa Payment Request";
         const errorDiv = document.getElementById("bpmg_error_message");
-        errorDiv.textContent = data.data || "Failed to send M-Pesa request.";
+        errorDiv.textContent = data.data.message || "Failed to send M-Pesa request.";
         errorDiv.style.display = "block";
       }
     })
