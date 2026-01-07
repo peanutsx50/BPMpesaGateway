@@ -52,7 +52,7 @@ if (!defined('ABSPATH')) {
                     <label>
                         <input type="checkbox" name="bpmpesa_show_paybill" value="1"
                             <?php checked(1, get_option('bpmpesa_show_paybill')); ?>>
-                        Show Paybill and Account Number if payment fails
+                        Show Paybill and Account Number if stk push fails
                     </label>
                 </td>
             </tr>

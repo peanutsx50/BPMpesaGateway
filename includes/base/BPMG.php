@@ -9,8 +9,8 @@
  * @link       http://example.com
  * @since      1.0.0
  *
- * @package    Test_Plugin
- * @subpackage Test_Plugin/includes
+ * @package    BPMpesaGateway
+ * @subpackage BPMpesaGateway/includes
  */
 
 /**
@@ -23,9 +23,9 @@
  * version of the plugin.
  *
  * @since      1.0.0
- * @package    Test_Plugin
- * @subpackage Test_Plugin/includes
- * @author     Your Name <email@example.com>
+ * @package    BPMpesaGateway
+ * @subpackage BPMpesaGateway/includes
+ * @author     Festus Murimi <murimifestus09@gmail.com>
  */
 
 namespace Inc\base;

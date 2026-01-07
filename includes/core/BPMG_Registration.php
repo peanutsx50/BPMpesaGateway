@@ -31,7 +31,8 @@ class BPMG_Registration
             include $template_path;
         }
     }
-    
+
     //check payment status
     //complete registration
+    //save transaction details
 }
