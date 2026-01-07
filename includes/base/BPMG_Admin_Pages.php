@@ -19,6 +19,9 @@ class BPMG_Admin_Pages{
     
     public static function admin_index(){
         // Admin page content goes here
-        echo '<h1>Welcome to the BPMpesaGateway Admin Page</h1>';
+        $template_path = BPMG_PLUGIN_PATH . 'includes/templates/admin-template.php';
+        if (file_exists($template_path)) {
+            include $template_path;
+        }
     }
 }
