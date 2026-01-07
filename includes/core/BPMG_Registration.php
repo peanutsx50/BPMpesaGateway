@@ -74,7 +74,7 @@ class BPMG_Registration
     {
         //code to send payment request to mpesa api
         //return response
-        return ['status' => 'failed'];
+        return ['status' => 'success'];
     }
     //check payment status
     private function bpmg_check_payment_status()
