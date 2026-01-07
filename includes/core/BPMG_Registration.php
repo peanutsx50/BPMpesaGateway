@@ -26,7 +26,26 @@ class BPMG_Registration
         add_action('wp_ajax_nopriv_bpmg_send_mpesa_request', array($this, 'handle_mpesa_request')); // non-logged in users
     }
 
-    //add custom fields to registration form
+    /**
+     * Add custom M-Pesa registration fields to the BuddyPress registration form.
+     *
+     * This method is hooked to 'bp_before_registration_submit_buttons' and is responsible
+     * for displaying additional input fields on the registration form. The fields are 
+     * included from a separate template file to keep markup organized.
+     *
+     * The template file path is constructed from the plugin's base path:
+     * BPMG_PLUGIN_PATH . 'includes/templates/registration-fields.php'
+     *
+     * If the template file exists, it is included and its contents (HTML inputs, labels, etc.)
+     * are rendered on the registration form. If the file does not exist, nothing is output.
+     *
+     * Usage:
+     * This function is automatically triggered via the BuddyPress hook when rendering 
+     * the registration form.
+     *
+     * @return void Outputs HTML content from the template file if it exists.
+     */
+
     public function bpmg_add_custom_registration_fields()
     {
         $template_path = BPMG_PLUGIN_PATH . 'includes/templates/registration-fields.php';
@@ -59,36 +78,15 @@ class BPMG_Registration
         }
         $phone = sanitize_text_field($_POST['phone']); // this code receives phone number from ajax request via post
         // send the request to mpesa api
-        $payment_response = $this->bpmg_send_mpesa_payment_request($phone);
+        $BPMG_Mpesa = new BPMG_Mpesa();
+        $payment_response = $BPMG_Mpesa->send_stk_push_request($phone);
         // handle the response
         if ($payment_response['status'] === 'success') {
-            wp_send_json_success(['message' => 'Payment request sent successfully. Please complete the payment on your phone.']);
+            wp_send_json_success(['message' => 'Payment request sent successfully. Please complete the payment on your phone.']); // send response back to ajax
         } else {
             wp_send_json_error(['message' => 'Failed to send payment request. Please try again.']);
         }
         wp_die();
     }
 
-    //send mpesa payment request
-    private function bpmg_send_mpesa_payment_request($phone)
-    {
-        //code to send payment request to mpesa api
-        //return response
-        return ['status' => 'success'];
-    }
-    //check payment status
-    private function bpmg_check_payment_status()
-    {
-        //code to check payment status
-    }
-    //save transaction details
-    private function bpmg_save_transaction_details()
-    {
-        //code to save transaction details
-    }
-    //complete registration
-    private function bpmg_complete_registration()
-    {
-        //code to complete registration after payment confirmation
-    }
 }

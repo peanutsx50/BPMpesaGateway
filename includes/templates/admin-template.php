@@ -49,6 +49,38 @@ if (!defined('ABSPATH')) {
                 </td>
             </tr>
 
+            <!-- M-Pesa Account Reference -->
+            <tr>
+                <th scope="row">Account Reference Prefix</th>
+                <td>
+                    <input type="text"
+                        name="bpmpesa_account_reference"
+                        value="<?php echo esc_attr(get_option('bpmpesa_account_reference')); ?>"
+                        class="regular-text">
+                    <p style="margin-top: 5px; font-style: italic;">
+                        Prefix used to generate M-Pesa payment references.
+                        Example: <code>INV</code> will produce <code>INV001</code>, <code>INV002</code>.
+                        This helps identify and match incoming payments.
+                    </p>
+                </td>
+            </tr>
+
+            <!-- Transaction Reference -->
+            <tr>
+                <th scope="row">Transaction Reference Label</th>
+                <td>
+                    <input type="text"
+                        name="bpmpesa_transaction_reference"
+                        value="<?php echo esc_attr(get_option('bpmpesa_transaction_reference')); ?>"
+                        class="regular-text">
+                    <p style="margin-top: 5px; font-style: italic;">
+                        Text shown on the customer’s M-Pesa statement to identify your business or payment purpose.
+                        Example: <code>Axios Tech Payment</code> or <code>Online Order</code>.
+                    </p>
+                </td>
+            </tr>
+
+
             <!-- Show Paybill on failure -->
             <tr>
                 <th scope="row">Show Paybill on Failure</th>

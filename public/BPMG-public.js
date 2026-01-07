@@ -66,7 +66,7 @@ function bpmg_send_mpesa_request(button) {
   })
     .then((response) => response.json())
     .then((data) => {
-      if (data.success) {
+      if (data.success) { // return true if successful
         // Payment request sent successfully
         button.textContent = "Request Sent! Please check your phone.";
         button.style.backgroundColor = "#4CAF50"; // Change button color to indicate success
