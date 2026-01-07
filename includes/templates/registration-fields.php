@@ -17,7 +17,7 @@ if (! defined('ABSPATH')) {
     <h2>Complete Registration with Mpesa</h2>
     <p>Enter your phone number to receive a payment request</p>
     <div class="bpmg_mpesa_amount">
-        <strong>Amount to pay:</strong> KES 1,200
+        <strong>Amount to pay:</strong> <?php echo esc_attr(get_option('bpmpesa_amount') ?: 0); ?>
     </div>
     <div class="bpmg_mpesa_form">
         <label for="bpmg_mpesa_phone">Enter M-Pesa Phone Number:</label>

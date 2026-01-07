@@ -19,6 +19,10 @@ if (!defined('ABSPATH')) {
     </p>
 
     <form method="post" action="options.php">
+        <?php
+        settings_fields('bpmpesa_settings_group');
+        do_settings_sections('bpmpesa_settings_group');
+        ?>
         <table class="form-table" role="presentation">
 
             <!-- Allow payments -->
