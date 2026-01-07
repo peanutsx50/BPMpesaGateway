@@ -32,7 +32,26 @@ document.addEventListener("DOMContentLoaded", function () {
       }
 
       // Phone is valid, proceed with M-Pesa request
-      console.log("Valid phone number:", cleanPhone);
+      try {
+        button.disabled = true; // Prevent multiple clicks
+        button.textContent = "Sending Request..."; // loading state
+        bpmg_send_mpesa_request(cleanPhone, button);
+      } catch (error) {
+        e.preventDefault();
+        button.disabled = false;
+        button.textContent = "Send M-Pesa Payment Request";
+        errorDiv.textContent =
+          "An error occurred while sending the M-Pesa request. Please try again.";
+        errorDiv.style.display = "block";
+        return false;
+      }
+
+
     });
   }
 });
+
+// send mpesa stk push request
+function bpmg_send_mpesa_request(phoneNumber, button) {
+  console.log("Sending M-Pesa request to:", phoneNumber);
+}
