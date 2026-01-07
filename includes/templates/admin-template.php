@@ -121,9 +121,10 @@ if (!defined('ABSPATH')) {
                 <td>
                     <input type="number"
                         name="bpmpesa_amount"
+                        min="1"
                         value="<?php echo esc_attr(get_option('bpmpesa_amount')); ?>"
                         class="small-text">
-                    <p class="description">Amount required to complete registration.</p>
+                    <p style="font-style: italic; margin-top: 5px;">Amount required to complete registration.</p>
                 </td>
             </tr>
 
