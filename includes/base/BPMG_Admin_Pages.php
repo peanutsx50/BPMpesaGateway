@@ -6,8 +6,8 @@
  * @link       http://example.com
  * @since      1.0.0
  *
- * @package    Test_Plugin
- * @subpackage Test_Plugin/includes
+ * @package    BPMpesaGateway
+ * @subpackage BPMpesaGateway/includes
  */
 
 namespace Inc\base;

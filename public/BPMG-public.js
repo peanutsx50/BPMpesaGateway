@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
       try {
         button.disabled = true; // Prevent multiple clicks
         button.textContent = "Sending Request..."; // loading state
-        bpmg_send_mpesa_request(cleanPhone, button);
+        bpmg_send_mpesa_request(button);
       } catch (error) {
         e.preventDefault();
         button.disabled = false;
@@ -45,13 +45,46 @@ document.addEventListener("DOMContentLoaded", function () {
         errorDiv.style.display = "block";
         return false;
       }
-
-
     });
   }
 });
 
-// send mpesa stk push request
-function bpmg_send_mpesa_request(phoneNumber, button) {
-  console.log("Sending M-Pesa request to:", phoneNumber);
+//ajax function to send mpesa request
+function bpmg_send_mpesa_request(button) {
+  fetch(bpmpesa_ajax.ajax_url, {
+    method: "POST",
+    credentials: "same-origin",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+    },
+    body: new URLSearchParams({
+      action: "bpmg_send_mpesa_request", //match action hook in PHP
+      phone: document.getElementById("bpmg_mpesa_phone").value.trim(), // data for function
+      bpmg_nonce: bpmpesa_ajax.nonce, // pass the security nonce
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.success) {
+        // Payment request sent successfully
+        button.textContent = "Request Sent! Please check your phone.";
+      } else {
+        // Error from server
+        button.disabled = false;
+        button.textContent = "Send M-Pesa Payment Request";
+        const errorDiv = document.getElementById("bpmg_error_message");
+        errorDiv.textContent = data.data || "Failed to send M-Pesa request.";
+        errorDiv.style.display = "block";
+      }
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      // Network or other error
+      button.disabled = false;
+      button.textContent = "Send M-Pesa Payment Request";
+      const errorDiv = document.getElementById("bpmg_error_message");
+      errorDiv.textContent =
+        "An error occurred while sending the M-Pesa request. Please try again.";
+      errorDiv.style.display = "block";
+    });
 }
