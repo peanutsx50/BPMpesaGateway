@@ -11,5 +11,12 @@ class BPMG_Enqueue_Public
             'bpmpesagateway-public-style',
             BPMG_PLUGIN_URL . 'public/BPMG-public.css'
         );
+        wp_enqueue_script(
+            'bpmpesagateway-public-script',
+            BPMG_PLUGIN_URL . 'public/BPMG-public.js',
+            array('jquery'),
+            null,
+            true
+        );
     }
 }

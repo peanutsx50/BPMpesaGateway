@@ -31,4 +31,8 @@ class BPMG_Registration
             include $template_path;
         }
     }
+
+    //send mpesa request
+    //check payment status
+    //complete registration
 }
