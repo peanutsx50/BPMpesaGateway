@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const phonePattern = /^254(?:7[0-9]|1[01])[0-9]{7}$/;
       const cleanPhone = phoneNumber
         .replace(/\s/g, "")
-        .ltrim($phone_number, "+");
+        .replace(/^\+/, "");
 
       // Clear previous error
       errorDiv.style.display = "none";

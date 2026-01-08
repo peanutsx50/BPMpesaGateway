@@ -19,6 +19,7 @@ class BPMG_Mpesa
     private $access_token;
     private $timestamp;
     private $environment = 'production'; //sandbox or production
+    private $callbackurl;
     private $account_reference;
     private $transaction_description;
     private $err;
@@ -38,6 +39,7 @@ class BPMG_Mpesa
         $this->account_reference   = get_option('bpmpesa_account_reference');
         $this->transaction_description = get_option('bpmpesa_transaction_reference');
         $this->timestamp            = date('YmdHis');
+        $this->callbackurl         = home_url('/wp-json/bpmpesa/v1/callback', 'https');
         $this->url = $this->environment === 'production' ?
             'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest' :
             'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
@@ -64,7 +66,7 @@ class BPMG_Mpesa
                 "PhoneNumber" => $phone_number,
                 "AccountReference" => $this->account_reference,
                 "TransactionDesc" => $this->transaction_description,
-                "CallBackURL" => home_url('/callback'),
+                "CallBackURL" => 'https://webhook.site/314181b3-7a95-47ad-af61-1acbfad8e42d', // test endpoing, will use ngrok later
             ];
             // send request to mpesa api
             $curl = curl_init();
@@ -140,7 +142,14 @@ class BPMG_Mpesa
     }
 
     // handle callback
-    public function handle_callback(){
-        // will add details later
+    public function handle_callback($request)
+    {
+        $response_data = array(
+            'status'  => 'success',
+            'message' => 'Custom API data retrieved!',
+        );
+
+        // Return the response, using rest_ensure_response() for proper formatting
+        return rest_ensure_response($response_data);
     }
 }

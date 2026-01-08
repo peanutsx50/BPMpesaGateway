@@ -31,6 +31,7 @@
 namespace Inc\base;
 
 use Inc\core\BPMG_Registration;
+use Inc\core\BPMG_Mpesa;
 
 class BPMG
 {
@@ -57,6 +58,14 @@ class BPMG
         add_action('admin_enqueue_scripts', [BPMG_Enqueue_Admin::class, 'bpmg_enqueue_admin']); // loads CSS file
         add_action('admin_enqueue_scripts', [BPMG_Enqueue_Admin::class, 'bpmg_enqueue_admin_scripts']); // loads JS file
         add_action('wp_enqueue_scripts', [BPMG_Enqueue_Public::class, 'bpmg_enqueue_public']);
+        // register REST endpoint
+        add_action('rest_api_init', function () {
+            register_rest_route('bpmpesa/v1', '/callback', [
+                'methods' => 'POST',
+                'callback' => [new BPMG_Mpesa(), 'handle_callback'],
+                'permission_callback' => '__return_true',
+            ]);
+        });
     }
 
     // Load core classes
