@@ -64,19 +64,23 @@ function bpmg_send_mpesa_request(button) {
       bpmg_nonce: bpmpesa_ajax.nonce, // pass the security nonce
     }),
   })
-    .then((response) => response.json())
+    .then((response) => {
+      console.log("Response:", response);
+      return response.json();
+    })
     .then((data) => {
+      console.log("Data:", data);
       if (data.success) { // return true if successful
         // Payment request sent successfully
         button.textContent = "Request Sent! Please check your phone.";
         button.style.backgroundColor = "#4CAF50"; // Change button color to indicate success
         button.style.borderColor = "#4CAF50";
       } else {
-        // Error from server
         button.disabled = false;
         button.textContent = "Send M-Pesa Payment Request";
         const errorDiv = document.getElementById("bpmg_error_message");
-        errorDiv.textContent = data.data.message || "Failed to send M-Pesa request.";
+        // Display the error message from server
+        errorDiv.textContent = data.data?.message || "Failed to send M-Pesa request. Please try again.";
         errorDiv.style.display = "block";
       }
     })

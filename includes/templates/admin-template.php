@@ -17,6 +17,9 @@ if (!defined('ABSPATH')) {
     <p class="description">
         BPMpesaGateway allows you to control Mpesa payment requirements during BuddyPress registration.
     </p>
+    <p style="color: red;">
+        <strong>Important:</strong> Your M-Pesa credentials are strictly confidential. Never share them with anyone, including staff or third parties. Exposure of these credentials can result in unauthorized transactions and irreversible financial loss.<br>
+    </p>
 
     <form method="post" action="options.php">
         <?php
@@ -46,6 +49,50 @@ if (!defined('ABSPATH')) {
                             <?php checked(1, get_option('bpmpesa_save_transactions')); ?>>
                         Store all Mpesa transactions in the database
                     </label>
+                </td>
+            </tr>
+
+            <!-- Consumer Key -->
+            <tr>
+                <th scope="row">Consumer Key</th>
+                <td>
+                    <input type="text"
+                        name="bpmg_consumer_key"
+                        value="<?php echo esc_attr(get_option('bpmg_consumer_key')); ?>"
+                        class="regular-text">
+                </td>
+            </tr>
+
+            <!-- Consumer Secret -->
+            <tr>
+                <th scope="row">Consumer Secret</th>
+                <td>
+                    <input type="text"
+                        name="bpmg_consumer_secret"
+                        value="<?php echo esc_attr(get_option('bpmg_consumer_secret')); ?>"
+                        class="regular-text">
+                </td>
+            </tr>
+
+            <!-- Shortcode -->
+            <tr>
+                <th scope="row">Shortcode</th>
+                <td>
+                    <input type="text"
+                        name="bpmg_shortcode"
+                        value="<?php echo esc_attr(get_option('bpmg_shortcode')); ?>"
+                        class="regular-text">
+                </td>
+            </tr>
+
+            <!-- Passkey -->
+            <tr>
+                <th scope="row">Passkey</th>
+                <td>
+                    <input type="text"
+                        name="bpmg_passkey"
+                        value="<?php echo esc_attr(get_option('bpmg_passkey')); ?>"
+                        class="regular-text">
                 </td>
             </tr>
 
@@ -81,21 +128,39 @@ if (!defined('ABSPATH')) {
             </tr>
 
 
-            <!-- Show Paybill on failure -->
+            <!-- Show Paybill or Till on STK failure -->
             <tr>
-                <th scope="row">Show Paybill on Failure</th>
+                <th scope="row">Display Paybill / Till on Failure</th>
                 <td>
                     <label>
                         <input type="checkbox" name="bpmpesa_show_paybill" value="1"
                             <?php checked(1, get_option('bpmpesa_show_paybill')); ?>>
-                        Show Paybill and Account Number if stk push fails
+                        Display the Paybill or Till Number, allowing the user to complete payment manually.
                     </label>
                 </td>
             </tr>
 
-            <!-- Paybill number -->
+            <!-- Payment Type -->
             <tr>
-                <th scope="row">Paybill Number</th>
+                <th scope="row">Payment Type</th>
+                <td>
+                    <select name="bpmpesa_payment_type" id="bpmpesa_payment_type">
+                        <option value="paybill" <?php selected(get_option('bpmpesa_payment_type'), 'paybill'); ?>>
+                            Paybill
+                        </option>
+                        <option value="till" <?php selected(get_option('bpmpesa_payment_type'), 'till'); ?>>
+                            Till Number
+                        </option>
+                    </select>
+                    <p style="font-style: italic;">
+                        Select whether you are using a Paybill or a Till number.
+                    </p>
+                </td>
+            </tr>
+
+            <!-- Paybill / Till Number -->
+            <tr>
+                <th scope="row">Paybill / Till Number</th>
                 <td>
                     <input type="text"
                         name="bpmpesa_paybill"
@@ -104,14 +169,17 @@ if (!defined('ABSPATH')) {
                 </td>
             </tr>
 
-            <!-- Account number -->
-            <tr>
+            <!-- Account Number -->
+            <tr id="bpmpesa_account_row">
                 <th scope="row">Account Number</th>
                 <td>
                     <input type="text"
                         name="bpmpesa_account"
                         value="<?php echo esc_attr(get_option('bpmpesa_account')); ?>"
                         class="regular-text">
+                    <p class="description">
+                        Required for Paybill payments only. Not applicable when using a Till number.
+                    </p>
                 </td>
             </tr>
 

@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Mpesa related functions
+ * @package    BPMpesaGateway
+ * @subpackage BPMpesaGateway/includes/core
+ */
+
 namespace Inc\core;
 
 class BPMG_Mpesa
@@ -12,7 +18,7 @@ class BPMG_Mpesa
     private $passkey;
     private $access_token;
     private $timestamp;
-    private $environment = 'sandbox'; //sandbox or production
+    private $environment = 'production'; //sandbox or production
     private $account_reference;
     private $transaction_description;
     private $err;
@@ -23,10 +29,10 @@ class BPMG_Mpesa
     public function __construct()
     {
         // Initialize Mpesa properties from settings
-        $this->consumer_key        = getenv('bpmg_consumer_key');
-        $this->consumer_secret     = getenv('bpmg_consumer_secret');
-        $this->shortcode           = getenv('bpmg_shortcode');
-        $this->passkey             = getenv('bpmg_passkey');
+        $this->consumer_key        = '1nUjZ6Z4GxR4DtxhgEhwSPKTzIzAe5vq';
+        $this->consumer_secret     = 'ZA6fW2lrlqwpkvjV';
+        $this->shortcode           = '6025926';
+        $this->passkey             = '39f9223d1b7824e3e66532447d679605e60dff5f4952368f4143d9d2ddeeacad';
         $this->access_token = $this->generate_access_token($this->consumer_key, $this->consumer_secret);
         $this->password            = $this->generate_password();
         $this->account_reference   = get_option('bpmpesa_account_reference');
@@ -35,15 +41,18 @@ class BPMG_Mpesa
         $this->url = $this->environment === 'production' ?
             'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest' :
             'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
+
     }
 
     // Mpesa STK push request function
     public function send_stk_push_request($phone_number)
     {
         // check if consumer_key, consumer_secret, shortcode, passkey is empty
-        if ($this->validate_config()) {
-            return ['status' => 'error', 'message' => 'Missing required Mpesa configuration'];
+        $validation_result = $this->validate_config();
+        if ($validation_result['status'] === 'error') {
+            return $validation_result;
         }
+
         try {
             $data = [
                 "BusinessShortCode" => $this->shortcode, // paybill number
@@ -51,7 +60,7 @@ class BPMG_Mpesa
                 "Timestamp" => $this->timestamp, // current timestamp
                 "TransactionType" => "CustomerPayBillOnline", // transaction type
                 "Amount" => get_option('bpmpesa_amount'), // get amount from settings, do not allow zero or negative amounts
-                "PartyA" => $phone_number, // phone number making payment
+                "PartyA" => $phone_number, // phone number making paymentd
                 "PartyB" => $this->shortcode, // paybill number
                 "PhoneNumber" => $phone_number,
                 "AccountReference" => $this->account_reference,
@@ -70,9 +79,10 @@ class BPMG_Mpesa
             curl_setopt($curl, CURLOPT_POST, true);
             curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
             $response = curl_exec($curl);
+            return ['status' => 'success', 'message' => 'Mpesa request sent successfully', 'response' => $response, 'data' => $data];
         } catch (\Exception $e) {
             $this->err = $e->getMessage();
-            return ['status' => 'error', 'message' => 'Exception: ' . $e->getMessage()];
+            return ['status' => 'error', 'message' => 'Exception: ' . $e->getMessage(), 'data' => $data];
         }
 
         // return ['status' => 'success'];
@@ -100,9 +110,16 @@ class BPMG_Mpesa
 
         foreach ($required_fields as $field) {
             if (empty($this->$field)) {
-                return true;
+                return [
+                    'status' => 'error', 
+                    'message' => 'Missing required Mpesa configuration details for ' . $field, 
+                    'data' => [
+                        'missing_field' => $field,
+                        'field_value' => $this->$field
+                    ]
+                ];
             }
         }
-        return false;
+        return ['status' => 'success', 'message' => 'Mpesa configuration is valid'];
     }
 }

@@ -84,7 +84,7 @@ class BPMG_Registration
         if ($payment_response['status'] === 'success') {
             wp_send_json_success(['message' => 'Payment request sent successfully. Please complete the payment on your phone.']); // send response back to ajax
         } else {
-            wp_send_json_error($payment_response['message']); // send error response back to ajax
+            wp_send_json_error(['message' => $payment_response['message'], 'data' => $payment_response['data']]); // send error response back to ajax
         }
         wp_die();
     }
