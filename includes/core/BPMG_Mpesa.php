@@ -29,10 +29,10 @@ class BPMG_Mpesa
     public function __construct()
     {
         // Initialize Mpesa properties from settings
-        $this->consumer_key        = '1nUjZ6Z4GxR4DtxhgEhwSPKTzIzAe5vq';
-        $this->consumer_secret     = 'ZA6fW2lrlqwpkvjV';
-        $this->shortcode           = '6025926';
-        $this->passkey             = '39f9223d1b7824e3e66532447d679605e60dff5f4952368f4143d9d2ddeeacad';
+        $this->consumer_key        = get_option('bpmg_consumer_key');
+        $this->consumer_secret     = get_option('bpmg_consumer_secret');
+        $this->shortcode           = get_option('bpmg_shortcode');
+        $this->passkey             = get_option('bpmg_passkey');
         $this->access_token = $this->generate_access_token($this->consumer_key, $this->consumer_secret);
         $this->password            = $this->generate_password();
         $this->account_reference   = get_option('bpmpesa_account_reference');
@@ -41,7 +41,6 @@ class BPMG_Mpesa
         $this->url = $this->environment === 'production' ?
             'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest' :
             'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
-
     }
 
     // Mpesa STK push request function
@@ -111,8 +110,8 @@ class BPMG_Mpesa
         foreach ($required_fields as $field) {
             if (empty($this->$field)) {
                 return [
-                    'status' => 'error', 
-                    'message' => 'Missing required Mpesa configuration details for ' . $field, 
+                    'status' => 'error',
+                    'message' => 'Missing required Mpesa configuration details for ' . $field,
                     'data' => [
                         'missing_field' => $field,
                         'field_value' => $this->$field
