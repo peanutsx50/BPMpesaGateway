@@ -78,10 +78,10 @@ class BPMG_Mpesa
             curl_setopt($curl, CURLOPT_POST, true);
             curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
             $response = curl_exec($curl);
-            return ['status' => 'success', 'message' => 'Mpesa request sent successfully', 'response' => $response, 'data' => $data];
+            return ['status' => 'success', 'message' => 'Mpesa request sent successfully', 'response' => $response];
         } catch (\Exception $e) {
             $this->err = $e->getMessage();
-            return ['status' => 'error', 'message' => 'Exception: ' . $e->getMessage(), 'data' => $data];
+            return ['status' => 'error', 'message' => 'Exception: ' . $e->getMessage()];
         }
 
         // return ['status' => 'success'];

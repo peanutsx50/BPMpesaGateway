@@ -83,9 +83,9 @@ class BPMG_Registration
         // handle the response
         if ($payment_response['status'] === 'success') {
             // send back message and data
-            wp_send_json_success(['message' => $payment_response['message'], 'data' => $payment_response['data']]); // send response back to ajax
+            wp_send_json_success(['message' => $payment_response['message'], 'response' => $payment_response['response']]); // send response back to ajax
         } else {
-            wp_send_json_error(['message' => $payment_response['message'], 'data' => $payment_response['data']]); // send error response back to ajax
+            wp_send_json_error(['message' => $payment_response['message']]); // send error response back to ajax
         }
         wp_die();
     }
