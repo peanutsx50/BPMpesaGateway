@@ -30,12 +30,12 @@ if (!defined('ABSPATH')) {
 
             <!-- Allow payments -->
             <tr>
-                <th scope="row">Allow Payments</th>
+                <th scope="row">Require Payments</th>
                 <td>
                     <label>
                         <input type="checkbox" name="bpmpesa_allow_payments" value="1"
                             <?php checked(1, get_option('bpmpesa_allow_payments')); ?>>
-                        Require Mpesa payment before registration
+                        Block registration until payment is complete
                     </label>
                 </td>
             </tr>

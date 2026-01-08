@@ -82,11 +82,11 @@ class BPMG_Registration
         $payment_response = $BPMG_Mpesa->send_stk_push_request($phone);
         // handle the response
         if ($payment_response['status'] === 'success') {
-            wp_send_json_success(['message' => 'Payment request sent successfully. Please complete the payment on your phone.']); // send response back to ajax
+            // send back message and data
+            wp_send_json_success(['message' => $payment_response['message'], 'data' => $payment_response['data']]); // send response back to ajax
         } else {
             wp_send_json_error(['message' => $payment_response['message'], 'data' => $payment_response['data']]); // send error response back to ajax
         }
         wp_die();
     }
-
 }

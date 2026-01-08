@@ -72,7 +72,7 @@ function bpmg_send_mpesa_request(button) {
       console.log("Data:", data);
       if (data.success) { // return true if successful
         // Payment request sent successfully
-        button.textContent = "Request Sent! Please check your phone.";
+        button.textContent = data.data?.message;
         button.style.backgroundColor = "#4CAF50"; // Change button color to indicate success
         button.style.borderColor = "#4CAF50";
       } else {
@@ -80,7 +80,7 @@ function bpmg_send_mpesa_request(button) {
         button.textContent = "Send M-Pesa Payment Request";
         const errorDiv = document.getElementById("bpmg_error_message");
         // Display the error message from server
-        errorDiv.textContent = data.data?.message || "Failed to send M-Pesa request. Please try again.";
+        errorDiv.textContent = data.data?.message;
         errorDiv.style.display = "block";
       }
     })
