@@ -33,7 +33,7 @@ class BPMG_Mpesa
         $this->consumer_secret     = get_option('bpmg_consumer_secret');
         $this->shortcode           = get_option('bpmg_shortcode');
         $this->passkey             = get_option('bpmg_passkey');
-        $this->access_token = $this->generate_access_token($this->consumer_key, $this->consumer_secret);
+        $this->access_token        = $this->generate_access_token();
         $this->password            = $this->generate_password();
         $this->account_reference   = get_option('bpmpesa_account_reference');
         $this->transaction_description = get_option('bpmpesa_transaction_reference');
@@ -70,7 +70,7 @@ class BPMG_Mpesa
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_URL, $this->url);
             curl_setopt($curl, CURLOPT_HTTPHEADER, [
-                'Authorization: Basic ' . $this->access_token,
+                'Authorization: Bearer ' . $this->access_token,
                 'Content-Type: application/json',
             ]);
             curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
@@ -81,17 +81,34 @@ class BPMG_Mpesa
             return ['status' => 'success', 'message' => 'Mpesa request sent successfully', 'response' => $response];
         } catch (\Exception $e) {
             $this->err = $e->getMessage();
-            return ['status' => 'error', 'message' => 'Exception: ' . $e->getMessage()];
+            return ['status' => 'error', 'message' => 'Exception: ' . $this->err];
         }
 
         // return ['status' => 'success'];
     }
 
     // generate access token for mpesa api
-    private function generate_access_token($consumer_key, $consumer_secret)
+    private function generate_access_token()
     {
-        $credentails = base64_encode($consumer_key . ':' . $consumer_secret);
-        return $credentails;
+        $auth_url = $this->environment === 'production' ?
+            'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials' :
+            'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
+
+        $credentials = base64_encode($this->consumer_key . ':' . $this->consumer_secret);
+
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $auth_url);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, [
+            'Authorization: Basic ' . $credentials
+        ]);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+        $response = curl_exec($curl);
+
+        $result = json_decode($response, true);
+
+        return isset($result['access_token']) ? $result['access_token'] : '';
     }
 
     // generate password for stk push
@@ -120,5 +137,10 @@ class BPMG_Mpesa
             }
         }
         return ['status' => 'success', 'message' => 'Mpesa configuration is valid'];
+    }
+
+    // handle callback
+    public function handle_callback(){
+        // will add details later
     }
 }

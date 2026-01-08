@@ -9,8 +9,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Validate Kenya phone number format
       // Accepts: +254xxxxxxxxx only
-      const phonePattern = /^(?:\+254)(?:7[0-9]|1[01])[0-9]{7}$/;
-      const cleanPhone = phoneNumber.replace(/\s/g, "");
+      const phonePattern = /^254(?:7[0-9]|1[01])[0-9]{7}$/;
+      const cleanPhone = phoneNumber
+        .replace(/\s/g, "")
+        .ltrim($phone_number, "+");
 
       // Clear previous error
       errorDiv.style.display = "none";
@@ -26,7 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!phonePattern.test(cleanPhone)) {
         e.preventDefault();
         errorDiv.textContent =
-          "Please enter a valid Kenya M-Pesa phone number (e.g., +254712345678).";
+          "Please enter a valid Kenya M-Pesa phone number (e.g., 254712345678).";
         errorDiv.style.display = "block";
         return false;
       }
@@ -64,12 +66,10 @@ function bpmg_send_mpesa_request(button) {
       bpmg_nonce: bpmpesa_ajax.nonce, // pass the security nonce
     }),
   })
-    .then((response) => {
-      console.log("Response:", response);
-      return response.json();
-    })
+    .then((response) => response.json())
     .then((data) => {
-      if (data.success) { // return true if successful
+      if (data.success) {
+        // return true if successful
         console.log("Data:", data);
         // Payment request sent successfully
         button.textContent = data.data?.message;
