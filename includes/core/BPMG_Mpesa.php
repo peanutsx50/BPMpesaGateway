@@ -144,12 +144,6 @@ class BPMG_Mpesa
     // handle callback
     public function handle_callback($request)
     {
-        $response_data = array(
-            'status'  => 'success',
-            'message' => 'Custom API data retrieved!',
-        );
-
-        // Return the response, using rest_ensure_response() for proper formatting
-        return rest_ensure_response($response_data);
+        return rest_ensure_response(array('message' => 'Hello World'));
     }
 }

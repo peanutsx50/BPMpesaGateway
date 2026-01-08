@@ -61,7 +61,7 @@ class BPMG
         // register REST endpoint
         add_action('rest_api_init', function () {
             register_rest_route('bpmpesa/v1', '/callback', [
-                'methods' => 'POST',
+                'methods' => \WP_REST_Server::READABLE,
                 'callback' => [new BPMG_Mpesa(), 'handle_callback'],
                 'permission_callback' => '__return_true',
             ]);
