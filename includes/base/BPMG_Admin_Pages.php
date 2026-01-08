@@ -32,7 +32,7 @@ class BPMG_Admin_Pages
     // save settings
     public static function register_settings()
     {
-        // Behaviour toggles (checkboxes)
+        // Allow payment: (checkboxes) true/false
         register_setting(
             'bpmpesa_settings_group',
             'bpmpesa_allow_payments',
@@ -43,6 +43,7 @@ class BPMG_Admin_Pages
             ]
         );
 
+        // save transaction settings: (checkbox) true/false
         register_setting(
             'bpmpesa_settings_group',
             'bpmpesa_save_transactions',
@@ -53,6 +54,69 @@ class BPMG_Admin_Pages
             ]
         );
 
+        // consumer key: (string)
+        register_setting(
+            'bpmpesa_settings_group',
+            'bpmg_consumer_key',
+            [
+                'type' => 'string',
+                'default' => '',
+            ]
+        );
+
+        // consumer secret: (string)
+        register_setting(
+            'bpmpesa_settings_group',
+            'bpmg_consumer_secret',
+            [
+                'type'    => 'string',
+                'default' => '',
+            ]
+        );
+
+        // shortcode: (string)
+        register_setting(
+            'bpmpesa_settings_group',
+            'bpmg_shortcode',
+            [
+                'type'    => 'string',
+                'default' => '',
+            ]
+        );
+
+        // passkey: (string)
+        register_setting(
+            'bpmpesa_settings_group',
+            'bpmg_passkey',
+            [
+                'type'    => 'string',
+                'default' => '',
+            ]
+        );
+
+        //account reference: (string)
+        register_setting(
+            'bpmpesa_settings_group',
+            'bpmpesa_account_reference',
+            [
+                'type'              => 'string',
+                'sanitize_callback' => 'sanitize_text_field',
+                'default'           => '',
+            ]
+        );
+
+        //transaction reference: (string)
+        register_setting(
+            'bpmpesa_settings_group',
+            'bpmpesa_transaction_reference',
+            [
+                'type'              => 'string',
+                'sanitize_callback' => 'sanitize_text_field',
+                'default'           => '',
+            ]
+        );
+
+        // show paybill (checkbox): true/false
         register_setting(
             'bpmpesa_settings_group',
             'bpmpesa_show_paybill',
@@ -63,7 +127,20 @@ class BPMG_Admin_Pages
             ]
         );
 
-        // Mpesa details
+        //payment type(dropdown): string
+        register_setting(
+            'bpmpesa_settings_group',
+            'bpmpesa_payment_type',
+            [
+                'type'              => 'string',
+                'sanitize_callback' => function ($value) {
+                    return in_array($value, ['paybill', 'till'], true) ? $value : 'paybill';
+                }, //checks if value is either paybill/till, if true pass as is if not default to paybill
+                'default'           => 'paybill',
+            ]
+        );
+
+        // paybill/till number: string
         register_setting(
             'bpmpesa_settings_group',
             'bpmpesa_paybill',
@@ -74,6 +151,7 @@ class BPMG_Admin_Pages
             ]
         );
 
+        // account number: string
         register_setting(
             'bpmpesa_settings_group',
             'bpmpesa_account',
@@ -92,7 +170,7 @@ class BPMG_Admin_Pages
                 'type'              => 'number',
                 'sanitize_callback' => function ($value) {
                     return max(0, (int) $value);
-                },
+                },//(int) $values cast anything other than number to 0
                 'default'           => 0,
             ]
         );
