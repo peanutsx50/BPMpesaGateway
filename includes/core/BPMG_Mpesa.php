@@ -35,10 +35,10 @@ class BPMG_Mpesa
         $this->shortcode           = get_option('bpmg_shortcode');
         $this->passkey             = get_option('bpmg_passkey');
         $this->access_token        = $this->generate_access_token();
+        $this->timestamp           = date('YmdHis');
         $this->password            = $this->generate_password();
         $this->account_reference   = get_option('bpmpesa_account_reference');
         $this->transaction_description = get_option('bpmpesa_transaction_reference');
-        $this->timestamp            = date('YmdHis');
         $this->callbackurl         = home_url('/wp-json/bpmpesa/v1/callback', 'https');
         $this->url = $this->environment === 'production' ?
             'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest' :
@@ -59,7 +59,7 @@ class BPMG_Mpesa
                 "BusinessShortCode" => $this->shortcode, // paybill number
                 "Password" => $this->password, // generated password
                 "Timestamp" => $this->timestamp, // current timestamp
-                "TransactionType" => "CustomerPayBillOnline", // transaction type
+                "TransactionType" => "CustomerPayBillOnline", // transaction type (CustomerBuyGoodsOnline or CustomerPayBillOnline)
                 "Amount" => get_option('bpmpesa_amount'), // get amount from settings, do not allow zero or negative amounts
                 "PartyA" => $phone_number, // phone number making paymentd
                 "PartyB" => $this->shortcode, // paybill number
