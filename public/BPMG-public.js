@@ -96,16 +96,29 @@ function bpmg_send_mpesa_request(button) {
 }
 
 function bpmg_start_mpesa_polling(checkoutId, button) {
-  console.log("interval starting.....", checkoutId);
+
+  let pollCount = 0;
+  const maxPolls = 20; // Stop after 2 minutes (20 * 3 seconds)
+
   const interval = setInterval(() => {
+    pollCount++;
+
+    if (pollCount > maxPolls) {
+      clearInterval(interval);
+      button.disabled = false;
+      button.textContent = "Payment timeout. Please try again.";
+      button.style.backgroundColor = "#ff9800";
+      return;
+    }
+
     fetch(`${bpmpesa_ajax.callback_url}?checkout_id=${checkoutId}`, {
       method: "GET",
       credentials: "same-origin",
     })
       .then((res) => res.json())
       .then((data) => {
+        console.log("data", data);
         const status = data.status;
-
         if (status === "success") {
           clearInterval(interval);
           button.textContent = "Payment successful. Continue registration.";

@@ -152,28 +152,78 @@ class BPMG_Mpesa
     // handle callback
     public function handle_callback($request)
     {
-        $body = json_decode($request->get_body(), true);
-        $stk = $body['Body']['stkCallback'] ?? null;
+        // Log all requests for debugging
+        error_log('BPMG Callback hit - Method: ' . $request->get_method());
 
-        // If called by Safaricom, process normally
+        // Log the raw body first
+        $raw_body = $request->get_body();
+        error_log('BPMG: Raw body: ' . $raw_body);
+
+        $body = json_decode($raw_body, true);
+        error_log('BPMG: Decoded body: ' . print_r($body, true));
+
+        $stk = $body['Body']['stkCallback'] ?? null;
+        error_log('BPMG: STK data: ' . print_r($stk, true));
+        error_log('BPMG: STK is null? ' . ($stk === null ? 'YES' : 'NO'));
+        
+        // If called by Safaricom (POST request with callback data)
         if ($stk) {
+            error_log('BPMG: Result Code : ' . $stk['ResultCode']);
+            error_log('BPMG: Result Description : ' . $stk['ResultDesc']);
             $checkoutId = $stk['CheckoutRequestID'];
             $resultCode = $stk['ResultCode'];
+            $resultDesc = $stk['ResultDesc'] ?? 'No description';
 
             $status = ($resultCode == 0) ? 'success' : 'failed';
 
-            update_option('bpmg_stk_' . $checkoutId, $status); // safaricom sends the response and it is stored
+            // Store the status and additional data
+            update_option('bpmg_stk_' . $checkoutId, [
+                'status' => $status,
+                'result_code' => $resultCode,
+                'result_desc' => $resultDesc,
+                'timestamp' => current_time('mysql')
+            ]);
+
+            error_log('BPMG: Stored status for ' . $checkoutId . ' - Status: ' . $status);
 
             return rest_ensure_response(['ResultCode' => 0, 'ResultDesc' => 'Accepted']);
         }
 
-        // If polled via JS, return status
-        $checkout_id = $_GET['checkout_id'] ?? '';
+        // If polled via JS (GET request with checkout_id parameter)
+        $checkout_id = $request->get_param('checkout_id');
+
         if ($checkout_id) {
-            $status = get_option('bpmg_stk_' . sanitize_text_field($checkout_id), 'pending'); //get the stored option
-            return rest_ensure_response(['status' => $status]); // return the stored option
+            $checkout_id = sanitize_text_field($checkout_id);
+            $stored_data = get_option('bpmg_stk_' . $checkout_id, null);
+
+            error_log('BPMG: Polling for ' . $checkout_id . ' - Found: ' . print_r($stored_data, true));
+
+            // If data exists and is an array (new format)
+            if (is_array($stored_data)) {
+                return rest_ensure_response([
+                    'status' => $stored_data['status'],
+                    'message' => $stored_data['result_desc'] ?? '',
+                    'timestamp' => $stored_data['timestamp'] ?? ''
+                ]);
+            }
+
+            // If data exists and is a string (old format - backwards compatibility)
+            if ($stored_data) {
+                return rest_ensure_response(['status' => $stored_data]);
+            }
+
+            // No data found yet - still pending
+            return rest_ensure_response([
+                'status' => 'pending',
+                'message' => 'Waiting for payment confirmation',
+                'data' => $stored_data,
+            ]);
         }
 
-        return rest_ensure_response(['status' => 'pending']);
+        // No checkout_id provided
+        return rest_ensure_response([
+            'status' => 'error',
+            'message' => 'No checkout ID provided'
+        ]);
     }
 }
