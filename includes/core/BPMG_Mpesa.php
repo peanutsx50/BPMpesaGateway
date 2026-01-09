@@ -154,17 +154,11 @@ class BPMG_Mpesa
     {
         // Log all requests for debugging
         error_log('BPMG Callback hit - Method: ' . $request->get_method());
-        
+
         // Log the raw body first
         $raw_body = $request->get_body();
-        error_log('BPMG: Raw body: ' . $raw_body);
-
         $body = json_decode($raw_body, true);
-        error_log('BPMG: Decoded body: ' . print_r($body, true));
-
-        $stk = $body['Body']['stkCallback'] ?? null;
-        error_log('BPMG: STK data: ' . print_r($stk, true));
-        error_log('BPMG: STK is null? ' . ($stk === null ? 'YES' : 'NO'));
+        $stk = $body['Body']['stkCallback'] ?? null; // will be empty if called by JS
 
         // If called by Safaricom (POST request with callback data)
         if ($stk) {
@@ -177,16 +171,12 @@ class BPMG_Mpesa
             $status = ($resultCode == 0) ? 'success' : 'failed';
 
             // Store the status and additional data
-            update_option('bpmg_stk_' . $checkoutId, [
+            return update_option('bpmg_stk_' . $checkoutId, [
                 'status' => $status,
                 'result_code' => $resultCode,
                 'result_desc' => $resultDesc,
                 'timestamp' => current_time('mysql')
             ]);
-
-            error_log('BPMG: Stored status for ' . $checkoutId . ' - Status: ' . $status);
-
-            return rest_ensure_response(['ResultCode' => 0, 'ResultDesc' => 'Accepted']);
         }
 
         // If polled via JS (GET request with checkout_id parameter)
@@ -205,11 +195,6 @@ class BPMG_Mpesa
                     'message' => $stored_data['result_desc'] ?? '',
                     'timestamp' => $stored_data['timestamp'] ?? ''
                 ]);
-            }
-
-            // If data exists and is a string (old format - backwards compatibility)
-            if ($stored_data) {
-                return rest_ensure_response(['status' => $stored_data]);
             }
 
             // No data found yet - still pending
