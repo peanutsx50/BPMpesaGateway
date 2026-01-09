@@ -23,6 +23,7 @@ class BPMG_Enqueue_Public
         wp_localize_script('bpmpesagateway-public-script', 'bpmpesa_ajax', [ // script : matches the handle used in wp_enqueue_script
             'ajax_url' => admin_url('admin-ajax.php'), // core wordpress ajax handler
             'nonce'    => wp_create_nonce('bpmg_mpesa_nonce'), // security nonce
+            'callback_url' => home_url('/wp-json/bpmpesa/v1/callback', 'https'), // callback url
         ]);
     }
 }

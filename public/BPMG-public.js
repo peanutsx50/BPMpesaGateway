@@ -10,9 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Validate Kenya phone number format
       // Accepts: 254xxxxxxxxx only
       const phonePattern = /^254(?:7[0-9]|1[01])[0-9]{7}$/;
-      const cleanPhone = phoneNumber
-        .replace(/\s/g, "")
-        .replace(/^\+/, "");
+      const cleanPhone = phoneNumber.replace(/\s/g, "").replace(/^\+/, "");
 
       // Clear previous error
       errorDiv.style.display = "none";
@@ -68,13 +66,14 @@ function bpmg_send_mpesa_request(button) {
   })
     .then((response) => response.json())
     .then((data) => {
+      // Payment request sent successfully
       if (data.success) {
-        // return true if successful
-        console.log("Data:", data);
-        // Payment request sent successfully
         button.textContent = data.data?.message;
-        button.style.backgroundColor = "#4CAF50"; // Change button color to indicate success
-        button.style.borderColor = "#4CAF50";
+        // check if user accepted or failed to complete payment
+        bpmg_start_mpesa_polling(
+          data.data?.response?.CheckoutRequestID,
+          button
+        );
       } else {
         button.disabled = false;
         button.textContent = "Send M-Pesa Payment Request";
@@ -94,4 +93,34 @@ function bpmg_send_mpesa_request(button) {
         "An error occurred while sending the M-Pesa request. Please try again.";
       errorDiv.style.display = "block";
     });
+}
+
+function bpmg_start_mpesa_polling(checkoutId, button) {
+  console.log("interval starting.....", checkoutId);
+  const interval = setInterval(() => {
+    fetch(`${bpmpesa_ajax.callback_url}?checkout_id=${checkoutId}`, {
+      method: "GET",
+      credentials: "same-origin",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const status = data.status;
+
+        if (status === "success") {
+          clearInterval(interval);
+          button.textContent = "Payment successful. Continue registration.";
+          button.style.backgroundColor = "#4CAF50";
+          button.style.borderColor = "#4CAF50";
+        }
+
+        if (status === "failed") {
+          clearInterval(interval);
+          button.disabled = false;
+          button.textContent = "Payment failed. Try again.";
+        }
+      })
+      .catch((err) => {
+        console.error("Polling error:", err);
+      });
+  }, 3000); // poll every 3 sec
 }

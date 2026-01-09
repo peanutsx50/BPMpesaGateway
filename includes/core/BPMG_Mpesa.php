@@ -35,7 +35,7 @@ class BPMG_Mpesa
         $this->shortcode           = get_option('bpmg_shortcode');
         $this->passkey             = get_option('bpmg_passkey');
         $this->access_token        = $this->generate_access_token();
-        $this->timestamp           = date('YmdHis');
+        $this->timestamp           = date('YmdHis'); // should always come first before generate password so its not empty
         $this->password            = $this->generate_password();
         $this->account_reference   = get_option('bpmpesa_account_reference');
         $this->transaction_description = get_option('bpmpesa_transaction_reference');
@@ -66,7 +66,7 @@ class BPMG_Mpesa
                 "PhoneNumber" => $phone_number,
                 "AccountReference" => $this->account_reference,
                 "TransactionDesc" => $this->transaction_description,
-                "CallBackURL" => 'https://webhook.site/314181b3-7a95-47ad-af61-1acbfad8e42d', // test endpoing, will use ngrok later
+                "CallBackURL" => home_url('/wp-json/bpmpesa/v1/callback', 'https'), // webhook callback
             ];
             // send request to mpesa api
             $curl = curl_init();
@@ -80,10 +80,18 @@ class BPMG_Mpesa
             curl_setopt($curl, CURLOPT_POST, true);
             curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
             $response = curl_exec($curl);
-            return ['status' => 'success', 'message' => 'Mpesa request sent successfully', 'response' => $response];
+
+            return [
+                'status' => 'success',
+                'message' => 'Payment request sent. Enter your M-Pesa PIN.',
+                'response' => json_decode($response, true), // decode the JSON response
+            ];
         } catch (\Exception $e) {
             $this->err = $e->getMessage();
-            return ['status' => 'error', 'message' => 'Exception: ' . $this->err];
+            return [
+                'status' => 'error',
+                'message' => 'Exception: ' . $this->err
+            ];
         }
 
         // return ['status' => 'success'];
@@ -144,6 +152,28 @@ class BPMG_Mpesa
     // handle callback
     public function handle_callback($request)
     {
-        return rest_ensure_response(array('message' => 'Hello World'));
+        $body = json_decode($request->get_body(), true);
+        $stk = $body['Body']['stkCallback'] ?? null;
+
+        // If called by Safaricom, process normally
+        if ($stk) {
+            $checkoutId = $stk['CheckoutRequestID'];
+            $resultCode = $stk['ResultCode'];
+
+            $status = ($resultCode == 0) ? 'success' : 'failed';
+
+            update_option('bpmg_stk_' . $checkoutId, $status); // safaricom sends the response and it is stored
+
+            return rest_ensure_response(['ResultCode' => 0, 'ResultDesc' => 'Accepted']);
+        }
+
+        // If polled via JS, return status
+        $checkout_id = $_GET['checkout_id'] ?? '';
+        if ($checkout_id) {
+            $status = get_option('bpmg_stk_' . sanitize_text_field($checkout_id), 'pending'); //get the stored option
+            return rest_ensure_response(['status' => $status]); // return the stored option
+        }
+
+        return rest_ensure_response(['status' => 'pending']);
     }
 }
