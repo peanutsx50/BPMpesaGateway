@@ -154,7 +154,7 @@ class BPMG_Mpesa
     {
         // Log all requests for debugging
         error_log('BPMG Callback hit - Method: ' . $request->get_method());
-
+        
         // Log the raw body first
         $raw_body = $request->get_body();
         error_log('BPMG: Raw body: ' . $raw_body);
@@ -165,7 +165,7 @@ class BPMG_Mpesa
         $stk = $body['Body']['stkCallback'] ?? null;
         error_log('BPMG: STK data: ' . print_r($stk, true));
         error_log('BPMG: STK is null? ' . ($stk === null ? 'YES' : 'NO'));
-        
+
         // If called by Safaricom (POST request with callback data)
         if ($stk) {
             error_log('BPMG: Result Code : ' . $stk['ResultCode']);
