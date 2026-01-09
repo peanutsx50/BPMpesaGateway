@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const phoneNumber = phoneInput.value.trim();
 
       // Validate Kenya phone number format
-      // Accepts: +254xxxxxxxxx only
+      // Accepts: 254xxxxxxxxx only
       const phonePattern = /^254(?:7[0-9]|1[01])[0-9]{7}$/;
       const cleanPhone = phoneNumber
         .replace(/\s/g, "")

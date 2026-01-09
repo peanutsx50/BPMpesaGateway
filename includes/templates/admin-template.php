@@ -59,7 +59,7 @@ if (!defined('ABSPATH')) {
                     <input type="password"
                         name="bpmg_consumer_key"
                         value="<?php echo esc_attr(get_option('bpmg_consumer_key')); ?>"
-                        class="regular-text">
+                        class="regular-text noCopyPaste">
                 </td>
             </tr>
 
@@ -68,9 +68,10 @@ if (!defined('ABSPATH')) {
                 <th scope="row">Consumer Secret</th>
                 <td>
                     <input type="password"
+                        id="noCopyPaste"
                         name="bpmg_consumer_secret"
                         value="<?php echo esc_attr(get_option('bpmg_consumer_secret')); ?>"
-                        class="regular-text">
+                        class="regular-text noCopyPaste">
                 </td>
             </tr>
 
@@ -79,9 +80,10 @@ if (!defined('ABSPATH')) {
                 <th scope="row">Shortcode</th>
                 <td>
                     <input type="password"
+                        id="noCopyPaste"
                         name="bpmg_shortcode"
                         value="<?php echo esc_attr(get_option('bpmg_shortcode')); ?>"
-                        class="regular-text">
+                        class="regular-text noCopyPaste">
                 </td>
             </tr>
 
@@ -90,9 +92,10 @@ if (!defined('ABSPATH')) {
                 <th scope="row">Passkey</th>
                 <td>
                     <input type="password"
+                        id="noCopyPaste"
                         name="bpmg_passkey"
                         value="<?php echo esc_attr(get_option('bpmg_passkey')); ?>"
-                        class="regular-text">
+                        class="regular-text noCopyPaste">
                 </td>
             </tr>
 
