@@ -46,6 +46,7 @@ class BPMG_Post_Types
         //$columns['phone_number'] = 'Phone Number';
         $columns['amount'] = 'Amount';
         $columns['status'] = 'Status';
+        $columns['result_desc'] = 'Description';
         $columns['date'] = 'Date';
         return $columns;
     }
@@ -65,6 +66,9 @@ class BPMG_Post_Types
                 break;
             case 'status':
                 echo esc_html(get_post_meta($post_id, 'status', true));
+                break;
+            case 'result_desc':
+                echo esc_html(get_post_meta($post_id, 'result_desc', true));
                 break;
             case 'date':
                 echo esc_html(get_the_date('', $post_id));
@@ -101,5 +105,4 @@ class BPMG_Post_Types
             $query->set('orderby', 'date');
         }
     }
-    
 }
