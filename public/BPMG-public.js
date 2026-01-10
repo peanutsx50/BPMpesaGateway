@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Submit button click handler
   const submitClickHandler = function (e) {
-    if (bpmg_get_cookie("payment") !== "paid") {
+    if (paymentStatus !== "paid") {
       e.preventDefault();
       e.stopImmediatePropagation();
       errorDiv.textContent =
@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   submitBtn.addEventListener("click", submitClickHandler, true);
+  // Store the handler function in the global window scope
   window.bpmg_submitClickHandler = submitClickHandler;
   window.bpmg_submitBtn = submitBtn;
 
@@ -161,7 +162,6 @@ function bpmg_start_mpesa_polling(checkoutId, button) {
               true
             );
           }
-
         }
 
         if (status === "failed") {

@@ -29,7 +29,7 @@ if (!defined('ABSPATH')) {
         <table class="form-table" role="presentation">
 
             <!-- Allow payments -->
-            <tr>
+            <!-- <tr>
                 <th scope="row">Require Payments</th>
                 <td>
                     <label>
@@ -38,10 +38,10 @@ if (!defined('ABSPATH')) {
                         Block registration until payment is complete
                     </label>
                 </td>
-            </tr>
+            </tr> -->
 
             <!-- Save transactions -->
-            <tr>
+            <!-- <tr>
                 <th scope="row">Save Transactions</th>
                 <td>
                     <label>
@@ -50,7 +50,7 @@ if (!defined('ABSPATH')) {
                         Store all Mpesa transactions in the database
                     </label>
                 </td>
-            </tr>
+            </tr> -->
 
             <!-- Consumer Key -->
             <tr>
@@ -108,9 +108,7 @@ if (!defined('ABSPATH')) {
                         value="<?php echo esc_attr(get_option('bpmpesa_account_reference')); ?>"
                         class="regular-text">
                     <p style="margin-top: 5px; font-style: italic;">
-                        Prefix used to generate M-Pesa payment references.
-                        Example: <code>INV</code> will produce <code>INV001</code>, <code>INV002</code>.
-                        This helps identify and match incoming payments.
+                        Text shown as the Account Reference in M-Pesa. Appears on the user transaction details to help identify payments.Example: <code>Axios Tech Payment</code>
                     </p>
                 </td>
             </tr>
@@ -125,14 +123,14 @@ if (!defined('ABSPATH')) {
                         class="regular-text">
                     <p style="margin-top: 5px; font-style: italic;">
                         Text shown on the customer’s M-Pesa statement to identify your business or payment purpose.
-                        Example: <code>Axios Tech Payment</code> or <code>Online Order</code>.
+                        Example: <code>Community registration</code> or <code>Online Order</code>.
                     </p>
                 </td>
             </tr>
 
 
             <!-- Show Paybill or Till on STK failure -->
-            <tr>
+            <!-- <tr>
                 <th scope="row">Display Paybill / Till on Failure</th>
                 <td>
                     <label>
@@ -141,10 +139,10 @@ if (!defined('ABSPATH')) {
                         Display the Paybill or Till Number, allowing the user to complete payment manually.
                     </label>
                 </td>
-            </tr>
+            </tr> -->
 
             <!-- Payment Type -->
-            <tr>
+            <!-- <tr>
                 <th scope="row">Payment Type</th>
                 <td>
                     <select name="bpmpesa_payment_type" id="bpmpesa_payment_type">
@@ -159,10 +157,10 @@ if (!defined('ABSPATH')) {
                         Select whether you are using a Paybill or a Till number.
                     </p>
                 </td>
-            </tr>
+            </tr> -->
 
             <!-- Paybill / Till Number -->
-            <tr>
+            <!-- <tr>
                 <th scope="row">Paybill / Till Number</th>
                 <td>
                     <input type="text"
@@ -170,10 +168,10 @@ if (!defined('ABSPATH')) {
                         value="<?php echo esc_attr(get_option('bpmpesa_paybill')); ?>"
                         class="regular-text">
                 </td>
-            </tr>
+            </tr> -->
 
             <!-- Account Number -->
-            <tr id="bpmpesa_account_row">
+            <!-- <tr id="bpmpesa_account_row">
                 <th scope="row">Account Number</th>
                 <td>
                     <input type="text"
@@ -184,7 +182,7 @@ if (!defined('ABSPATH')) {
                         Required for Paybill payments only. Not applicable when using a Till number.
                     </p>
                 </td>
-            </tr>
+            </tr> -->
 
             <!-- Amount -->
             <tr>
