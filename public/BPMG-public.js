@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const button = document.getElementById("bpmg_send_mpesa_request");
   const phoneInput = document.getElementById("bpmg_mpesa_phone");
   const errorDiv = document.getElementById("bpmg_error_message");
+  const submitBtn = document.querySelector('#signup-form input[type="submit"]');
 
   const paymentStatus = bpmg_get_cookie("payment");
 
@@ -15,6 +16,22 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   if (!button) return;
+
+  // Submit button click handler
+  const submitClickHandler = function (e) {
+    if (bpmg_get_cookie("payment") !== "paid") {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      errorDiv.textContent =
+        "Please complete M-Pesa payment before continuing.";
+      errorDiv.style.display = "block";
+      return false;
+    }
+  };
+
+  submitBtn.addEventListener("click", submitClickHandler, true);
+  window.bpmg_submitClickHandler = submitClickHandler;
+  window.bpmg_submitBtn = submitBtn;
 
   button.addEventListener("click", function (e) {
     const phoneNumber = phoneInput.value.trim();
@@ -135,6 +152,16 @@ function bpmg_start_mpesa_polling(checkoutId, button) {
           button.style.backgroundColor = "#4CAF50";
           button.style.borderColor = "#4CAF50";
           document.cookie = "payment=paid; path=/; SameSite=Lax"; // store paid status in cookie to persist data
+
+          // Remove event listeners to allow form submission
+          if (window.bpmg_submitBtn && window.bpmg_submitClickHandler) {
+            window.bpmg_submitBtn.removeEventListener(
+              "click",
+              window.bpmg_submitClickHandler,
+              true
+            );
+          }
+
         }
 
         if (status === "failed") {
@@ -163,3 +190,5 @@ function bpmg_get_cookie(name) {
   if (parts.length === 2) return parts.pop().split(";").shift();
   return null;
 }
+
+// function to disable button click
