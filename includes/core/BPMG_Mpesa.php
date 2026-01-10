@@ -24,7 +24,6 @@ class BPMG_Mpesa
     private $transaction_description;
     private $err;
     private $url;
-    private $phone; // declare global so we can store value in db
     private $amount;
     private $transactionType = 'CustomerPayBillOnline';
 
@@ -57,7 +56,7 @@ class BPMG_Mpesa
         if ($validation_result['status'] === 'error') {
             return $validation_result;
         }
-        $this->phone = $phone_number;
+
         try {
             $data = [
                 "BusinessShortCode" => $this->shortcode, // paybill number
@@ -65,9 +64,9 @@ class BPMG_Mpesa
                 "Timestamp" => $this->timestamp, // current timestamp
                 "TransactionType" => $this->transactionType, // transaction type (CustomerBuyGoodsOnline or CustomerPayBillOnline)
                 "Amount" => $this->amount, // get amount from settings, do not allow zero or negative amounts
-                "PartyA" => $this->phone, // phone number making payment
+                "PartyA" => $phone_number, // phone number making payment
                 "PartyB" => $this->shortcode, // paybill number
-                "PhoneNumber" => $this->phone, // similar to pary A
+                "PhoneNumber" => $phone_number, // similar to pary A
                 "AccountReference" => $this->account_reference, // transaction id
                 "TransactionDesc" => $this->transaction_description, // description of transaction
                 "CallBackURL" => $this->callbackurl, // webhook callback
@@ -192,13 +191,13 @@ class BPMG_Mpesa
             ]);
 
             if ($existing) {
-                $post_id = $existing[0];
+                $post_id = $existing[0]; // returns back the post id
             } else {
                 $post_id = wp_insert_post([
                     'post_type'   => 'mpesa',
                     'post_status' => 'publish',
                     'post_title'  => 'Mpesa STK ' . $checkoutId,
-                ]);
+                ]); // after create complete returns back the post id
             }
 
             if (is_wp_error($post_id)) {
@@ -214,7 +213,7 @@ class BPMG_Mpesa
             update_post_meta($post_id, 'amount', $this->amount);
             update_post_meta($post_id, 'result_code', $resultCode);
             update_post_meta($post_id, 'result_desc', $resultDesc);
-            update_post_meta($post_id, 'phone_number', $this->phone ?? '');
+            //update_post_meta($post_id, 'phone_number', $this->phone);
             update_post_meta($post_id, 'account_ref', $this->account_reference ?? '');
             update_post_meta($post_id, 'date', current_time('mysql'));
 

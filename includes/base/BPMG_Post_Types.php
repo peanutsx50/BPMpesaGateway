@@ -43,7 +43,7 @@ class BPMG_Post_Types
         unset($columns['date']);
         unset($columns['title']);
         $columns['account_ref'] = 'Transaction Ref';
-        $columns['phone_number'] = 'Phone Number';
+        //$columns['phone_number'] = 'Phone Number';
         $columns['amount'] = 'Amount';
         $columns['status'] = 'Status';
         $columns['date'] = 'Date';
@@ -57,9 +57,9 @@ class BPMG_Post_Types
             case 'account_ref':
                 echo esc_html(get_post_meta($post_id, 'account_ref', true));
                 break;
-            case 'phone_number':
-                echo esc_html(get_post_meta($post_id, 'phone_number', true));
-                break;
+            // case 'phone_number':
+            //     echo esc_html(get_post_meta($post_id, 'phone_number', true));
+            //     break;
             case 'amount':
                 echo esc_html(get_post_meta($post_id, 'amount', true));
                 break;
@@ -101,7 +101,5 @@ class BPMG_Post_Types
             $query->set('orderby', 'date');
         }
     }
-
-    // populate the post page with transaction data
     
 }
