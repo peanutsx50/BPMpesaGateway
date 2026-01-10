@@ -46,7 +46,7 @@ class BPMG_Post_Types
         $columns['phone_number'] = 'Phone Number';
         $columns['amount'] = 'Amount';
         $columns['status'] = 'Status';
-        $columns['timestamp'] = 'Date';
+        $columns['date'] = 'Date';
         return $columns;
     }
 
@@ -66,7 +66,7 @@ class BPMG_Post_Types
             case 'status':
                 echo esc_html(get_post_meta($post_id, 'status', true));
                 break;
-            case 'timestamp':
+            case 'date':
                 echo esc_html(get_the_date('', $post_id));
                 break;
         }

@@ -216,7 +216,7 @@ class BPMG_Mpesa
             update_post_meta($post_id, 'result_desc', $resultDesc);
             update_post_meta($post_id, 'phone_number', $this->phone ?? '');
             update_post_meta($post_id, 'account_ref', $this->account_reference ?? '');
-            update_post_meta($post_id, 'timestamp', current_time('mysql'));
+            update_post_meta($post_id, 'date', current_time('mysql'));
 
             return rest_ensure_response(['status' => 'ok']);
         }
@@ -254,7 +254,7 @@ class BPMG_Mpesa
         return rest_ensure_response([
             'status'    => get_post_meta($post_id, 'status', true),
             'message'   => get_post_meta($post_id, 'result_desc', true),
-            'timestamp' => get_post_meta($post_id, 'timestamp', true),
+            'date'      => get_post_meta($post_id, 'date', true),
         ]);
     }
     // save data if successful and allow user to continue registration
