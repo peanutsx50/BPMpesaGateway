@@ -24,6 +24,7 @@ class BPMG_Mpesa
     private $transaction_description;
     private $err;
     private $url;
+    private $phone; // declare global so we can store value in db
 
 
     // Mpesa related functions can be added here in the future
@@ -37,7 +38,7 @@ class BPMG_Mpesa
         $this->access_token        = $this->generate_access_token();
         $this->timestamp           = date('YmdHis'); // should always come first before generate password so its not empty
         $this->password            = $this->generate_password();
-        $this->account_reference   = get_option('bpmpesa_account_reference');
+        $this->account_reference   = get_option('bpmpesa_account_reference'); // figure out how to make it incremental
         $this->transaction_description = get_option('bpmpesa_transaction_reference');
         $this->callbackurl         = home_url('/wp-json/bpmpesa/v1/callback', 'https');
         $this->url = $this->environment === 'production' ?
@@ -53,7 +54,7 @@ class BPMG_Mpesa
         if ($validation_result['status'] === 'error') {
             return $validation_result;
         }
-
+        $this->phone = $phone_number;
         try {
             $data = [
                 "BusinessShortCode" => $this->shortcode, // paybill number
@@ -175,6 +176,8 @@ class BPMG_Mpesa
                 'status' => $status,
                 'result_code' => $resultCode,
                 'result_desc' => $resultDesc,
+                'phone_number' => $this->phone,
+                'account_ref' => $this->account_reference,
                 'timestamp' => current_time('mysql')
             ]);
         }
@@ -211,4 +214,6 @@ class BPMG_Mpesa
             'message' => 'No checkout ID provided'
         ]);
     }
+
+    // save data if successful and allow user to continue registration
 }
