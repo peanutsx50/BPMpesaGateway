@@ -42,11 +42,11 @@ class BPMG_Post_Types
     {
         unset($columns['date']);
         unset($columns['title']);
-        $columns['transaction_id'] = 'Transaction ID';
+        $columns['account_ref'] = 'Transaction Ref';
         $columns['phone_number'] = 'Phone Number';
         $columns['amount'] = 'Amount';
         $columns['status'] = 'Status';
-        $columns['date'] = 'Date';
+        $columns['timestamp'] = 'Date';
         return $columns;
     }
 
@@ -54,8 +54,8 @@ class BPMG_Post_Types
     public static function custom_mpesacolumns($column, $post_id)
     {
         switch ($column) {
-            case 'transaction_id':
-                echo esc_html(get_post_meta($post_id, 'transaction_id', true));
+            case 'account_ref':
+                echo esc_html(get_post_meta($post_id, 'account_ref', true));
                 break;
             case 'phone_number':
                 echo esc_html(get_post_meta($post_id, 'phone_number', true));
@@ -66,7 +66,7 @@ class BPMG_Post_Types
             case 'status':
                 echo esc_html(get_post_meta($post_id, 'status', true));
                 break;
-            case 'date':
+            case 'timestamp':
                 echo esc_html(get_the_date('', $post_id));
                 break;
         }
@@ -101,4 +101,7 @@ class BPMG_Post_Types
             $query->set('orderby', 'date');
         }
     }
+
+    // populate the post page with transaction data
+    
 }

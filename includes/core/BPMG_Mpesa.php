@@ -25,6 +25,8 @@ class BPMG_Mpesa
     private $err;
     private $url;
     private $phone; // declare global so we can store value in db
+    private $amount;
+    private $transactionType = 'CustomerPayBillOnline';
 
 
     // Mpesa related functions can be added here in the future
@@ -40,6 +42,7 @@ class BPMG_Mpesa
         $this->password            = $this->generate_password();
         $this->account_reference   = get_option('bpmpesa_account_reference'); // figure out how to make it incremental
         $this->transaction_description = get_option('bpmpesa_transaction_reference');
+        $this->amount              = get_option('bpmpesa_amount');
         $this->callbackurl         = home_url('/wp-json/bpmpesa/v1/callback', 'https');
         $this->url = $this->environment === 'production' ?
             'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest' :
@@ -60,14 +63,14 @@ class BPMG_Mpesa
                 "BusinessShortCode" => $this->shortcode, // paybill number
                 "Password" => $this->password, // generated password
                 "Timestamp" => $this->timestamp, // current timestamp
-                "TransactionType" => "CustomerPayBillOnline", // transaction type (CustomerBuyGoodsOnline or CustomerPayBillOnline)
-                "Amount" => get_option('bpmpesa_amount'), // get amount from settings, do not allow zero or negative amounts
-                "PartyA" => $phone_number, // phone number making paymentd
+                "TransactionType" => $this->transactionType, // transaction type (CustomerBuyGoodsOnline or CustomerPayBillOnline)
+                "Amount" => $this->amount, // get amount from settings, do not allow zero or negative amounts
+                "PartyA" => $this->phone, // phone number making payment
                 "PartyB" => $this->shortcode, // paybill number
-                "PhoneNumber" => $phone_number,
-                "AccountReference" => $this->account_reference,
-                "TransactionDesc" => $this->transaction_description,
-                "CallBackURL" => home_url('/wp-json/bpmpesa/v1/callback', 'https'), // webhook callback
+                "PhoneNumber" => $this->phone, // similar to pary A
+                "AccountReference" => $this->account_reference, // transaction id
+                "TransactionDesc" => $this->transaction_description, // description of transaction
+                "CallBackURL" => $this->callbackurl, // webhook callback
             ];
             // send request to mpesa api
             $curl = curl_init();
@@ -153,67 +156,106 @@ class BPMG_Mpesa
     // handle callback
     public function handle_callback($request)
     {
-        // Log all requests for debugging
         error_log('BPMG Callback hit - Method: ' . $request->get_method());
 
-        // Log the raw body first
-        $raw_body = $request->get_body();
-        $body = json_decode($raw_body, true);
-        $stk = $body['Body']['stkCallback'] ?? null; // will be empty if called by JS
+        /*
+     * ======================================================
+     * 1. SAFARICOM CALLBACK (POST)
+     * ======================================================
+     */
+        if ($request->get_method() === 'POST') {
 
-        // If called by Safaricom (POST request with callback data)
-        if ($stk) {
-            error_log('BPMG: Result Code : ' . $stk['ResultCode']);
-            error_log('BPMG: Result Description : ' . $stk['ResultDesc']);
-            $checkoutId = $stk['CheckoutRequestID'];
-            $resultCode = $stk['ResultCode'];
-            $resultDesc = $stk['ResultDesc'] ?? 'No description';
+            $raw_body = $request->get_body();
+            $body = json_decode($raw_body, true);
 
-            $status = ($resultCode == 0) ? 'success' : 'failed';
+            $stk = $body['Body']['stkCallback'] ?? null;
 
-            // Store the status and additional data
-            return update_option('bpmg_stk_' . $checkoutId, [
-                'status' => $status,
-                'result_code' => $resultCode,
-                'result_desc' => $resultDesc,
-                'phone_number' => $this->phone,
-                'account_ref' => $this->account_reference,
-                'timestamp' => current_time('mysql')
+            if (!$stk) {
+                return rest_ensure_response(['status' => 'ignored']);
+            }
+
+            $checkoutId = sanitize_text_field($stk['CheckoutRequestID']);
+            $resultCode = (int) $stk['ResultCode'];
+            $resultDesc = sanitize_text_field($stk['ResultDesc'] ?? '');
+
+            $status = ($resultCode === 0) ? 'success' : 'failed';
+
+            /*
+         * Prevent duplicates (Safaricom retries callbacks)
+         */
+            $existing = get_posts([
+                'post_type'   => 'mpesa',
+                'meta_key'    => 'checkout_id',
+                'meta_value'  => $checkoutId,
+                'fields'      => 'ids',
+                'numberposts' => 1,
             ]);
-        }
 
-        // If polled via JS (GET request with checkout_id parameter)
-        $checkout_id = $request->get_param('checkout_id');
-
-        if ($checkout_id) {
-            $checkout_id = sanitize_text_field($checkout_id);
-            $stored_data = get_option('bpmg_stk_' . $checkout_id, null);
-
-            error_log('BPMG: Polling for ' . $checkout_id . ' - Found: ' . print_r($stored_data, true));
-
-            // If data exists and is an array (new format)
-            if (is_array($stored_data)) {
-                return rest_ensure_response([
-                    'status' => $stored_data['status'],
-                    'message' => $stored_data['result_desc'] ?? '',
-                    'timestamp' => $stored_data['timestamp'] ?? ''
+            if ($existing) {
+                $post_id = $existing[0];
+            } else {
+                $post_id = wp_insert_post([
+                    'post_type'   => 'mpesa',
+                    'post_status' => 'publish',
+                    'post_title'  => 'Mpesa STK ' . $checkoutId,
                 ]);
             }
 
-            // No data found yet - still pending
+            if (is_wp_error($post_id)) {
+                error_log('BPMG: Failed to create mpesa post');
+                return rest_ensure_response(['status' => 'error']);
+            }
+
+            /*
+         * Store callback data
+         */
+            update_post_meta($post_id, 'checkout_id', $checkoutId);
+            update_post_meta($post_id, 'status', $status);
+            update_post_meta($post_id, 'amount', $this->amount);
+            update_post_meta($post_id, 'result_code', $resultCode);
+            update_post_meta($post_id, 'result_desc', $resultDesc);
+            update_post_meta($post_id, 'phone_number', $this->phone ?? '');
+            update_post_meta($post_id, 'account_ref', $this->account_reference ?? '');
+            update_post_meta($post_id, 'timestamp', current_time('mysql'));
+
+            return rest_ensure_response(['status' => 'ok']);
+        }
+
+        /*
+     * ======================================================
+     * 2. JS POLLING (GET)
+     * ======================================================
+     */
+        $checkoutId = sanitize_text_field($request->get_param('checkout_id'));
+
+        if (!$checkoutId) {
             return rest_ensure_response([
-                'status' => 'pending',
-                'message' => 'Waiting for payment confirmation',
-                'data' => $stored_data,
+                'status'  => 'error',
+                'message' => 'No checkout_id provided',
             ]);
         }
 
-        // No checkout_id provided
+        $posts = get_posts([
+            'post_type'   => 'mpesa',
+            'meta_key'    => 'checkout_id',
+            'meta_value'  => $checkoutId,
+            'numberposts' => 1,
+        ]);
+
+        if (!$posts) {
+            return rest_ensure_response([
+                'status'  => 'pending',
+                'message' => 'Waiting for payment confirmation',
+            ]);
+        }
+
+        $post_id = $posts[0]->ID;
+
         return rest_ensure_response([
-            'status' => 'error',
-            'message' => 'No checkout ID provided'
+            'status'    => get_post_meta($post_id, 'status', true),
+            'message'   => get_post_meta($post_id, 'result_desc', true),
+            'timestamp' => get_post_meta($post_id, 'timestamp', true),
         ]);
     }
-
     // save data if successful and allow user to continue registration
 }
