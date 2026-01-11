@@ -66,6 +66,15 @@ class BPMG
                 'permission_callback' => '__return_true',
             ]);
         });
+        // Display admin notice - check license key on each admin page load
+        add_action('admin_notices', function () {
+            $licenseKey = get_option('BPMG_license_key', '');
+            if (empty($licenseKey)) {
+                echo '<div class="notice notice-error"><p>';
+                echo '⚠️ Please enter your BPMpesaGateway license key to use the plugin.';
+                echo '</p></div>';
+            }
+        });
     }
 
     // Load core classes

@@ -75,14 +75,10 @@ if (class_exists('YahnisElsts\PluginUpdateChecker\v5\PucFactory')) {
         'bpmpesagateway'
     );
 
-    //$updateChecker->setBranch('main');
-
     // Correctly pass the license key into the filter scope
     $updateChecker->addQueryArgFilter(function ($queryArgs) {
         $licenseKey = get_option('BPMG_license_key', '');
-        if (!empty($licenseKey)) {
-            $queryArgs['license_key'] = $licenseKey;
-        }
+        $queryArgs['license_key'] = $licenseKey;
         return $queryArgs;
     });
 }
