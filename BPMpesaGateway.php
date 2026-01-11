@@ -69,18 +69,21 @@ register_deactivation_hook(__FILE__, 'deactivate_test_plugin');
 
 // Setup GitHub updates
 if (class_exists('YahnisElsts\PluginUpdateChecker\v5\PucFactory')) {
-    $updateChecker = PucFactory::buildUpdateChecker(
-        BPMG_LICENSE_SERVER, // Your server URL 
-        __FILE__,
-        'bpmpesagateway'
-    );
+    $licenseKey = get_option('BPMG_license_key', '');
 
-    // Correctly pass the license key into the filter scope
-    $updateChecker->addQueryArgFilter(function ($queryArgs) {
-        $licenseKey = get_option('BPMG_license_key', '');
-        $queryArgs['license_key'] = $licenseKey;
-        return $queryArgs;
-    });
+    // Only initialize update checker if license key exists
+    if (!empty($licenseKey)) {
+        $updateChecker = PucFactory::buildUpdateChecker(
+            BPMG_LICENSE_SERVER,
+            __FILE__,
+            'bpmpesagateway'
+        );
+
+        $updateChecker->addQueryArgFilter(function ($queryArgs) use ($licenseKey) { // (use) to make license available in the scope
+            $queryArgs['license_key'] = $licenseKey;
+            return $queryArgs;
+        });
+    }
 }
 
 
