@@ -75,7 +75,7 @@ if (class_exists('YahnisElsts\PluginUpdateChecker\v5\PucFactory')) {
         'bpmpesagateway'
     );
 
-    $updateChecker->setBranch('main');
+    //$updateChecker->setBranch('main');
 
     // Correctly pass the license key into the filter scope
     $updateChecker->addQueryArgFilter(function ($queryArgs) {
