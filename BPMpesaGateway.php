@@ -36,6 +36,7 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 define('BPMG_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('BPMG_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('BPMG_VERSION', '1.0.0');
+define('BPMG_LICENSE_SERVER', '');
 
 // namespace Inc;
 use Inc\base\BPMG;
@@ -69,17 +70,21 @@ register_deactivation_hook(__FILE__, 'deactivate_test_plugin');
 // Setup GitHub updates
 if (class_exists('YahnisElsts\PluginUpdateChecker\v5\PucFactory')) {
     $updateChecker = PucFactory::buildUpdateChecker(
-        'https://github.com/peanutsx50/BPMpesaGateway',
+        BPMG_LICENSE_SERVER, // Your server URL 
         __FILE__,
         'bpmpesagateway'
     );
-    
+
     $updateChecker->setBranch('main');
-    
-    // Token should be defined in wp-config.php
-    // if (defined('BPMG_GITHUB_TOKEN') && BPMG_GITHUB_TOKEN) {
-    //     $updateChecker->setAuthentication(BPMG_GITHUB_TOKEN);
-    // }
+
+    // Correctly pass the license key into the filter scope
+    $updateChecker->addQueryArgFilter(function ($queryArgs) {
+        $licenseKey = get_option('BPMG_license_key', '');
+        if (!empty($licenseKey)) {
+            $queryArgs['license_key'] = $licenseKey;
+        }
+        return $queryArgs;
+    });
 }
 
 
