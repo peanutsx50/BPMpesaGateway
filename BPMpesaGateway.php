@@ -35,6 +35,7 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 // Define plugin constants
 define('BPMG_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('BPMG_PLUGIN_PATH', plugin_dir_path(__FILE__));
+define('BPMG_BASENAME', plugin_basename(__FILE__));
 define('BPMG_VERSION', '1.0.0');
 define('BPMG_LICENSE_SERVER', 'https://bp-mpesa-gateway-license.vercel.app/');
 
