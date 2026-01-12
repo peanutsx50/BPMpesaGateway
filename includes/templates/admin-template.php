@@ -27,30 +27,19 @@ if (!defined('ABSPATH')) {
         do_settings_sections('bpmpesa_settings_group');
         ?>
         <table class="form-table" role="presentation">
-
-            <!-- Allow payments -->
-            <!-- <tr>
-                <th scope="row">Require Payments</th>
+            <!-- License Key -->
+            <tr>
+                <th scope="row">License Key</th>
                 <td>
-                    <label>
-                        <input type="checkbox" name="bpmpesa_allow_payments" value="1"
-                            <?php checked(1, get_option('bpmpesa_allow_payments')); ?>>
-                        Block registration until payment is complete
-                    </label>
+                    <input type="password"
+                        name="bpmg_license_key"
+                        value="<?php echo esc_attr(get_option('bpmg_license_key')); ?>"
+                        class="regular-text noCopyPaste">
+                    <p style="margin-top: 5px; font-style: italic;">
+                        Enter your license key to enable plugin updates and support. The plugin will still work without a license key, but you won't receive updates or support.
+                    </p>
                 </td>
-            </tr> -->
-
-            <!-- Save transactions -->
-            <!-- <tr>
-                <th scope="row">Save Transactions</th>
-                <td>
-                    <label>
-                        <input type="checkbox" name="bpmpesa_save_transactions" value="1"
-                            <?php checked(1, get_option('bpmpesa_save_transactions')); ?>>
-                        Store all Mpesa transactions in the database
-                    </label>
-                </td>
-            </tr> -->
+            </tr>
 
             <!-- Consumer Key -->
             <tr>
@@ -127,62 +116,6 @@ if (!defined('ABSPATH')) {
                     </p>
                 </td>
             </tr>
-
-
-            <!-- Show Paybill or Till on STK failure -->
-            <!-- <tr>
-                <th scope="row">Display Paybill / Till on Failure</th>
-                <td>
-                    <label>
-                        <input type="checkbox" name="bpmpesa_show_paybill" value="1"
-                            <?php checked(1, get_option('bpmpesa_show_paybill')); ?>>
-                        Display the Paybill or Till Number, allowing the user to complete payment manually.
-                    </label>
-                </td>
-            </tr> -->
-
-            <!-- Payment Type -->
-            <!-- <tr>
-                <th scope="row">Payment Type</th>
-                <td>
-                    <select name="bpmpesa_payment_type" id="bpmpesa_payment_type">
-                        <option value="paybill" <?php selected(get_option('bpmpesa_payment_type'), 'paybill'); ?>>
-                            Paybill
-                        </option>
-                        <option value="till" <?php selected(get_option('bpmpesa_payment_type'), 'till'); ?>>
-                            Till Number
-                        </option>
-                    </select>
-                    <p style="font-style: italic;">
-                        Select whether you are using a Paybill or a Till number.
-                    </p>
-                </td>
-            </tr> -->
-
-            <!-- Paybill / Till Number -->
-            <!-- <tr>
-                <th scope="row">Paybill / Till Number</th>
-                <td>
-                    <input type="text"
-                        name="bpmpesa_paybill"
-                        value="<?php echo esc_attr(get_option('bpmpesa_paybill')); ?>"
-                        class="regular-text">
-                </td>
-            </tr> -->
-
-            <!-- Account Number -->
-            <!-- <tr id="bpmpesa_account_row">
-                <th scope="row">Account Number</th>
-                <td>
-                    <input type="text"
-                        name="bpmpesa_account"
-                        value="<?php echo esc_attr(get_option('bpmpesa_account')); ?>"
-                        class="regular-text">
-                    <p class="description">
-                        Required for Paybill payments only. Not applicable when using a Till number.
-                    </p>
-                </td>
-            </tr> -->
 
             <!-- Amount -->
             <tr>
