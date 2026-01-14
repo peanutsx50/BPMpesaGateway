@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", function () {
     try {
       button.disabled = true; // Prevent multiple clicks
       button.textContent = "Sending Request..."; // loading state
-      bpmg_send_mpesa_request(button);
+      bpmg_send_mpesa_request(button, cleanPhone);
     } catch (error) {
       e.preventDefault();
       console.error("Error:", error);
@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 //ajax function to send mpesa request
-function bpmg_send_mpesa_request(button) {
+function bpmg_send_mpesa_request(button, phoneNumber) {
   fetch(bpmpesa_ajax.ajax_url, {
     method: "POST",
     credentials: "same-origin",
@@ -89,7 +89,7 @@ function bpmg_send_mpesa_request(button) {
     },
     body: new URLSearchParams({
       action: "bpmg_send_mpesa_request", //match action hook in PHP
-      phone: document.getElementById("bpmg_mpesa_phone").value.trim(), // data for function
+      phone: phoneNumber, // data for function
       bpmg_nonce: bpmpesa_ajax.nonce, // pass the security nonce
     }),
   })
@@ -101,7 +101,8 @@ function bpmg_send_mpesa_request(button) {
         // check if user accepted or failed to complete payment
         bpmg_start_mpesa_polling(
           data.data?.response?.CheckoutRequestID,
-          button
+          button,
+          phoneNumber
         );
       } else {
         button.disabled = false;
@@ -124,7 +125,7 @@ function bpmg_send_mpesa_request(button) {
     });
 }
 
-function bpmg_start_mpesa_polling(checkoutId, button) {
+function bpmg_start_mpesa_polling(checkoutId, button, phoneNumber) {
   let pollCount = 0;
   const maxPolls = 20; // Stop after 2 minutes (20 * 3 seconds)
 
@@ -139,7 +140,7 @@ function bpmg_start_mpesa_polling(checkoutId, button) {
       return;
     }
 
-    fetch(`${bpmpesa_ajax.callback_url}?checkout_id=${checkoutId}`, {
+    fetch(`${bpmpesa_ajax.callback_url}?checkout_id=${checkoutId}&phone=${phoneNumber}`, {
       method: "GET",
       credentials: "same-origin",
     })
@@ -180,7 +181,7 @@ function bpmg_start_mpesa_polling(checkoutId, button) {
         button.disabled = false;
         button.textContent = "Payment failed. Try again.";
       });
-  }, 3000); // poll every 3 sec
+  }, 1000); // poll every 3 sec
 }
 
 // function to get cookie

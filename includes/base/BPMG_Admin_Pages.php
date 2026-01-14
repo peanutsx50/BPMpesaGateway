@@ -32,25 +32,13 @@ class BPMG_Admin_Pages
     // save settings
     public static function register_settings()
     {
-        // Allow payment: (checkboxes) true/false
+        // license key: (string)
         register_setting(
             'bpmpesa_settings_group',
-            'bpmpesa_allow_payments',
+            'bpmg_license_key',
             [
-                'type'              => 'boolean',
-                'sanitize_callback' => 'rest_sanitize_boolean',
-                'default'           => true,
-            ]
-        );
-
-        // save transaction settings: (checkbox) true/false
-        register_setting(
-            'bpmpesa_settings_group',
-            'bpmpesa_save_transactions',
-            [
-                'type'              => 'boolean',
-                'sanitize_callback' => 'rest_sanitize_boolean',
-                'default'           => true,
+                'type'    => 'string',
+                'default' => '',
             ]
         );
 
@@ -116,52 +104,6 @@ class BPMG_Admin_Pages
             ]
         );
 
-        // show paybill (checkbox): true/false
-        register_setting(
-            'bpmpesa_settings_group',
-            'bpmpesa_show_paybill',
-            [
-                'type'              => 'boolean',
-                'sanitize_callback' => 'rest_sanitize_boolean',
-                'default'           => false,
-            ]
-        );
-
-        //payment type(dropdown): string
-        register_setting(
-            'bpmpesa_settings_group',
-            'bpmpesa_payment_type',
-            [
-                'type'              => 'string',
-                'sanitize_callback' => function ($value) {
-                    return in_array($value, ['paybill', 'till'], true) ? $value : 'paybill';
-                }, //checks if value is either paybill/till, if true pass as is if not default to paybill
-                'default'           => 'paybill',
-            ]
-        );
-
-        // paybill/till number: string
-        register_setting(
-            'bpmpesa_settings_group',
-            'bpmpesa_paybill',
-            [
-                'type'              => 'string',
-                'sanitize_callback' => 'sanitize_text_field',
-                'default'           => '',
-            ]
-        );
-
-        // account number: string
-        register_setting(
-            'bpmpesa_settings_group',
-            'bpmpesa_account',
-            [
-                'type'              => 'string',
-                'sanitize_callback' => 'sanitize_text_field',
-                'default'           => '',
-            ]
-        );
-
         // Payment amount
         register_setting(
             'bpmpesa_settings_group',
@@ -170,7 +112,7 @@ class BPMG_Admin_Pages
                 'type'              => 'number',
                 'sanitize_callback' => function ($value) {
                     return max(0, (int) $value);
-                },//(int) $values cast anything other than number to 0
+                }, //(int) $values cast anything other than number to 0
                 'default'           => 0,
             ]
         );
