@@ -208,6 +208,8 @@ class BPMG_Mpesa
             /*
          * Store callback data
          */
+            // store relevant data in post meta
+
             update_post_meta($post_id, 'checkout_id', $checkoutId);
             update_post_meta($post_id, 'status', $status);
             update_post_meta($post_id, 'amount', $this->amount);
@@ -226,11 +228,13 @@ class BPMG_Mpesa
      * ======================================================
      */
         $checkoutId = sanitize_text_field($request->get_param('checkout_id'));
+        $phone = sanitize_text_field($request->get_param('phone'));
+        
 
-        if (!$checkoutId) {
+        if (!$checkoutId || !$phone) {
             return rest_ensure_response([
                 'status'  => 'error',
-                'message' => 'No checkout_id provided',
+                'message' => 'No checkout id or phone provided',
             ]);
         }
 
@@ -249,6 +253,9 @@ class BPMG_Mpesa
         }
 
         $post_id = $posts[0]->ID;
+
+        //store phone number in post meta
+        update_post_meta($post_id, 'phone_number', $phone);
 
         return rest_ensure_response([
             'status'    => get_post_meta($post_id, 'status', true),
