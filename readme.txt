@@ -2,7 +2,7 @@
 Contributors: Festus murimi
 Donate link: https://bpmesagateway.com/
 Tags: mpesa, payment, gateway, buddypress, registration, e-commerce
-Requires at least: 5.0
+Requires at least: 6.9
 Tested up to: 6.2.1
 Stable tag: 1.0.0
 Requires PHP: 8.1
