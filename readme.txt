@@ -1,95 +1,99 @@
-=== Plugin Name ===
-Contributors: (this should be a list of wordpress.org userid's)
-Donate link: https://example.com/
-Tags: tag1, tag2
-Requires at least: 4.7
-Tested up to: 5.4
-Stable tag: 4.3
-Requires PHP: 7.0
+=== BPMpesa Gateway ===
+Contributors: Festus murimi
+Donate link: https://bpmesagateway.com/
+Tags: mpesa, payment, gateway, buddypress, registration, e-commerce
+Requires at least: 5.0
+Tested up to: 6.4
+Stable tag: 1.0.0
+Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Here is a short description of the plugin.  This should be no more than 150 characters.  No markup here.
+Accept M-Pesa payments on your WordPress site with BuddyPress integration for seamless registration and checkout experiences.
 
 == Description ==
 
-This is the long description.  No limit, and you can use Markdown (as well as in the following sections).
+**BPMpesa Gateway** is a powerful WordPress plugin that integrates M-Pesa payment processing with BuddyPress member registration. Accept payments directly from your customers using Kenya's most popular mobile money solution.
 
-For backwards compatibility, if this section is missing, the full length of the short description will be used, and
-Markdown parsed.
+= Features =
 
-A few notes about the sections above:
+* **M-Pesa Integration** - Direct integration with Safaricom's M-Pesa API
+* **BuddyPress Compatible** - Seamless integration with BuddyPress profile fields and registration workflow
+* **STK Push** - Automatic payment prompts sent directly to customer phones
+* **Real-time Payment Verification** - Polling mechanism for instant payment confirmation
+* **Secure Transactions** - Industry-standard encryption and security protocols
+* **Admin Dashboard** - Comprehensive settings and transaction monitoring
+* **Callback Handling** - Automatic processing of M-Pesa callbacks and webhooks
+* **Transaction Logging** - Complete audit trail of all payment transactions
 
-* "Contributors" is a comma separated list of wordpress.org usernames
-* "Tags" is a comma separated list of tags that apply to the plugin
-* "Requires at least" is the lowest version that the plugin will work on
-* "Tested up to" is the highest version that you've *successfully used to test the plugin*
-* Stable tag must indicate the Subversion "tag" of the latest stable version
+= Requirements =
 
-Note that the `readme.txt` value of stable tag is the one that is the defining one for the plugin.  If the `/trunk/readme.txt` file says that the stable tag is `4.3`, then it is `/tags/4.3/readme.txt` that'll be used for displaying information about the plugin.
+* WordPress 5.0+
+* PHP 7.4+
+* BuddyPress (optional, for member registration features)
+* Active M-Pesa Business API credentials from Safaricom
 
-If you develop in trunk, you can update the trunk `readme.txt` to reflect changes in your in-development version, without having that information incorrectly disclosed about the current stable version that lacks those changes -- as long as the trunk's `readme.txt` points to the correct stable tag.
+= Getting Started =
 
-If no stable tag is provided, your users may not get the correct version of your code.
+1. Install and activate the plugin
+2. Navigate to **BPMpesa Gateway Settings** in WordPress Admin
+3. Enter your M-Pesa API credentials (Consumer Key, Consumer Secret, Shortcode, Passkey)
+4. Configure payment amounts and account references
+5. Test with sandbox credentials before going live
+
+== Installation ==
+
+1. Upload the `BPMpesaGateway` folder to the `/wp-content/plugins/` directory
+2. Activate the plugin through the **Plugins** menu in WordPress
+3. Go to the plugin settings and configure your M-Pesa API credentials
+4. Customize payment amounts and descriptions
+5. Add the payment form to your pages using shortcodes or widgets
 
 == Frequently Asked Questions ==
 
-= A question that someone might have =
+= Do I need BuddyPress? =
 
-An answer to that question.
+Byes BuddyPress is required for the plugin to work. The plugin works by integrating seamlessly with BuddyPress for member registration workflows.
 
-= What about foo bar? =
+= What payment amounts can I accept? =
 
-Answer to foo bar dilemma.
+You can configure any amount in your plugin settings. M-Pesa typically supports amounts between KES 1 and KES 150,000 per transaction.
+
+= Is this plugin secure? =
+
+Yes. The plugin uses SSL/TLS encryption, nonce verification, and sanitized data handling. Always use production credentials only on HTTPS sites.
+
+= How do I get M-Pesa API credentials? =
+
+Visit the [Safaricom Developer Portal](https://developer.safaricom.co.ke/) to register for Business API access and obtain your credentials.
+
+= Can I customize the payment form? =
+
+Yes, the plugin supports hooks and filters for customizing the payment form and integrating with custom fields.
+
+= What happens after payment? =
+
+After successful payment, the customer can complete registration or proceed with their purchase. Payment data is automatically logged for your records.
 
 == Screenshots ==
 
-1. This screen shot description corresponds to screenshot-1.(png|jpg|jpeg|gif). Screenshots are stored in the /assets directory.
-2. This is the second screen shot
+1. M-Pesa Payment Form - Clean, user-friendly payment interface
+2. Admin Settings - Configure API credentials and payment parameters
+3. Transaction Log - View all payment transactions and details
+4. BuddyPress Integration - Seamless member registration with payment
 
 == Changelog ==
 
-= 1.0 =
-* A change since the previous version.
-* Another change.
-
-= 0.5 =
-* List versions from most recent at top to oldest at bottom.
+= 1.0.0 =
+* Initial release
+* M-Pesa STK Push integration
+* BuddyPress member registration support
+* Real-time payment polling
+* Admin dashboard and settings
+* Transaction logging and audit trails
+* Callback handling and verification
 
 == Upgrade Notice ==
 
-= 1.0 =
-Upgrade notices describe the reason a user should upgrade.  No more than 300 characters.
-
-= 0.5 =
-This version fixes a security related bug.  Upgrade immediately.
-
-== A brief Markdown Example ==
-
-Markdown is what the parser uses to process much of the readme file.
-
-[markdown syntax]: https://daringfireball.net/projects/markdown/syntax
-
-Ordered list:
-
-1. Some feature
-1. Another feature
-1. Something else about the plugin
-
-Unordered list:
-
-* something
-* something else
-* third thing
-
-Links require brackets and parenthesis:
-
-Here's a link to [WordPress](https://wordpress.org/ "Your favorite software") and one to [Markdown's Syntax Documentation][markdown syntax]. Link titles are optional, naturally.
-
-Blockquotes are email style:
-
-> Asterisks for *emphasis*. Double it up  for **strong**.
-
-And Backticks for code:
-
-`<?php code(); ?>`
+= 1.0.0 =
+Initial stable release. Install now to start accepting M-Pesa payments on your WordPress site.
