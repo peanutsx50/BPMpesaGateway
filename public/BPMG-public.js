@@ -181,7 +181,7 @@ function bpmg_start_mpesa_polling(checkoutId, button, phoneNumber) {
         button.disabled = false;
         button.textContent = "Payment failed. Try again.";
       });
-  }, 3000); // poll every 3 sec
+  }, 1000); // poll every 3 sec
 }
 
 // function to get cookie
