@@ -27,20 +27,6 @@ if (!defined('ABSPATH')) {
         do_settings_sections('bpmpesa_settings_group');
         ?>
         <table class="form-table" role="presentation">
-            <!-- License Key -->
-            <tr>
-                <th scope="row">License Key</th>
-                <td>
-                    <input type="password"
-                        name="bpmg_license_key"
-                        value="<?php echo esc_attr(get_option('bpmg_license_key')); ?>"
-                        class="regular-text noCopyPaste">
-                    <p style="margin-top: 5px; font-style: italic;">
-                        Enter your license key to enable plugin updates and support. The plugin will still work without a license key, but you won't receive updates or support.
-                    </p>
-                </td>
-            </tr>
-
             <!-- Consumer Key -->
             <tr>
                 <th scope="row">Consumer Key</th>
