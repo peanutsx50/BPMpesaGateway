@@ -2,13 +2,13 @@
 /*
  * 
  * 
- * @link              http://example.com
+ * @link              https://shorturl.at/E4V3K
  * @since             1.0.0
  * @package           BPMpesaGateway
  * 
  * 
  * Plugin Name:       BPMpesaGateway
- * Plugin URI:        https://example.com/plugins/the-basics/
+ * Plugin URI:        https://shorturl.at/E4V3K
  * Description:       BPMpesaGateway enables site administrators to require payment before users can register or join a BuddyPress-powered community.
  * Version:           1.0.0
  * Requires at least: 6.2.1
@@ -16,7 +16,7 @@
  * Author:            Festus Murimi
  * Author URI:        https://www.linkedin.com/in/festus-murimi-b41aa2251/
  * License:           EULA
- * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+ * License URI:       https://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain:       bpmpesagateway
  * Domain Path:       /languages
  * Requires Plugins:  buddypress

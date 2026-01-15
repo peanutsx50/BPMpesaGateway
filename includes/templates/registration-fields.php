@@ -24,7 +24,7 @@ if (! defined('ABSPATH')) {
         <input type="tel" id="bpmg_mpesa_phone" name="bpmg_mpesa_phone" value="" placeholder="e.g., 254 712 345 678" />
     </div>
     <div class="bpmg_mpesa_note">
-        Payment request sent via <strong>Appointly Technologies</strong>. Enter your M-Pesa PIN to complete registration.
+        Payment request will be sent. Enter your M-Pesa PIN to complete registration.
     </div>
     <div id="bpmg_error_message" style="display:none; color: red; margin-top: 10px;font-style: italic;"></div>
     <div class="bpmg_mpesa_button">
