@@ -32,16 +32,6 @@ class BPMG_Admin_Pages
     // save settings
     public static function register_settings()
     {
-        // license key: (string)
-        register_setting(
-            'bpmpesa_settings_group',
-            'bpmg_license_key',
-            [
-                'type'    => 'string',
-                'default' => '',
-            ]
-        );
-
         // consumer key: (string)
         register_setting(
             'bpmpesa_settings_group',

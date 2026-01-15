@@ -66,22 +66,6 @@ class BPMG
                 'permission_callback' => '__return_true',
             ]);
         });
-        // Display admin notice - check license key on each admin page load
-        add_action('after_plugin_row_' . BPMG_BASENAME, function () {
-            $licenseKey = get_option('BPMG_license_key', '');
-            if (empty($licenseKey)) {
-                echo '<tr class="plugin-update-tr active">';
-                echo '<td colspan="4" class="plugin-update colspanchange">';
-                echo '<div class="update-message notice inline notice-error notice-alt">';
-                echo '<p>';
-                echo '⚠️ <strong>License Key Required:</strong> ';
-                echo 'Please enter your license key to receive updates.';
-                echo '</p>';
-                echo '</div>';
-                echo '</td>';
-                echo '</tr>';
-            }
-        }, 10, 3);
     }
 
     // Load core classes

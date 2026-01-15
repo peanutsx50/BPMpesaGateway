@@ -68,23 +68,31 @@ function deactivate_test_plugin()
 register_activation_hook(__FILE__, 'activate_test_plugin');
 register_deactivation_hook(__FILE__, 'deactivate_test_plugin');
 
-// Setup GitHub updates
+// Setup server updates
+/**
+ * Initialize plugin update checker if the PucFactory class is available.
+ *
+ * This code checks if the YahnisElsts PluginUpdateChecker library is loaded
+ * and available. If it is, it creates an update checker instance that will
+ * periodically check the license server for plugin updates.
+ *
+ * @since 1.0.0
+ */
 if (class_exists('YahnisElsts\PluginUpdateChecker\v5\PucFactory')) {
-    $licenseKey = get_option('BPMG_license_key', '');
 
-    // Only initialize update checker if license key exists
-    if (!empty($licenseKey)) {
-        $updateChecker = PucFactory::buildUpdateChecker(
-            BPMG_LICENSE_SERVER,
-            __FILE__,
-            'bpmpesagateway'
-        );
-
-        $updateChecker->addQueryArgFilter(function ($queryArgs) use ($licenseKey) { // (use) to make license available in the scope
-            $queryArgs['license_key'] = $licenseKey;
-            return $queryArgs;
-        });
-    }
+    /**
+     * Build and configure the update checker.
+     *
+     * Parameters:
+     * - BPMG_LICENSE_SERVER: The remote server URL that provides update information
+     * - __FILE__: The main plugin file path
+     * - 'bpmpesagateway': Unique slug identifier for this plugin
+     */
+    $updateChecker = PucFactory::buildUpdateChecker(
+        BPMG_LICENSE_SERVER,
+        __FILE__,
+        'bpmpesagateway'
+    );
 }
 
 
