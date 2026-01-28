@@ -19,6 +19,7 @@ A powerful WordPress plugin that integrates M-Pesa payment processing with Buddy
 - [Features](#features)
 - [Requirements](#requirements)
 - [Installation](#installation)
+- [Using Ngrok](#local-development-with-ngrok)
 - [Project Structure](#project-structure)
 - [Contributing](#contributing)
 - [Credits](#credits)
@@ -75,6 +76,51 @@ A powerful WordPress plugin that integrates M-Pesa payment processing with Buddy
      - Transaction Description
      - Amount
 
+---
+
+## Local Development with ngrok
+
+To test the plugin locally with HTTPS (required for secure M-Pesa callbacks), you can use ngrok to expose your local WordPress installation.
+
+#### Setup Steps
+
+1. **Install ngrok**: Download from [ngrok.com](https://ngrok.com) or install via package manager
+
+2. **Configure wp-config.php**: Add the following code to your `wp-config.php` file before the line `/* That's all, stop editing! */`:
+
+```php
+define('WP_HOME', 'https://XXXX.ngrok-free.dev');
+define('WP_SITEURL', 'https://XXXX.ngrok-free.dev');
+
+define('FORCE_SSL_ADMIN', true);
+define('FORCE_SSL_LOGIN', true);
+
+if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+    $_SERVER['HTTPS'] = 'on';
+}
+```
+
+Replace `XXXX` with your actual ngrok subdomain.
+
+3. **restart apache2**: once you add the code to your wp-config, you need to restart apache2 for changes to take effect
+```bash
+sudo systemctl restart apache2
+```
+
+4. **Start ngrok**: Run the following command in your terminal:
+
+```bash
+ngrok http <port>
+```
+
+Replace `<port>` with your local WordPress server port (typically 8000, 8080, 3000, etc.)
+
+Example:
+```bash
+ngrok http 8000
+```
+
+5. **Test Payment Flow**: You can now test M-Pesa payment processing with full HTTPS support
 
 ## Project Structure
 
@@ -153,7 +199,7 @@ We welcome contributions from the community! Here's how you can help:
 
 1. **Fork the Repository**
    ```bash
-   git clone https://github.com/yourusername/BPMpesaGateway.git
+   git clone git@github.com:peanutsx50/BPMpesaGateway.git
    cd BPMpesaGateway
    ```
 
@@ -239,7 +285,7 @@ the Free Software Foundation, either version 3 of the License, or
 
 - **LinkedIn:** [Festus Murimi](https://www.linkedin.com/in/festus-murimi-b41aa2251/)
 - **Email:** [Contact via LinkedIn](https://www.linkedin.com/in/festus-murimi-b41aa2251/)
-- **Documentation:** [Plugin Documentation](https://shorturl.at/E4V3K)
+- **Documentation:** [Plugin Documentation](https://surgetech.co.ke/bpmpesagateway)
 
 ### Support
 
