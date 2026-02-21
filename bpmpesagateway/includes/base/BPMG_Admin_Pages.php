@@ -32,6 +32,10 @@ class BPMG_Admin_Pages
     // save settings
     public static function register_settings()
     {
+        // NOW it's safe to save settings
+        if (!current_user_can('manage_options')) {
+            wp_die('Unauthorized');
+        }
         // consumer key: (string)
         register_setting(
             'bpmpesa_settings_group',

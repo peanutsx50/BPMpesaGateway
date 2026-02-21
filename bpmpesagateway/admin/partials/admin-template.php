@@ -22,8 +22,9 @@ if (!defined('ABSPATH')) {
 
     <form method="post" action="options.php">
         <?php
+        
+        // Output security fields for the registered setting "mpesapaywallpro_options"
         settings_fields('bpmpesa_settings_group');
-        do_settings_sections('bpmpesa_settings_group');
         ?>
         <table class="form-table" role="presentation">
             <!-- Consumer Key -->
