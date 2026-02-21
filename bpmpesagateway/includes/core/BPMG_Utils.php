@@ -1,6 +1,6 @@
 <?php
 
-namespace Inc\utils;
+namespace BPMpesaGateway\Core;
 
 class BPMG_Utils{
     public static function debug_to_console($data, $context = 'Debug in Console') {

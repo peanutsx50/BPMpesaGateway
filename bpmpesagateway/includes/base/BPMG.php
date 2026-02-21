@@ -28,10 +28,10 @@
  * @author     Festus Murimi <murimifestus09@gmail.com>
  */
 
-namespace Inc\base;
+namespace BPMpesaGateway\Base;
 
-use Inc\core\BPMG_Registration;
-use Inc\core\BPMG_Mpesa;
+use BPMpesaGateway\Core\BPMG_Registration;
+use BPMpesaGateway\Core\BPMG_Mpesa;
 
 class BPMG
 {

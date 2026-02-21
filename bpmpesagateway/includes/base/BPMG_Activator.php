@@ -10,7 +10,7 @@
  * @subpackage Test_Plugin/includes
  */
 
-namespace Inc\base;
+namespace BPMpesaGateway\Base;
 
 class BPMG_Activator {
 

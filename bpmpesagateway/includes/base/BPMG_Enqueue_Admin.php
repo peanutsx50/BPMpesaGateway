@@ -1,6 +1,6 @@
 <?php
 
-namespace Inc\base;
+namespace BPMpesaGateway\Base;
 
 class BPMG_Enqueue_Admin
 {

@@ -44,9 +44,9 @@ define('BPMG_BASENAME', plugin_basename(__FILE__));
 define('BPMG_VERSION', '1.0.0');
 
 // namespace Inc;
-use Inc\base\BPMG;
-use Inc\base\BPMG_Activator;
-use Inc\base\BPMG_Deactivator;
+use BPMpesaGateway\Base\BPMG;
+use BPMpesaGateway\Base\BPMG_Activator;
+use BPMpesaGateway\Base\BPMG_Deactivator;
 
 
 /**

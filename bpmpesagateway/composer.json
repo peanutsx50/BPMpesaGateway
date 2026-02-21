@@ -5,7 +5,9 @@
 	"license": "GPL-2.0-or-later",
 	"autoload": {
 		"psr-4": {
-			"Inc\\": "./includes"
+			"BPMpesaGateway\\Core\\": "includes/",
+			"BPMpesaGateway\\Admin\\": "admin/",
+			"BPMpesaGateway\\Public\\": "public/"
 		}
 	},
 	"authors": [

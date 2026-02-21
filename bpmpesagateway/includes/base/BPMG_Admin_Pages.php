@@ -10,7 +10,7 @@
  * @subpackage BPMpesaGateway/includes
  */
 
-namespace Inc\base;
+namespace BPMpesaGateway\Base;
 
 class BPMG_Admin_Pages
 {

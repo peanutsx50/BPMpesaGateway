@@ -6,7 +6,7 @@
  * @subpackage BPMpesaGateway/includes/core
  */
 
-namespace Inc\core;
+namespace BPMpesaGateway\Core;
 
 class BPMG_Mpesa
 {
