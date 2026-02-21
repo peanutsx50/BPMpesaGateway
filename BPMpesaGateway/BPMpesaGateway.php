@@ -1,26 +1,31 @@
 <?php
-/*
- * 
- * 
- * @link              https://shorturl.at/E4V3K
+
+/**
+ * The main plugin file
+ *
+ * This file is read by WordPress to generate the plugin information in the plugin
+ * admin area. This file also includes all of the dependencies used by the plugin,
+ * registers the activation and deactivation functions, and defines a function
+ * that starts the plugin.
+ *
+ * @link              https://surgetech.co.ke/bpmepesagateway
  * @since             1.0.0
  * @package           BPMpesaGateway
- * 
- * 
+ *
+ * @wordpress-plugin
  * Plugin Name:       BPMpesaGateway
- * Plugin URI:        https://shorturl.at/E4V3K
- * Description:       BPMpesaGateway enables site administrators to require payment before users can register or join a BuddyPress-powered community.
+ * Plugin URI:        https://surgetech.co.ke/bpmepesagateway
+ * Description:       BPMpesaGateway is a WordPress plugin that turns your BuddyPress community into a paid membership site, requiring M-Pesa payment from visitors before they can join the community.
  * Version:           1.0.0
- * Requires at least: 6.2.1
- * Requires PHP:      8.1
- * Author:            Festus Murimi
- * Author URI:        https://www.linkedin.com/in/festus-murimi-b41aa2251/
- * License:           EULA
- * License URI:       https://www.gnu.org/licenses/gpl-3.0.html
- * Text Domain:       bpmpesagateway
+ * Author:            SurgeTech
+ * Author URI:        https://surgetech.co.ke/
+ * License:           GNU General Public License v2
+ * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
+ * Text Domain:       bpmepesagateway
  * Domain Path:       /languages
  * Requires Plugins:  buddypress
  */
+
 
 // Exit if accessed directly
 if (! defined('ABSPATH')) {
