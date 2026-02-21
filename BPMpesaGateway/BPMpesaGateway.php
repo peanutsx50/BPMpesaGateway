@@ -37,20 +37,18 @@ define('BPMG_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('BPMG_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('BPMG_BASENAME', plugin_basename(__FILE__));
 define('BPMG_VERSION', '1.0.0');
-define('BPMG_LICENSE_SERVER', 'https://bp-mpesa-gateway-license.vercel.app/');
 
 // namespace Inc;
 use Inc\base\BPMG;
 use Inc\base\BPMG_Activator;
 use Inc\base\BPMG_Deactivator;
-use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
 
 /**
  * The code that runs during plugin activation.
  * This action is documented in includes/class-plugin-name-activator.php
  */
-function activate_test_plugin()
+function activate_bpmg_plugin()
 {
     BPMG_Activator::activate();
 }
@@ -59,42 +57,14 @@ function activate_test_plugin()
  * The code that runs during plugin deactivation.
  * This action is documented in includes/class-plugin-name-deactivator.php
  */
-function deactivate_test_plugin()
+function deactivate_bpmg_plugin()
 {
     BPMG_Deactivator::deactivate();
 }
 
 // Register activation and deactivation hooks
-register_activation_hook(__FILE__, 'activate_test_plugin');
-register_deactivation_hook(__FILE__, 'deactivate_test_plugin');
-
-// Setup server updates
-/**
- * Initialize plugin update checker if the PucFactory class is available.
- *
- * This code checks if the YahnisElsts PluginUpdateChecker library is loaded
- * and available. If it is, it creates an update checker instance that will
- * periodically check the license server for plugin updates.
- *
- * @since 1.0.0
- */
-if (class_exists('YahnisElsts\PluginUpdateChecker\v5\PucFactory')) {
-
-    /**
-     * Build and configure the update checker.
-     *
-     * Parameters:
-     * - BPMG_LICENSE_SERVER: The remote server URL that provides update information
-     * - __FILE__: The main plugin file path
-     * - 'bpmpesagateway': Unique slug identifier for this plugin
-     */
-    $updateChecker = PucFactory::buildUpdateChecker(
-        BPMG_LICENSE_SERVER,
-        __FILE__,
-        'bpmpesagateway'
-    );
-}
-
+register_activation_hook(__FILE__, 'activate_bpmg_plugin');
+register_deactivation_hook(__FILE__, 'deactivate_bpmg_plugin');
 
 /**
  * Begins execution of the plugin.
@@ -105,10 +75,10 @@ if (class_exists('YahnisElsts\PluginUpdateChecker\v5\PucFactory')) {
  *
  * @since    1.0.0
  */
-function run_test_plugin()
+function run_bpmg_plugin()
 {
     $BPMG = new BPMG();
     return $BPMG;
 }
 
-run_test_plugin();
+run_bpmg_plugin();
