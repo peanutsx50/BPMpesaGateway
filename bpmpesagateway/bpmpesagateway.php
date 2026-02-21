@@ -32,11 +32,16 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
-
 // Autoload dependencies using Composer
-if (file_exists(__DIR__ . '/vendor/autoload.php')) {
-    require_once __DIR__ . '/vendor/autoload.php';
+$autoload = __DIR__ . '/vendor/autoload.php';
+if (! file_exists($autoload)) {
+	wp_die(
+		'MpesaPaywallPro requires Composer dependencies. Please run <code>composer install</code> in the plugin directory.',
+		'MpesaPaywallPro — Missing Dependencies',
+		array('exit_status' => 1)
+	);
 }
+require_once $autoload;
 
 // namespace Inc after autoload;
 use BPMpesaGateway\Base\BPMG;
