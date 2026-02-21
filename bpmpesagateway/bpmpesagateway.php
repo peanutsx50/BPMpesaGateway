@@ -32,6 +32,11 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
+// namespace Inc;
+use BPMpesaGateway\Base\BPMG;
+use BPMpesaGateway\Base\BPMG_Activator;
+use BPMpesaGateway\Base\BPMG_Deactivator;
+
 // Autoload dependencies using Composer
 if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require_once __DIR__ . '/vendor/autoload.php';
@@ -43,10 +48,6 @@ define('BPMG_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('BPMG_BASENAME', plugin_basename(__FILE__));
 define('BPMG_VERSION', '1.0.0');
 
-// namespace Inc;
-use BPMpesaGateway\Base\BPMG;
-use BPMpesaGateway\Base\BPMG_Activator;
-use BPMpesaGateway\Base\BPMG_Deactivator;
 
 
 /**
