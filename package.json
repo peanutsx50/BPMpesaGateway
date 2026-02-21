@@ -1,8 +1,8 @@
 {
   "name": "bpmpesagateway",
   "version": "1.0.0",
-  "description": "<div align=\"center\">",
-  "homepage": "https://github.com/peanutsx50/BPMpesaGateway#readme",
+  "description": "Accept M-Pesa payments on your WordPress site with BuddyPress integration. Enable paid registration and premium community access via Kenya's most popular mobile money solution.",
+  "homepage": "https://surgetech.co.ke/",
   "bugs": {
     "url": "https://github.com/peanutsx50/BPMpesaGateway/issues"
   },
@@ -10,8 +10,8 @@
     "type": "git",
     "url": "git+https://github.com/peanutsx50/BPMpesaGateway.git"
   },
-  "license": "ISC",
-  "author": "",
+  "license": "GPL-2.0-or-later",
+  "author": "SurgeTech",
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
