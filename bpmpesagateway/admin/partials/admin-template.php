@@ -5,7 +5,6 @@
  *
  * @package BPMpesaGateway
  */
-
 if (!defined('ABSPATH')) {
     exit;
 }
