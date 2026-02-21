@@ -1,21 +1,21 @@
 {
-    "name": "peanuts/test-plugin",
-    "description": "Awesome starter plugin",
-    "type": "project",
-    "license": "GPL-2.0-or-later",
-    "autoload": {
-        "psr-4": {
-            "Inc\\": "./includes"
-        }
-    },
-    "authors": [
-        {
-            "name": "peanutsx50",
-            "email": "murimifestus09@gmail.com"
-        }
-    ],
-    "minimum-stability": "dev",
-    "require": {
-        "yahnis-elsts/plugin-update-checker": "dev-master"
-    }
+	"name": "surgetech/bpmpesagateway",
+	"description": "BPMpesaGateway is a WordPress plugin that turns your BuddyPress community into a paid membership site, requiring M-Pesa payment from visitors before they can join the community.",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"autoload": {
+		"psr-4": {
+			"Inc\\": "./includes"
+		}
+	},
+	"authors": [
+		{
+			"name": "Surge Technologies",
+			"email": "admin@surgetech.co.ke"
+		}
+	],
+	"config": {
+		"optimize-autoloader": true,
+		"sort-packages": true
+	}
 }
