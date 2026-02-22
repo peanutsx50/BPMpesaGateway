@@ -68,4 +68,8 @@ class BPMGUtils
         $subnet &= $mask;
         return ($ip & $mask) === $subnet;
     }
+
+    public static function rate_limit_exceeded($ip, $phone_number, $max_request = 5, $time_window = 2, $ban_threshold = 8) {}
+
+    public static function check_phone_number($phone) {}
 }

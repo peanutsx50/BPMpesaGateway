@@ -3,6 +3,9 @@
 namespace BPMpesaGateway\Public;
 
 use BPMpesaGateway\Core\BPMGMpesa;
+use BPMpesaGateway\Core\BPMGUtils;
+use WP_Error;
+use WP_REST_Request;
 
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
@@ -66,14 +69,97 @@ class BPMGPublic
             'permission_callback' => [$this, 'validate_mpesa_request'],
             'show_in_index' => false, // Hide from REST API index
             'args' => [
-				'phone_number' => [
-					'required'          => true,
-					'type'              => 'string',
-					'validate_callback' => [$this, 'validate_phone_number'], // check if phone number is valid for M-Pesa
-					'sanitize_callback' => 'sanitize_text_field',
-				],
+                'phone_number' => [
+                    'required'          => true,
+                    'type'              => 'string',
+                    'validate_callback' => [$this, 'validate_phone_number'], // check if phone number is valid for M-Pesa
+                    'sanitize_callback' => 'sanitize_text_field',
+                ],
             ],
         ]);
+    }
+
+    public function validate_safaricom_IP(WP_REST_Request $request)
+    {
+        //check for ssl
+        if (!is_ssl()) {
+            return new WP_Error('ssl_required', 'SSL is required for this endpoint', ['status' => 403]);
+        }
+
+        // check request IP address from server
+        $raw_ip = $_SERVER['REMOTE_ADDR'] ?? 'UNKNOWN';
+        $client_ip = filter_var($raw_ip, FILTER_VALIDATE_IP) ? $raw_ip : 'UNKNOWN';
+
+        // compare with expected IP addressess
+        if (!BPMGUtils::is_safaricom_ip($client_ip)) {
+            return new WP_Error('unauthorized_ip', 'Access denied', ['status' => 403]);
+        }
+
+        // obtain auth token passed as url param
+        $url_token = $request->get_param('bpmg_auth');
+
+        // We use a hash of your NONCE_SALT to create a unique-to-you key
+        $secret_key = wp_hash(wp_salt('nonce'), 'nonce');
+
+        // compare received against expected
+        if (!hash_equals($secret_key, $url_token)) {
+            return new WP_Error('invalid_token', 'Access denied', ['status' => 403]);
+        }
+
+        return true;
+    }
+
+    public function validate_phone_number($phone, $request, $key)
+    {
+
+        $results = BPMGUtils::check_phone_number($phone);
+
+        // Kenyan phone number validation
+        if (!$results) {
+            return new WP_Error(
+                'invalid_phone',
+                'Invalid phone number. Use format: 254XXXXXXXXX',
+                ['status' => 400]
+            );
+        }
+
+        return true;
+    }
+
+    public function validate_mpesa_request(WP_REST_Request $request)
+    {
+        //1. check for ssl and return error if not enabled
+        if (!is_ssl()) {
+            return new WP_Error(
+                'ssl_required',
+                'SSL is not enabled on this site, transactions cannot be processed securely',
+                ['status' => 403]
+            );
+        }
+
+        //2. verify nonce
+        $nonce = $request->get_header('X-WP-Nonce');
+        $raw_ip = $_SERVER['REMOTE_ADDR'] ?? '';
+        $ip = filter_var($raw_ip, FILTER_VALIDATE_IP) ? sanitize_text_field($raw_ip) : 'UNKNOWN';
+        if (!wp_verify_nonce($nonce, 'wp_rest')) {
+            return new WP_Error(
+                'invalid_nonce',
+                'Invalid request',
+                ['status' => 403]
+            );
+        }
+
+        //3. rate limit check
+        $phone_number = $request->get_param('phone_number');
+        if (BPMGUtils::rate_limit_exceeded($ip, $phone_number)) {
+            return new WP_Error(
+                'rate_limit_exceeded',
+                'Too many requests. Please try again later.',
+                ['status' => 429]
+            );
+        }
+
+        return true;
     }
 
     public function bpmg_add_custom_registration_fields()

@@ -111,33 +111,5 @@ class BPMG
         $this->loader->run();
     }
 
-    public function validate_safaricom_IP(WP_REST_Request $request)
-    {
-        //check for ssl
-        if (!is_ssl()) {
-            return new WP_Error('ssl_required', 'SSL is required for this endpoint', ['status' => 403]);
-        }
-
-        // check request IP address from server
-        $raw_ip = $_SERVER['REMOTE_ADDR'] ?? 'UNKNOWN';
-        $client_ip = filter_var($raw_ip, FILTER_VALIDATE_IP) ? $raw_ip : 'UNKNOWN';
-
-        // compare with expected IP addressess
-        if (!BPMGUtils::is_safaricom_ip($client_ip)) {
-            return new WP_Error('unauthorized_ip', 'Access denied', ['status' => 403]);
-        }
-
-        // obtain auth token passed as url param
-        $url_token = $request->get_param('bpmg_auth');
-
-        // We use a hash of your NONCE_SALT to create a unique-to-you key
-        $secret_key = wp_hash(wp_salt('nonce'), 'nonce');
-
-        // compare received against expected
-        if (!hash_equals($secret_key, $url_token)) {
-            return new WP_Error('invalid_token', 'Access denied', ['status' => 403]);
-        }
-
-        return true;
-    }
+    
 }
