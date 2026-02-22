@@ -8,6 +8,8 @@
 
 namespace BPMpesaGateway\Core;
 
+use DateTimeZone;
+
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
@@ -30,26 +32,52 @@ class BPMGMpesa
     private $url;
     private $amount;
     private $transactionType = 'CustomerPayBillOnline';
+    private const MPESA_PRODUCTION_URL = 'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
+    private const MPESA_SANDBOX_URL = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
+
 
 
     // Mpesa related functions can be added here in the future
     public function __construct()
     {
+        // retrive all the options from the database using BPMGOptions class
+        $options = BPMGOptions::get_options();
+
+        // decrypt consumer key, consumer secret and passkey
+        $decrypted_consumer_key = BPMGUtils::decrypt_credential($options['consumer_key']);
+        $decrypted_consumer_secret = BPMGUtils::decrypt_credential($options['consumer_secret']);
+        $decrypted_passkey = BPMGUtils::decrypt_credential($options['passkey']);
+
+
         // Initialize Mpesa properties from settings
-        $this->consumer_key        = get_option('bpmg_consumer_key');
-        $this->consumer_secret     = get_option('bpmg_consumer_secret');
-        $this->shortcode           = get_option('bpmg_shortcode');
-        $this->passkey             = get_option('bpmg_passkey');
+        $this->consumer_key        = $decrypted_consumer_key;
+        $this->consumer_secret     = $decrypted_consumer_secret;
+        $this->shortcode           = $options['shortcode'];
+        $this->passkey             = $decrypted_passkey;
+
+        // Generate access token immediately upon initialization
         $this->access_token        = $this->generate_access_token();
-        $this->timestamp           = date('YmdHis'); // should always come first before generate password so its not empty
+
+        // get timestamp using Africa/Nairobi timezone and format it as YmdHis
+        $this->timestamp           = wp_date('YmdHis', null, new DateTimeZone('Africa/Nairobi')); // should always come first before generate password so its not empty
+
         $this->password            = $this->generate_password();
-        $this->account_reference   = get_option('bpmpesa_account_reference'); // figure out how to make it incremental
-        $this->transaction_description = get_option('bpmpesa_transaction_reference');
-        $this->amount              = get_option('bpmpesa_amount');
-        $this->callbackurl         = home_url('/wp-json/bpmpesa/v1/callback', 'https');
-        $this->url = $this->environment === 'production' ?
-            'https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest' :
-            'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
+        $this->account_reference   = $options['account_reference']; // figure out how to make it incremental
+        $this->transaction_description = $options['transaction_reference'];
+        $this->amount              = $options['amount'];
+
+        // protected callback URL with a unique secret hash to prevent callback spoofing
+        $secret_key = wp_hash(wp_salt('nonce'), 'nonce'); // unique auth
+        $this->callbackurl = add_query_arg(
+            'bpmg_auth',
+            $secret_key,
+            rest_url('bpmpesagateway/v1/callback')
+        );
+
+        // Set the appropriate M-Pesa API endpoint URL based on environment
+        $this->url          = $this->environment === 'production' ?
+            self::MPESA_PRODUCTION_URL :
+            self::MPESA_SANDBOX_URL;
     }
 
     // Mpesa STK push request function
@@ -233,7 +261,7 @@ class BPMGMpesa
      */
         $checkoutId = sanitize_text_field($request->get_param('checkout_id'));
         $phone = sanitize_text_field($request->get_param('phone'));
-        
+
 
         if (!$checkoutId || !$phone) {
             return rest_ensure_response([
