@@ -43,6 +43,12 @@ jobs:
         working-directory: ./bpmpesagateway
         run: composer install --no-interaction --prefer-dist
 
+      - name: Install WP-CLI
+        run: |
+          curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+          chmod +x wp-cli.phar
+          sudo mv wp-cli.phar /usr/local/bin/wp
+
       - name: Download WordPress
         run: |
           mkdir -p /tmp/wordpress
