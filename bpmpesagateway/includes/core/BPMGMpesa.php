@@ -7,6 +7,7 @@
  */
 
 namespace BPMpesaGateway\Core;
+
 use WP_REST_Request;
 use DateTimeZone;
 
@@ -241,119 +242,136 @@ class BPMGMpesa
         return self::store_details_meta($stk);
     }
 
-    public static function store_details_meta($stk) {}
-
-
-    // handle callback
-    public static function old_handle_callback($request)
+    public static function store_details_meta($stk)
     {
-        error_log('BPMG Callback hit - Method: ' . $request->get_method());
+        // Extract basic callback data
+        $checkoutId = sanitize_text_field($stk['CheckoutRequestID'] ?? '');
+        $merchantRequestId = sanitize_text_field($stk['MerchantRequestID'] ?? '');
+        $resultCode = (int) ($stk['ResultCode'] ?? -1);
+        $resultDesc = sanitize_text_field($stk['ResultDesc'] ?? '');
 
-        /*
-     * ======================================================
-     * 1. SAFARICOM CALLBACK (POST)
-     * ======================================================
-     */
-        if ($request->get_method() === 'POST') {
 
-            $raw_body = $request->get_body();
-            $body = json_decode($raw_body, true);
+        // This should never happen if M-Pesa is working correctly, but we check just in case to prevent processing invalid callbacks
+        if (empty($checkoutId)) {
+            return rest_ensure_response(['status' => 'error', 'message' => 'Missing checkout ID'], 400);
+        }
+        // check for pending transaction
+        $content_post_id = get_transient('bpmg_pending_' . $checkoutId);
 
-            $stk = $body['Body']['stkCallback'] ?? null;
-
-            if (!$stk) {
-                return rest_ensure_response(['status' => 'ignored']);
-            }
-
-            $checkoutId = sanitize_text_field($stk['CheckoutRequestID']);
-            $resultCode = (int) $stk['ResultCode'];
-            $resultDesc = sanitize_text_field($stk['ResultDesc'] ?? '');
-
-            $status = ($resultCode === 0) ? 'success' : 'failed';
-
-            /*
-         * Prevent duplicates (Safaricom retries callbacks)
-         */
-            $existing = get_posts([
-                'post_type'   => 'mpesa',
-                'meta_key'    => 'checkout_id',
-                'meta_value'  => $checkoutId,
-                'fields'      => 'ids',
-                'numberposts' => 1,
-            ]);
-
-            if ($existing) {
-                $post_id = $existing[0]; // returns back the post id
-            } else {
-                $post_id = wp_insert_post([
-                    'post_type'   => 'mpesa',
-                    'post_status' => 'publish',
-                    'post_title'  => 'Mpesa STK ' . $checkoutId,
-                ]); // after create complete returns back the post id
-            }
-
-            if (is_wp_error($post_id)) {
-                error_log('BPMG: Failed to create mpesa post');
-                return rest_ensure_response(['status' => 'error']);
-            }
-
-            /*
-         * Store callback data
-         */
-            // store relevant data in post meta
-
-            update_post_meta($post_id, 'checkout_id', $checkoutId);
-            update_post_meta($post_id, 'status', $status);
-            update_post_meta($post_id, 'amount', self::$amount);
-            update_post_meta($post_id, 'result_code', $resultCode);
-            update_post_meta($post_id, 'result_desc', $resultDesc);
-            //update_post_meta($post_id, 'phone_number', $this->phone);
-            update_post_meta($post_id, 'account_ref', self::$account_reference ?? '');
-            update_post_meta($post_id, 'date', current_time('mysql'));
-
-            return rest_ensure_response(['status' => 'ok']);
+        // Security: If no pending transaction found, reject the callback attempted callback spoofing
+        if (!$content_post_id) {
+            return rest_ensure_response(['status' => 'error', 'message' => 'Unknown transaction'], 400);
         }
 
-        /*
-     * ======================================================
-     * 2. JS POLLING (GET)
-     * ======================================================
-     */
-        $checkoutId = sanitize_text_field($request->get_param('checkout_id'));
-        $phone = sanitize_text_field($request->get_param('phone'));
+        // Clean up the transient
+        delete_transient('bpmg_pending_' . $checkoutId);
 
+        // Extract transaction metadata
+        $amount = 0;
+        $phoneNumber = '';
+        $mpesaReceipt = '';
+        $transactionDate = '';
 
-        if (!$checkoutId || !$phone) {
-            return rest_ensure_response([
-                'status'  => 'error',
-                'message' => 'No checkout id or phone provided',
-            ]);
+        if ($resultCode === 0 && isset($stk['CallbackMetadata']['Item'])) {
+            foreach ($stk['CallbackMetadata']['Item'] as $item) {
+                switch ($item['Name']) {
+                    case 'Amount':
+                        $amount = floatval($item['Value'] ?? 0);
+                        break;
+                    case 'MpesaReceiptNumber':
+                        $mpesaReceipt = sanitize_text_field($item['Value'] ?? '');
+                        break;
+                    case 'PhoneNumber':
+                        $phoneNumber = sanitize_text_field($item['Value'] ?? '');
+                        break;
+                    case 'TransactionDate':
+                        $transactionDate = sanitize_text_field($item['Value'] ?? '');
+                        break;
+                }
+            }
+        }
+        $status = ($resultCode === 0) ? 'success' : 'failed';
+
+        // Duplicate check for exisiting checkoutId to prevent replay attacks
+        global $wpdb;
+        $existing_post_id = $wpdb->get_var($wpdb->prepare(
+            "SELECT post_id FROM {$wpdb->postmeta} 
+         WHERE meta_key = 'checkout_id' 
+         AND meta_value = %s 
+         LIMIT 1",
+            $checkoutId
+        ));
+
+        if ($existing_post_id) {
+            return rest_ensure_response(['status' => 'ok', 'post_id' => $existing_post_id, 'duplicate' => true], 200);
         }
 
-        $posts = get_posts([
-            'post_type'   => 'mpesa',
-            'meta_key'    => 'checkout_id',
-            'meta_value'  => $checkoutId,
-            'numberposts' => 1,
-        ]);
+        // ULTRA-OPTIMIZED Single database transaction
+        $current_time = current_time('mysql'); // get local time for post
+        $gmt_time = get_gmt_from_date($current_time); // gets UTC time for consistency in storage
 
-        if (!$posts) {
-            return rest_ensure_response([
-                'status'  => 'pending',
-                'message' => 'Waiting for payment confirmation',
-            ]);
+        // Start transaction for atomic insert
+        $wpdb->query('START TRANSACTION');
+
+        // Insert post
+        $wpdb->query($wpdb->prepare(
+            "INSERT INTO {$wpdb->posts} 
+        (post_type, post_status, post_title, post_date, post_date_gmt, post_modified, post_modified_gmt) 
+        VALUES (%s, %s, %s, %s, %s, %s, %s)",
+            'mpesa', // custom post type for M-Pesa transactions
+            'publish', // publish immediately for visibility in admin
+            'Mpesa STK ' . $checkoutId, // title with checkout ID for easy identification
+            $current_time, // local time for post_date
+            $gmt_time, // UTC time for post_date_gmt
+            $current_time, // local time for post_modified
+            $gmt_time // UTC time for post_modified_gmt
+        ));
+
+        // get id of newly inserted post
+        $post_id = $wpdb->insert_id;
+
+        if (!$post_id) {
+            $wpdb->query('ROLLBACK');
+            return rest_ensure_response(['status' => 'error', 'message' => 'Database error'], 500);
         }
 
-        $post_id = $posts[0]->ID;
+        // Build meta values
+        $meta_rows = [
+            [$post_id, 'checkout_id', $checkoutId],
+            [$post_id, 'merchant_request_id', $merchantRequestId],
+            [$post_id, 'status', $status],
+            [$post_id, 'result_code', (string)$resultCode],
+            [$post_id, 'result_desc', $resultDesc],
+            [$post_id, 'date', $current_time],
+            [$post_id, 'content_post_id', $content_post_id],
+        ];
 
-        //store phone number in post meta
-        update_post_meta($post_id, 'phone_number', $phone);
+        // add more meta if transaction was successful
+        if ($resultCode === 0) {
+            $meta_rows[] = [$post_id, 'amount', (string)$amount];
+            $meta_rows[] = [$post_id, 'mpesa_receipt_number', $mpesaReceipt];
+            $meta_rows[] = [$post_id, 'phone_number', $phoneNumber];
+            $meta_rows[] = [$post_id, 'transaction_date', $transactionDate];
+        }
 
-        return rest_ensure_response([
-            'status'    => get_post_meta($post_id, 'status', true),
-            'message'   => get_post_meta($post_id, 'result_desc', true),
-            'date'      => get_post_meta($post_id, 'date', true),
-        ]);
+        // Single bulk insert for all meta
+        $placeholders = implode(', ', array_fill(0, count($meta_rows), '(%d, %s, %s)')); // build placeholders for prepared statement
+        $values = [];
+        foreach ($meta_rows as $row) {
+            $values = array_merge($values, $row);
+        }
+
+        $wpdb->query($wpdb->prepare(
+            "INSERT INTO {$wpdb->postmeta} (post_id, meta_key, meta_value) VALUES {$placeholders}",
+            ...$values
+        ));
+
+        // Commit transaction
+        $wpdb->query('COMMIT');
+
+        // Clean cache
+        clean_post_cache($post_id);
+
+        return rest_ensure_response(['status' => 'ok', 'post_id' => $post_id], 200);
     }
-    // save data if successful and allow user to continue registration
 }
