@@ -40,8 +40,40 @@ class BPMGPublic
                 'ajax_url' => admin_url('admin-ajax.php'), // core wordpress ajax handler
                 'nonce'    => wp_create_nonce('bpmg_mpesa_nonce'), // security nonce
                 'callback_url' => rest_url('bpmpesa/v1/callback'), // callback url
+                'process_payment_url' => rest_url('bpmpesa/v1/process-payment'), // endpoint to initiate payment from frontend
             ]
         );
+    }
+
+    public function register_endpoints()
+    {
+        register_rest_route('bpmpesa/v1', '/callback', [
+            'methods' => ['POST', 'GET'],
+            'callback' => [BPMGMpesa::class, 'handle_callback'],
+            'permission_callback' => [$this, 'validate_safaricom_IP'],
+            'show_in_index' => false, // Hide from REST API index
+            'args'                => [
+                'bpmg_auth' => [
+                    'required' => true,
+                    'sanitize_callback' => 'sanitize_text_field',
+                ],
+            ],
+        ]);
+
+        register_rest_route('bpmpesa/v1', '/process-payment', [
+            'methods' => ['POST', 'GET'],
+            'callback' => [$this, 'handle_mpesa_request'],
+            'permission_callback' => [$this, 'validate_mpesa_request'],
+            'show_in_index' => false, // Hide from REST API index
+            'args' => [
+				'phone_number' => [
+					'required'          => true,
+					'type'              => 'string',
+					'validate_callback' => [$this, 'validate_phone_number'], // check if phone number is valid for M-Pesa
+					'sanitize_callback' => 'sanitize_text_field',
+				],
+            ],
+        ]);
     }
 
     public function bpmg_add_custom_registration_fields()

@@ -101,29 +101,8 @@ class BPMG
         $this->loader->add_action('wp_enqueue_scripts', $public, 'enqueue_scripts');
         $this->loader->add_action('wp_enqueue_scripts', $public, 'localize_scripts');
         $this->loader->add_action('bp_before_registration_submit_buttons', $public, 'bpmg_add_custom_registration_fields');
-        $this->loader->add_action('wp_ajax_bpmg_send_mpesa_request', $public, 'handle_mpesa_request'); // logged in users
-        $this->loader->add_action('wp_ajax_nopriv_bpmg_send_mpesa_request', $public, 'handle_mpesa_request'); // non-logged in users
+        $this->loader->add_action('rest_api_init', $public, 'register_endpoints');
 
-    }
-
-    // register hooks
-    public function register()
-    {
-        // register REST endpoint
-        add_action('rest_api_init', function () {
-            register_rest_route('bpmpesa/v1', '/callback', [
-                'methods' => ['POST', 'GET'],
-                'callback' => [new BPMGMpesa(), 'handle_callback'],
-                'permission_callback' => [$this, 'validate_safaricom_IP'],
-                'show_in_index' => false, // Hide from REST API index
-                'args'                => [
-                    'bpmg_auth' => [
-                        'required' => true,
-                        'sanitize_callback' => 'sanitize_text_field',
-                    ],
-                ],
-            ]);
-        });
     }
 
     // load core classes

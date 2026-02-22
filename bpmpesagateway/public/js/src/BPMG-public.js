@@ -81,7 +81,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 //ajax function to send mpesa request
 function bpmg_send_mpesa_request(button, phoneNumber) {
-  fetch(bpmpesa_ajax.ajax_url, {
+  fetch(bpmpesa_ajax.process_payment_url, {
     method: "POST",
     credentials: "same-origin",
     headers: {
