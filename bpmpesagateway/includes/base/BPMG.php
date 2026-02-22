@@ -42,12 +42,35 @@ if (!defined('ABSPATH')) {
 
 class BPMG
 {
+    protected $loader;
+    protected $version;
+    protected $bpmpesagateway;
+
     // Constructor to set up hooks
     public function __construct()
     {
-        $this->register();
-        $this->load_core_classes();
+        if (defined('BPMG_VERSION')) {
+            $this->version = BPMG_VERSION;
+        } else {
+            $this->version = '1.0.0';
+        }
+        $this->bpmpesagateway = 'BPMpesaGateway';
+
+        $this->load_dependencies();
+        $this->define_admin_hooks();
+        $this->define_public_hooks();
     }
+
+    private function load_dependencies()
+    {
+
+        $this->loader = new BPMGLoader();
+    }
+
+
+    public function define_public_hooks() {}
+
+    public function define_admin_hooks() {}
 
     // register hooks
     public function register()
@@ -82,6 +105,11 @@ class BPMG
         });
     }
 
+    // load core classes
+    public function run()
+    {
+        $this->loader->run();
+    }
     // Load core classes
     private function load_core_classes()
     {
