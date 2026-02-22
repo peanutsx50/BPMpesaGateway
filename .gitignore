@@ -5,7 +5,7 @@ CODE_ANALYSIS.md
 node_modules/
 
 ## ingoore build folder and files
-/dist/
+**/**/dist/
 **/vendor/
 **/composer.lock
 package-lock.json
