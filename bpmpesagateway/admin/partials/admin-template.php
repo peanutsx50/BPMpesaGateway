@@ -9,7 +9,9 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-$options = get_option('bpmpesagateway_options');
+use BPMpesaGateway\Core\BPMGOptions;
+$options = BPMGOptions::get_options(); // retrieve options to pre-fill form fields
+
 ?>
 
 <div class="wrap">
