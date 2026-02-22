@@ -89,7 +89,7 @@ function bpmg_send_mpesa_request(button, phoneNumber) {
 			"X-WP-Nonce": bpmpesa_ajax.nonce, // pass the security nonce in header for better security
 		},
 		body: new URLSearchParams({
-			phone: phoneNumber, // data for function
+			phone_number: phoneNumber, // data for function
 		}),
 	})
 		.then((response) => response.json())
