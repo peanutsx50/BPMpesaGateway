@@ -216,25 +216,36 @@ class BPMGMpesa
     //validate all the field values are not empty
     private function validate_config()
     {
-        $required_fields = ['consumer_key', 'consumer_secret', 'shortcode', 'passkey', 'account_reference', 'transaction_description'];
+        $required_fields = ['consumer_key', 'consumer_secret', 'shortcode', 'passkey', 'account_reference', 'access_token'];
 
         foreach ($required_fields as $field) {
             if (empty($this->$field)) {
                 return [
                     'status' => 'error',
-                    'message' => 'Missing required Mpesa configuration details for ' . $field,
-                    'data' => [
-                        'missing_field' => $field,
-                        'field_value' => $this->$field
-                    ]
+                    'message' => 'Missing required Mpesa configuration details',
                 ];
             }
         }
         return ['status' => 'success', 'message' => 'Mpesa configuration is valid'];
     }
 
+    public static function handle_callback(\WP_REST_Request $request)
+    {
+        $params = $request->get_params();
+        $stk    = $params['Body']['stkCallback'] ?? null;
+
+        if (!$stk) {
+            return rest_ensure_response(['status' => 'ignored']);
+        }
+
+        return self::store_details_meta($stk);
+    }
+
+    public static function store_details_meta($stk) {}
+
+
     // handle callback
-    public function handle_callback($request)
+    public static function old_handle_callback($request)
     {
         error_log('BPMG Callback hit - Method: ' . $request->get_method());
 
@@ -293,11 +304,11 @@ class BPMGMpesa
 
             update_post_meta($post_id, 'checkout_id', $checkoutId);
             update_post_meta($post_id, 'status', $status);
-            update_post_meta($post_id, 'amount', $this->amount);
+            update_post_meta($post_id, 'amount', self::$amount);
             update_post_meta($post_id, 'result_code', $resultCode);
             update_post_meta($post_id, 'result_desc', $resultDesc);
             //update_post_meta($post_id, 'phone_number', $this->phone);
-            update_post_meta($post_id, 'account_ref', $this->account_reference ?? '');
+            update_post_meta($post_id, 'account_ref', self::$account_reference ?? '');
             update_post_meta($post_id, 'date', current_time('mysql'));
 
             return rest_ensure_response(['status' => 'ok']);

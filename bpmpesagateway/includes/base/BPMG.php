@@ -32,6 +32,8 @@ namespace BPMpesaGateway\Base;
 
 use BPMpesaGateway\Core\BPMGRegistration;
 use BPMpesaGateway\Core\BPMGMpesa;
+use BPMpesaGateway\Core\BPMGUtils;
+use WP_Error;
 
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
@@ -67,7 +69,14 @@ class BPMG
             register_rest_route('bpmpesa/v1', '/callback', [
                 'methods' => ['POST', 'GET'],
                 'callback' => [new BPMGMpesa(), 'handle_callback'],
-                'permission_callback' => '__return_true',
+                'permission_callback' => [$this, 'validate_safaricom_IP'],
+                'show_in_index' => false, // Hide from REST API index
+                'args'                => [
+                    'bpmg_auth' => [
+                        'required' => true,
+                        'sanitize_callback' => 'sanitize_text_field',
+                    ],
+                ],
             ]);
         });
     }
@@ -76,5 +85,31 @@ class BPMG
     private function load_core_classes()
     {
         $registration = new BPMGRegistration();
+    }
+
+    public function validate_safaricom_IP($request)
+    {
+        //check for ssl
+        if (!is_ssl()) {
+            return new WP_Error('ssl_required', 'SSL is required for this endpoint', ['status' => 403]);
+        }
+
+        $raw_ip = $_SERVER['REMOTE_ADDR'] ?? 'UNKNOWN';
+        $client_ip = filter_var($raw_ip, FILTER_VALIDATE_IP) ? $raw_ip : 'UNKNOWN';
+
+        if (!BPMGUtils::is_safaricom_ip($client_ip)) {
+            return new WP_Error('unauthorized_ip', 'Access denied', ['status' => 403]);
+        }
+        // validate auth token
+        $url_token = $request->get_param('bpmg_auth');
+
+        // We use a hash of your NONCE_SALT to create a unique-to-you key
+        $secret_key = wp_hash(wp_salt('nonce'), 'nonce');
+
+        if (!hash_equals($secret_key, $url_token)) {
+            return new WP_Error('invalid_token', 'Access denied', ['status' => 403]);
+        }
+
+        return true;
     }
 }
