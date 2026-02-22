@@ -6,13 +6,17 @@
  * @link       http://example.com
  * @since      1.0.0
  *
- * @package    Test_Plugin
- * @subpackage Test_Plugin/includes
+ * @package    BPMpesaGateway
+ * @subpackage BPMpesaGateway/includes
  */
 
-namespace Inc\base;
+namespace BPMpesaGateway\Base;
 
-class BPMG_Activator {
+if (!defined('ABSPATH')) {
+    exit; // Exit if accessed directly.
+}
+
+class BPMGActivator {
 
     /**
      * Activation logic here
@@ -21,7 +25,7 @@ class BPMG_Activator {
      */
     public static function activate() {
         // Activation code goes here.
-        BPMG_Post_Types::register_custom_post_type();
+        BPMGPostTypes::register_custom_post_type();
         flush_rewrite_rules();
     }
 }

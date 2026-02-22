@@ -5,7 +5,6 @@
  * @package    BPMpesaGateway
  * @subpackage BPMpesaGateway/includes/templates
  * */
-
 // Exit if accessed directly
 if (! defined('ABSPATH')) {
     exit;

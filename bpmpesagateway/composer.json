@@ -1,0 +1,25 @@
+{
+	"name": "surgetech/bpmpesagateway",
+	"description": "BPMpesaGateway is a WordPress plugin that turns your BuddyPress community into a paid membership site, requiring M-Pesa payment from visitors before they can join the community.",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"autoload": {
+		"psr-4": {
+			"BPMpesaGateway\\Base\\": "includes/base/",
+			"BPMpesaGateway\\Core\\": "includes/core/",
+			"BPMpesaGateway\\Admin\\": "admin/",
+			"BPMpesaGateway\\Public\\": "public/",
+			"BPMpesaGateway\\": "includes/"
+		}
+	},
+	"authors": [
+		{
+			"name": "Surge Technologies",
+			"email": "admin@surgetech.co.ke"
+		}
+	],
+	"config": {
+		"optimize-autoloader": true,
+		"sort-packages": true
+	}
+}

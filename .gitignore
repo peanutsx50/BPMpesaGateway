@@ -4,9 +4,8 @@ CODE_ANALYSIS.md
 ## ingoore node_modules
 node_modules/
 
-## ingoore dist
-dist/
-
-## ingoore vendor folder and files
+## ingoore build folder and files
+**/**/dist/
 **/vendor/
 **/composer.lock
+package-lock.json

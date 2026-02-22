@@ -10,9 +10,13 @@
  * @subpackage BPMpesaGateway/includes
  */
 
-namespace Inc\base;
+namespace BPMpesaGateway\Base;
 
-class BPMG_Post_Types
+if (!defined('ABSPATH')) {
+    exit; // Exit if accessed directly.
+}
+
+class BPMGPostTypes
 {
     public static function register_custom_post_type()
     {
