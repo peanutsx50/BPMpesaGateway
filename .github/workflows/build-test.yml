@@ -35,6 +35,6 @@ jobs:
 
       # Fix: Use @main to get the latest fixes for the @wp-playground 404 issue
       - name: Run plugin check
-        uses: wordpress/plugin-check-action@v1 # Use a stable tag, not @main
+        uses: wordpress/plugin-check-action@v1.1.5 # Use a stable tag, not @main
         with:
           build-dir: "./bpmpesagateway"
