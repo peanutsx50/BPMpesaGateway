@@ -103,23 +103,44 @@ class BPMGMpesa
                 "TransactionDesc" => $this->transaction_description, // description of transaction
                 "CallBackURL" => $this->callbackurl, // webhook callback
             ];
-            // send request to mpesa api
-            $curl = curl_init();
-            curl_setopt($curl, CURLOPT_URL, $this->url);
-            curl_setopt($curl, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $this->access_token,
-                'Content-Type: application/json',
+            $response = wp_remote_post($this->url, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->access_token,
+                    'Content-Type'  => 'application/json',
+                    'Expect'        => '',
+                    'Connection'    => 'Keep-Alive', // Request the server to stay connected
+                ],
+                'body'    => json_encode($data),
+                'timeout' => 30, // Reduced from 60 - M-Pesa responds quickly
+                'httpversion' => '1.1', // Force HTTP/1.1 for better compatibility
+                'sslverify' => true, // Explicit for security
             ]);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curl, CURLOPT_POST, true);
-            curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
-            $response = curl_exec($curl);
 
+            if (is_wp_error($response)) {
+                return [
+                    'status' => 'error',
+                    'message' => 'HTTP Request failed: ' . $response->get_error_message(),
+                ];
+            }
+
+            $body = wp_remote_retrieve_body($response);
+            $decoded_response = json_decode($body, true);
+
+            // Check if M-Pesa API returned an error code
+            if (isset($decoded_response['errorCode'])) {
+                return [
+                    'status' => 'error',
+                    'message' => $decoded_response['errorMessage'] ?? 'M-Pesa API Error',
+                    'error_code' => $decoded_response['errorCode'],
+                    'response' => $decoded_response
+                ];
+            }
+
+            // Return success response with payment details for client-side tracking
             return [
                 'status' => 'success',
                 'message' => 'Payment request sent. Enter your M-Pesa PIN.',
-                'response' => json_decode($response, true), // decode the JSON response
+                'response' => $decoded_response,
             ];
         } catch (\Exception $e) {
             $this->err = $e->getMessage();
@@ -135,25 +156,53 @@ class BPMGMpesa
     // generate access token for mpesa api
     private function generate_access_token()
     {
-        $auth_url = $this->environment === 'production' ?
-            'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials' :
-            'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
+        // Check for cache first (early return for best performance)
+        $cached_token = get_transient('bpmg_access_token');
+        if ($cached_token) {
+            return $cached_token;
+        }
 
+        // Use class constants for URLs (defined once, reused always)
+        static $auth_urls = [
+            'production' => 'https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials',
+            'sandbox'    => 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
+        ];
+
+        $auth_url = $auth_urls[$this->environment];
+
+        // Pre-build authorization header (avoid string concatenation in array)
         $credentials = base64_encode($this->consumer_key . ':' . $this->consumer_secret);
 
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $auth_url);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, [
-            'Authorization: Basic ' . $credentials
+        // Optimized HTTP request with minimal timeout
+        $response = wp_remote_get($auth_url, [
+            'headers' => [
+                'Authorization' => 'Basic ' . $credentials,
+            ],
+            'timeout' => 30, // Reduced from 60 - M-Pesa typically responds in <5s
+            'sslverify' => true, // Explicit for security
         ]);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
 
-        $response = curl_exec($curl);
+        // Early error handling
+        if (is_wp_error($response)) {
+            $error_msg = $response->get_error_message();
+            return '';
+        }
 
-        $result = json_decode($response, true);
+        // Parse response
+        $result = json_decode(wp_remote_retrieve_body($response), true);
 
-        return isset($result['access_token']) ? $result['access_token'] : '';
+
+        // Validate token exists
+        if (empty($result['access_token'])) {
+            return '';
+        }
+
+        $access_token = $result['access_token'];
+
+        // Cache for 50 minutes
+        set_transient('bpmg_access_token', $access_token, 50 * MINUTE_IN_SECONDS);
+
+        return $access_token;
     }
 
     // generate password for stk push
