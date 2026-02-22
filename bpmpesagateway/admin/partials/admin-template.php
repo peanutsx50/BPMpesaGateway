@@ -8,6 +8,8 @@
 if (!defined('ABSPATH')) {
     exit;
 }
+
+$options = get_option('bpmpesagateway_options');
 ?>
 
 <div class="wrap">
@@ -22,7 +24,7 @@ if (!defined('ABSPATH')) {
 
     <form method="post" action="options.php">
         <?php
-        
+
         // Output security fields for the registered setting "mpesapaywallpro_options"
         settings_fields('bpmpesa_settings_group');
         ?>
@@ -32,8 +34,9 @@ if (!defined('ABSPATH')) {
                 <th scope="row">Consumer Key</th>
                 <td>
                     <input type="password"
-                        name="bpmg_consumer_key"
-                        value="<?php echo esc_attr(get_option('bpmg_consumer_key')); ?>"
+                        id="consumer_key"
+                        name="bpmpesagateway_options[consumer_key]"
+                        value="<?php echo esc_attr($options['consumer_key'] ?? ''); ?>"
                         class="regular-text noCopyPaste">
                 </td>
             </tr>
@@ -43,9 +46,9 @@ if (!defined('ABSPATH')) {
                 <th scope="row">Consumer Secret</th>
                 <td>
                     <input type="password"
-                        id="noCopyPaste"
-                        name="bpmg_consumer_secret"
-                        value="<?php echo esc_attr(get_option('bpmg_consumer_secret')); ?>"
+                        id="consumer_secret"
+                        name="bpmpesagateway_options[consumer_secret]"
+                        value="<?php echo esc_attr($options['consumer_secret'] ?? ''); ?>"
                         class="regular-text noCopyPaste">
                 </td>
             </tr>
@@ -55,9 +58,9 @@ if (!defined('ABSPATH')) {
                 <th scope="row">Shortcode</th>
                 <td>
                     <input type="password"
-                        id="noCopyPaste"
-                        name="bpmg_shortcode"
-                        value="<?php echo esc_attr(get_option('bpmg_shortcode')); ?>"
+                        id="shortcode"
+                        name="bpmpesagateway_options[shortcode]"
+                        value="<?php echo esc_attr($options['shortcode'] ?? ''); ?>"
                         class="regular-text noCopyPaste">
                 </td>
             </tr>
@@ -67,9 +70,9 @@ if (!defined('ABSPATH')) {
                 <th scope="row">Passkey</th>
                 <td>
                     <input type="password"
-                        id="noCopyPaste"
-                        name="bpmg_passkey"
-                        value="<?php echo esc_attr(get_option('bpmg_passkey')); ?>"
+                        id="passkey"
+                        name="bpmpesagateway_options[passkey]"
+                        value="<?php echo esc_attr($options['passkey'] ?? ''); ?>"
                         class="regular-text noCopyPaste">
                 </td>
             </tr>
@@ -79,8 +82,9 @@ if (!defined('ABSPATH')) {
                 <th scope="row">Account Reference Prefix</th>
                 <td>
                     <input type="text"
-                        name="bpmpesa_account_reference"
-                        value="<?php echo esc_attr(get_option('bpmpesa_account_reference')); ?>"
+                        id="account_reference"
+                        name="bpmpesagateway_options[account_reference]"
+                        value="<?php echo esc_attr($options['account_reference'] ?? ''); ?>"
                         class="regular-text">
                     <p style="margin-top: 5px; font-style: italic;">
                         Text shown as the Account Reference in M-Pesa. Appears on the user transaction details to help identify payments.Example: <code>Axios Tech Payment</code>
@@ -93,8 +97,9 @@ if (!defined('ABSPATH')) {
                 <th scope="row">Transaction Reference Label</th>
                 <td>
                     <input type="text"
-                        name="bpmpesa_transaction_reference"
-                        value="<?php echo esc_attr(get_option('bpmpesa_transaction_reference')); ?>"
+                        id="transaction_reference"
+                        name="bpmpesagateway_options[transaction_reference]"
+                        value="<?php echo esc_attr($options['transaction_reference'] ?? ''); ?>"
                         class="regular-text">
                     <p style="margin-top: 5px; font-style: italic;">
                         Text shown on the customer’s M-Pesa statement to identify your business or payment purpose.
@@ -108,9 +113,10 @@ if (!defined('ABSPATH')) {
                 <th scope="row">Payment Amount</th>
                 <td>
                     <input type="number"
-                        name="bpmpesa_amount"
+                        id="amount"
+                        name="bpmpesagateway_options[amount]"
                         min="1"
-                        value="<?php echo esc_attr(get_option('bpmpesa_amount')); ?>"
+                        value="<?php echo esc_attr($options['amount'] ?? ''); ?>"
                         class="small-text">
                     <p style="font-style: italic; margin-top: 5px;">Amount required to complete registration.</p>
                 </td>
