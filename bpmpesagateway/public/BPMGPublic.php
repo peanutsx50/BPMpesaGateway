@@ -1,58 +1,52 @@
 <?php
 
-/**
- * Create custom fields in Buddypress resgistration form, validate them
- * @package    BPMpesaGateway
- * @subpackage BPMpesaGateway/includes
- */
+namespace BPMpesaGateway\Public;
 
-namespace BPMpesaGateway\Core;
+use BPMpesaGateway\Core\BPMGMpesa;
 
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
 
-class BPMGRegistration
+class BPMGPublic
 {
+    private $bpmpesagateway;
+    private $version;
 
-    //constructor
-    public function __construct()
+    public function __construct($bpmpesagateway, $version)
     {
-        $this->register();
+
+        $this->bpmpesagateway = $bpmpesagateway;
+        $this->version = $version;
     }
 
-    // register hooks
-    private function register()
+    public function enqueue_styles()
     {
-        add_action('bp_before_registration_submit_buttons', array($this, 'bpmg_add_custom_registration_fields'));
-        //ajax hooks
-        add_action('wp_ajax_bpmg_send_mpesa_request', array($this, 'handle_mpesa_request')); // logged in users
-        add_action('wp_ajax_nopriv_bpmg_send_mpesa_request', array($this, 'handle_mpesa_request')); // non-logged in users
+        wp_enqueue_style($this->bpmpesagateway . '-public-style', BPMG_PUBLIC_CSS_URL . 'BPMG-public.css', array(), $this->version, 'all');
     }
 
-    /**
-     * Add custom M-Pesa registration fields to the BuddyPress registration form.
-     *
-     * This method is hooked to 'bp_before_registration_submit_buttons' and is responsible
-     * for displaying additional input fields on the registration form. The fields are 
-     * included from a separate template file to keep markup organized.
-     *
-     * The template file path is constructed from the plugin's base path:
-     * BPMG_PUBLIC_PARTIALS_PATH . 'registration-fields.php'
-     *
-     * If the template file exists, it is included and its contents (HTML inputs, labels, etc.)
-     * are rendered on the registration form. If the file does not exist, nothing is output.
-     *
-     * Usage:
-     * This function is automatically triggered via the BuddyPress hook when rendering 
-     * the registration form.
-     *
-     * @return void Outputs HTML content from the template file if it exists.
-     */
+    public function enqueue_scripts()
+    {
+        wp_enqueue_script($this->bpmpesagateway . '-public-script', BPMG_PUBLIC_JS_URL . 'BPMG-public.min.js', array('jquery'), $this->version, true);
+    }
+
+    public function localize_scripts()
+    {
+        //wp localize script to pass ajax url
+        wp_localize_script(
+            $this->bpmpesagateway . '-public-script',
+            'bpmpesa_ajax',
+            [ // script : matches the handle used in wp_enqueue_script
+                'ajax_url' => admin_url('admin-ajax.php'), // core wordpress ajax handler
+                'nonce'    => wp_create_nonce('bpmg_mpesa_nonce'), // security nonce
+                'callback_url' => rest_url('bpmpesa/v1/callback'), // callback url
+            ]
+        );
+    }
 
     public function bpmg_add_custom_registration_fields()
     {
-        $template_path = BPMG_PUBLIC_PARTIALS_PATH . 'registration-fields.php';
+        $template_path = BPMG_PUBLIC_PARTIALS . 'registration-fields.php';
         if (file_exists($template_path)) {
             include $template_path;
         }

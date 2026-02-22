@@ -30,9 +30,10 @@
 
 namespace BPMpesaGateway\Base;
 
-use BPMpesaGateway\Core\BPMGRegistration;
 use BPMpesaGateway\Core\BPMGMpesa;
 use BPMpesaGateway\Core\BPMGUtils;
+use BPMpesaGateway\Admin\BPMGAdmin;
+use BPMpesaGateway\Public\BPMGPublic;
 use WP_Error;
 use WP_REST_Request;
 
@@ -72,7 +73,7 @@ class BPMG
     public function define_post_types()
     {
         $postTypes = new BPMGPostTypes();
-        
+
         // Loader ($hook, $component, $callback, $priority = 10, $accepted_args = 1)
         $this->loader->add_action('init', $postTypes, 'register_custom_post_type');
         $this->loader->add_filter('manage_mpesa_posts_columns', $postTypes, 'set_custom_edit_mpesacolumns');
@@ -81,19 +82,33 @@ class BPMG
         $this->loader->add_action('pre_get_posts', $postTypes, 'handle_sorting_by_meta_value');
     }
 
-    public function define_admin_hooks() {}
+    public function define_admin_hooks()
+    {
+        $admin = new BPMGAdmin($this->bpmpesagateway, $this->version);
 
-    public function define_public_hooks() {}
+        // Loader ($hook, $component, $callback, $priority = 10, $accepted_args = 1)
+        $this->loader->add_action('admin_menu', $admin, 'add_admin_pages');
+        $this->loader->add_action('admin_init', $admin, 'register_settings');
+        $this->loader->add_action('admin_enqueue_scripts', $admin, 'enqueue_scripts');
+        $this->loader->add_action('admin_enqueue_scripts', $admin, 'enqueue_styles');
+    }
+
+    public function define_public_hooks() {
+        $public = new BPMGPublic($this->bpmpesagateway, $this->version);
+
+        // Loader ($hook, $component, $callback, $priority = 10, $accepted_args = 1)
+        $this->loader->add_action('wp_enqueue_scripts', $public, 'enqueue_styles');
+        $this->loader->add_action('wp_enqueue_scripts', $public, 'enqueue_scripts');
+        $this->loader->add_action('wp_enqueue_scripts', $public, 'localize_scripts');
+        $this->loader->add_action('bp_before_registration_submit_buttons', $public, 'bpmg_add_custom_registration_fields');
+        $this->loader->add_action('wp_ajax_bpmg_send_mpesa_request', $public, 'handle_mpesa_request'); // logged in users
+        $this->loader->add_action('wp_ajax_nopriv_bpmg_send_mpesa_request', $public, 'handle_mpesa_request'); // non-logged in users
+
+    }
 
     // register hooks
     public function register()
     {
-        // admin hooks: add admin pages
-        add_action('admin_menu', [BPMGAdminPages::class, 'add_admin_pages']);
-        // admin hooks: load CSS and JS files
-        add_action('admin_enqueue_scripts', [BPMGEnqueueAdmin::class, 'bpmg_enqueue_admin']); // loads CSS file
-        add_action('admin_enqueue_scripts', [BPMGEnqueueAdmin::class, 'bpmg_enqueue_admin_scripts']); // loads JS file
-        add_action('wp_enqueue_scripts', [BPMGEnqueuePublic::class, 'bpmg_enqueue_public']);
         // register REST endpoint
         add_action('rest_api_init', function () {
             register_rest_route('bpmpesa/v1', '/callback', [
@@ -115,11 +130,6 @@ class BPMG
     public function run()
     {
         $this->loader->run();
-    }
-    // Load core classes
-    private function load_core_classes()
-    {
-        $registration = new BPMGRegistration();
     }
 
     public function validate_safaricom_IP(WP_REST_Request $request)

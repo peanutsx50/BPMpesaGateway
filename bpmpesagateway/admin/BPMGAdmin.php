@@ -10,7 +10,7 @@
  * @subpackage BPMpesaGateway/includes
  */
 
-namespace BPMpesaGateway\Base;
+namespace BPMpesaGateway\Admin;
 
 use BPMpesaGateway\Core\BPMGOptions;
 use BPMpesaGateway\Core\BPMGUtils;
@@ -19,25 +19,52 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
 
-class BPMGAdminPages
+class BPMGAdmin
 {
-    public static function add_admin_pages()
+    private $bpmpesagateway;
+    private $version;
+
+    public function __construct($bpmpesagateway, $version)
     {
-        add_menu_page('BPMpesaGateway', 'BPMpesaGateway', 'manage_options', 'bpmpesagateway', [self::class, 'admin_index'], 'dashicons-admin-generic', 110);
-        add_action('admin_init', [self::class, 'register_settings']);
+
+        $this->bpmpesagateway = $bpmpesagateway;
+        $this->version = $version;
     }
 
-    public static function admin_index()
+    public function add_admin_pages()
+    {
+        add_menu_page(
+            'BPMpesaGateway',
+            'BPMpesaGateway',
+            'manage_options',
+            'bpmpesagateway',
+            [$this, 'admin_page_content'],
+            'dashicons-admin-generic',
+            110
+        );
+    }
+
+    public function enqueue_scripts()
+    {
+        wp_enqueue_script($this->bpmpesagateway . '-admin-script', BPMG_PUBLIC_JS_URL . 'BPMG-admin.min.js', array('jquery'), $this->version, true);
+    }
+
+    public function enqueue_styles()
+    {
+        wp_enqueue_style($this->bpmpesagateway . '-admin-style', BPMG_PUBLIC_CSS_URL . 'BPMG-admin.css', array(), $this->version, 'all');
+    }
+
+    public function admin_page_content()
     {
         // Admin page content goes here
-        $template_path = BPMG_ADMIN_PARTIALS_PATH . 'admin-template.php';
+        $template_path = BPMG_ADMIN_PARTIALS . 'admin-template.php';
         if (file_exists($template_path)) {
             include $template_path;
         }
     }
 
     // save settings
-    public static function register_settings()
+    public function register_settings()
     {
         // NOW it's safe to save settings
         if (!current_user_can('manage_options')) {

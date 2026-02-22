@@ -35,11 +35,11 @@ if (! defined('ABSPATH')) {
 // Autoload dependencies using Composer
 $autoload = __DIR__ . '/vendor/autoload.php';
 if (! file_exists($autoload)) {
-	wp_die(
-		'MpesaPaywallPro requires Composer dependencies. Please run <code>composer install</code> in the plugin directory.',
-		'MpesaPaywallPro — Missing Dependencies',
-		array('exit_status' => 1)
-	);
+    wp_die(
+        'MpesaPaywallPro requires Composer dependencies. Please run <code>composer install</code> in the plugin directory.',
+        'MpesaPaywallPro — Missing Dependencies',
+        array('exit_status' => 1)
+    );
 }
 require_once $autoload;
 
@@ -53,12 +53,19 @@ use BPMpesaGateway\Base\BPMGDeactivator;
 define('BPMG_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('BPMG_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('BPMG_BASENAME', plugin_basename(__FILE__));
-define('BPMG_ADMIN_PARTIALS_PATH', plugin_dir_path(__FILE__) . 'admin/partials/');
-define('BPMG_PUBLIC_PARTIALS_PATH', plugin_dir_path(__FILE__) . 'public/partials/');
+
+// Paths for PHP includes
+define('BPMG_ADMIN_PARTIALS', BPMG_PLUGIN_PATH . 'admin/partials/');
+define('BPMG_PUBLIC_PARTIALS', BPMG_PLUGIN_PATH . 'public/partials/');
+
+// URLs for enqueued assets
+define('BPMG_ADMIN_CSS_URL', BPMG_PLUGIN_URL . 'admin/css/');
+define('BPMG_PUBLIC_CSS_URL', BPMG_PLUGIN_URL . 'public/css/');
+define('BPMG_ADMIN_JS_URL', BPMG_PLUGIN_URL . 'admin/js/dist/');
+define('BPMG_PUBLIC_JS_URL', BPMG_PLUGIN_URL . 'public/js/dist/');
+
 define('BPMG_TEXT_DOMAIN', 'bpmpesagateway');
 define('BPMG_VERSION', '1.0.0');
-
-
 
 /**
  * The code that runs during plugin activation.
