@@ -1,8 +1,20 @@
 <?php
 
+/**
+ * Enqueue admin styles and scripts for BPMpesaGateway plugin.
+ *
+ * @package    BPMpesaGateway
+ * @subpackage BPMpesaGateway/includes
+ */
+
+
 namespace BPMpesaGateway\Base;
 
-class BPMG_Enqueue_Admin
+if (!defined('ABSPATH')) {
+    exit; // Exit if accessed directly.
+}
+
+class BPMGEnqueueAdmin
 {
     // Enqueue admin styles
     public static function bpmg_enqueue_admin()

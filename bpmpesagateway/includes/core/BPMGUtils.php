@@ -2,7 +2,11 @@
 
 namespace BPMpesaGateway\Core;
 
-class BPMG_Utils{
+if (!defined('ABSPATH')) {
+    exit; // Exit if accessed directly.
+}
+
+class BPMGUtils{
     public static function debug_to_console($data, $context = 'Debug in Console') {
     // Buffering to solve problems with frameworks that may use header()
     ob_start(); 

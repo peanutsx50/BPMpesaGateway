@@ -45,8 +45,8 @@ require_once $autoload;
 
 // namespace Inc after autoload;
 use BPMpesaGateway\Base\BPMG;
-use BPMpesaGateway\Base\BPMG_Activator;
-use BPMpesaGateway\Base\BPMG_Deactivator;
+use BPMpesaGateway\Base\BPMGActivator;
+use BPMpesaGateway\Base\BPMGDeactivator;
 
 
 // Define plugin constants
@@ -63,7 +63,7 @@ define('BPMG_VERSION', '1.0.0');
  */
 function activate_bpmg_plugin()
 {
-    BPMG_Activator::activate();
+    BPMGActivator::activate();
 }
 
 /**
@@ -72,7 +72,7 @@ function activate_bpmg_plugin()
  */
 function deactivate_bpmg_plugin()
 {
-    BPMG_Deactivator::deactivate();
+    BPMGDeactivator::deactivate();
 }
 
 // Register activation and deactivation hooks

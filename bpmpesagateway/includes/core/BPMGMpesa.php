@@ -8,7 +8,11 @@
 
 namespace BPMpesaGateway\Core;
 
-class BPMG_Mpesa
+if (!defined('ABSPATH')) {
+    exit; // Exit if accessed directly.
+}
+
+class BPMGMpesa
 {
     // Mpesa properties
     private $consumer_key;

@@ -12,7 +12,11 @@
 
 namespace BPMpesaGateway\Base;
 
-class BPMG_Admin_Pages
+if (!defined('ABSPATH')) {
+    exit; // Exit if accessed directly.
+}
+
+class BPMGAdminPages
 {
     public static function add_admin_pages()
     {

@@ -6,13 +6,17 @@
  * @link       http://example.com
  * @since      1.0.0
  *
- * @package    Test_Plugin
- * @subpackage Test_Plugin/includes
+ * @package    BPMpesaGateway
+ * @subpackage BPMpesaGateway/includes
  */
 
 namespace BPMpesaGateway\Base;
 
-class BPMG_Deactivator {
+if (!defined('ABSPATH')) {
+    exit; // Exit if accessed directly.
+}
+
+class BPMGDeactivator {
 
     /**
      * Deactivation logic here

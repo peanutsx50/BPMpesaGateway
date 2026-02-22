@@ -8,7 +8,11 @@
 
 namespace BPMpesaGateway\Core;
 
-class BPMG_Registration
+if (!defined('ABSPATH')) {
+    exit; // Exit if accessed directly.
+}
+
+class BPMGRegistration
 {
 
     //constructor
@@ -78,7 +82,7 @@ class BPMG_Registration
         }
         $phone = sanitize_text_field($_POST['phone']); // this code receives phone number from ajax request via post
         // send the request to mpesa api
-        $BPMG_Mpesa = new BPMG_Mpesa();
+        $BPMG_Mpesa = new BPMGMpesa();
         $payment_response = $BPMG_Mpesa->send_stk_push_request($phone);
         // handle the response
         if ($payment_response['status'] === 'success') {

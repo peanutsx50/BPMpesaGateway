@@ -2,7 +2,11 @@
 
 namespace BPMpesaGateway\Base;
 
-class BPMG_Enqueue_Public
+if (!defined('ABSPATH')) {
+    exit; // Exit if accessed directly.
+}
+
+class BPMGEnqueuePublic
 {
     // Enqueue public styles and scripts
     public static function bpmg_enqueue_public()
