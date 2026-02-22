@@ -57,6 +57,7 @@ class BPMG
         $this->bpmpesagateway = 'BPMpesaGateway';
 
         $this->load_dependencies();
+        $this->define_post_types();
         $this->define_admin_hooks();
         $this->define_public_hooks();
     }
@@ -68,20 +69,25 @@ class BPMG
     }
 
 
-    public function define_public_hooks() {}
+    public function define_post_types()
+    {
+        $postTypes = new BPMGPostTypes();
+        
+        // Loader ($hook, $component, $callback, $priority = 10, $accepted_args = 1)
+        $this->loader->add_action('init', $postTypes, 'register_custom_post_type');
+        $this->loader->add_filter('manage_mpesa_posts_columns', $postTypes, 'set_custom_edit_mpesacolumns');
+        $this->loader->add_action('manage_mpesa_posts_custom_column', $postTypes, 'custom_mpesacolumns', 10, 2);
+        $this->loader->add_filter('manage_edit-mpesa_sortable_columns', $postTypes, 'sortable_columns');
+        $this->loader->add_action('pre_get_posts', $postTypes, 'handle_sorting_by_meta_value');
+    }
 
     public function define_admin_hooks() {}
+
+    public function define_public_hooks() {}
 
     // register hooks
     public function register()
     {
-        // enqueue hooks: admin and public, loads CSS and js files
-        add_action('init', [BPMGPostTypes::class, 'register_custom_post_type']);
-        // admin hooks: manage mpesa posts columns, custom columns, sorting
-        add_filter('manage_mpesa_posts_columns', [BPMGPostTypes::class, 'set_custom_edit_mpesacolumns']);
-        add_action('manage_mpesa_posts_custom_column', [BPMGPostTypes::class, 'custom_mpesacolumns'], 10, 2);
-        add_filter('manage_edit-mpesa_sortable_columns', [BPMGPostTypes::class, 'sortable_columns']);
-        add_action('pre_get_posts', [BPMGPostTypes::class, 'handle_sorting_by_meta_value']);
         // admin hooks: add admin pages
         add_action('admin_menu', [BPMGAdminPages::class, 'add_admin_pages']);
         // admin hooks: load CSS and JS files
