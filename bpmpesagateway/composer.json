@@ -7,6 +7,8 @@
 		"psr-4": {
 			"BPMpesaGateway\\Base\\": "includes/base/",
 			"BPMpesaGateway\\Core\\": "includes/core/",
+			"BPMpesaGateway\\Admin\\": "admin/",
+			"BPMpesaGateway\\Public\\": "public/",
 			"BPMpesaGateway\\": "includes/"
 		}
 	},
