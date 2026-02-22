@@ -7,7 +7,7 @@
  */
 
 namespace BPMpesaGateway\Core;
-
+use WP_REST_Request;
 use DateTimeZone;
 
 if (!defined('ABSPATH')) {
@@ -229,7 +229,7 @@ class BPMGMpesa
         return ['status' => 'success', 'message' => 'Mpesa configuration is valid'];
     }
 
-    public static function handle_callback(\WP_REST_Request $request)
+    public static function handle_callback(WP_REST_Request $request)
     {
         $params = $request->get_params();
         $stk    = $params['Body']['stkCallback'] ?? null;
