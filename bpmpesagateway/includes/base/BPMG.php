@@ -1,19 +1,6 @@
 <?php
 
 /**
- * The file that defines the core plugin class
- *
- * A class definition that includes attributes and functions used across both the
- * public-facing side of the site and the admin area.
- *
- * @link       http://example.com
- * @since      1.0.0
- *
- * @package    BPMpesaGateway
- * @subpackage BPMpesaGateway/includes
- */
-
-/**
  * The core plugin class.
  *
  * This is used to define internationalization, admin-specific hooks, and
@@ -30,12 +17,8 @@
 
 namespace BPMpesaGateway\Base;
 
-use BPMpesaGateway\Core\BPMGMpesa;
-use BPMpesaGateway\Core\BPMGUtils;
 use BPMpesaGateway\Admin\BPMGAdmin;
 use BPMpesaGateway\Public\BPMGPublic;
-use WP_Error;
-use WP_REST_Request;
 
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
@@ -106,7 +89,7 @@ class BPMG
 
     }
 
-    // load core classes
+    // Loop through all registered actions and filters and register them with WordPress.
     public function run()
     {
         $this->loader->run();

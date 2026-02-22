@@ -101,7 +101,7 @@ register_deactivation_hook(__FILE__, 'deactivate_bpmg_plugin');
 function run_bpmg_plugin()
 {
     $BPMG = new BPMG();
-    return $BPMG;
+    $BPMG->run();
 }
 
 run_bpmg_plugin();
