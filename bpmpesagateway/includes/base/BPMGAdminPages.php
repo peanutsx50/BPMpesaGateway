@@ -12,6 +12,9 @@
 
 namespace BPMpesaGateway\Base;
 
+use BPMpesaGateway\Core\BPMGOptions;
+use BPMpesaGateway\Core\BPMGUtils;
+
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
@@ -40,79 +43,49 @@ class BPMGAdminPages
         if (!current_user_can('manage_options')) {
             wp_die('Unauthorized');
         }
-        // consumer key: (string)
-        register_setting(
-            'bpmpesa_settings_group',
-            'bpmg_consumer_key',
-            [
-                'type' => 'string',
-                'default' => '',
-            ]
-        );
 
-        // consumer secret: (string)
-        register_setting(
-            'bpmpesa_settings_group',
-            'bpmg_consumer_secret',
-            [
-                'type'    => 'string',
-                'default' => '',
-            ]
-        );
+        // register settings from options[array_key]
 
-        // shortcode: (string)
         register_setting(
-            'bpmpesa_settings_group',
-            'bpmg_shortcode',
+            'bpmpesagateway_settings_group', // option group
+            'bpmpesagateway_options', // option name
             [
-                'type'    => 'string',
-                'default' => '',
-            ]
-        );
+                'type' => 'array',
+                'sanitize_callback' => function ($options) {
+                    // return sanitized options array
+                    $options = is_array($options) ? $options : [];
 
-        // passkey: (string)
-        register_setting(
-            'bpmpesa_settings_group',
-            'bpmg_passkey',
-            [
-                'type'    => 'string',
-                'default' => '',
-            ]
-        );
+                    // Get existing options from database
+                    $existing_options = BPMGOptions::get_options();
 
-        //account reference: (string)
-        register_setting(
-            'bpmpesa_settings_group',
-            'bpmpesa_account_reference',
-            [
-                'type'              => 'string',
-                'sanitize_callback' => 'sanitize_text_field',
-                'default'           => '',
-            ]
-        );
+                    // Merge new options with existing ones (new values override existing)
+                    $options = array_merge($existing_options, $options);
 
-        //transaction reference: (string)
-        register_setting(
-            'bpmpesa_settings_group',
-            'bpmpesa_transaction_reference',
-            [
-                'type'              => 'string',
-                'sanitize_callback' => 'sanitize_text_field',
-                'default'           => '',
-            ]
-        );
+                    // encrypt consumer_key, consumer_secret, passkey before saving
+                    $consumer_key =  BPMGUtils::encrypt_credential(sanitize_text_field($options['consumer_key'] ?? ''));
+                    $consumer_secret = BPMGUtils::encrypt_credential(sanitize_text_field($options['consumer_secret'] ?? ''));
+                    $passkey = BPMGUtils::encrypt_credential(sanitize_text_field($options['passkey'] ?? ''));
 
-        // Payment amount
-        register_setting(
-            'bpmpesa_settings_group',
-            'bpmpesa_amount',
-            [
-                'type'              => 'number',
-                'sanitize_callback' => function ($value) {
-                    return max(0, (int) $value);
-                }, //(int) $values cast anything other than number to 0
-                'default'           => 0,
-            ]
+                    return [
+                        'consumer_key' => $consumer_key,
+                        'consumer_secret' => $consumer_secret,
+                        'shortcode' => sanitize_text_field($options['shortcode']),
+                        'passkey' => $passkey,
+                        'account_reference' => sanitize_text_field($options['account_reference']),
+                        'transaction_reference' => sanitize_text_field($options['transaction_reference']),
+                        'amount' => floatval($options['amount']),
+                    ];
+                },
+                'default' => [
+                    'consumer_key' => '',
+                    'consumer_secret' => '',
+                    'shortcode' => '',
+                    'passkey' => '',
+                    'account_reference' => '',
+                    'transaction_reference' => '',
+                    'amount' => 0,
+                ],
+            ],
         );
     }
 }
