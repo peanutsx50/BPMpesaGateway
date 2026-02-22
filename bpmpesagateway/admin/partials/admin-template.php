@@ -16,22 +16,22 @@ $options = get_option('bpmpesagateway_options');
     <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
 
     <p class="description">
-        BPMpesaGateway allows you to control Mpesa payment requirements during BuddyPress registration.
+        <?php echo esc_html_e('BPMpesaGateway allows you to control Mpesa payment requirements during BuddyPress registration.', 'bpmpesagateway'); ?>
     </p>
     <p style="color: red;">
-        <strong>Important:</strong> Your M-Pesa credentials are strictly confidential. Never share them with anyone, including staff or third parties. Exposure of these credentials can result in unauthorized transactions and irreversible financial loss.<br>
+        <strong><?php echo esc_html_e('Important:', 'bpmpesagateway'); ?></strong> <?php echo esc_html_e('Your M-Pesa credentials are strictly confidential. Never share them with anyone, including staff or third parties. Exposure of these credentials can result in unauthorized transactions and irreversible financial loss.', 'bpmpesagateway'); ?><br>
     </p>
 
     <form method="post" action="options.php">
         <?php
 
         // Output security fields for the registered setting "mpesapaywallpro_options"
-        settings_fields('bpmpesa_settings_group');
+        settings_fields('bpmpesagateway_settings_group');
         ?>
         <table class="form-table" role="presentation">
             <!-- Consumer Key -->
             <tr>
-                <th scope="row">Consumer Key</th>
+                <th scope="row"><?php echo esc_html_e('Consumer Key', 'bpmpesagateway'); ?></th>
                 <td>
                     <input type="password"
                         id="consumer_key"
@@ -43,7 +43,7 @@ $options = get_option('bpmpesagateway_options');
 
             <!-- Consumer Secret -->
             <tr>
-                <th scope="row">Consumer Secret</th>
+                <th scope="row"><?php echo esc_html_e('Consumer Secret', 'bpmpesagateway'); ?></th>
                 <td>
                     <input type="password"
                         id="consumer_secret"
@@ -55,7 +55,7 @@ $options = get_option('bpmpesagateway_options');
 
             <!-- Shortcode -->
             <tr>
-                <th scope="row">Shortcode</th>
+                <th scope="row"><?php echo esc_html_e('Shortcode', 'bpmpesagateway'); ?></th>
                 <td>
                     <input type="password"
                         id="shortcode"
@@ -67,7 +67,7 @@ $options = get_option('bpmpesagateway_options');
 
             <!-- Passkey -->
             <tr>
-                <th scope="row">Passkey</th>
+                <th scope="row"><?php echo esc_html_e('Passkey', 'bpmpesagateway'); ?></th>
                 <td>
                     <input type="password"
                         id="passkey"
@@ -79,7 +79,7 @@ $options = get_option('bpmpesagateway_options');
 
             <!-- M-Pesa Account Reference -->
             <tr>
-                <th scope="row">Account Reference Prefix</th>
+                <th scope="row"><?php echo esc_html_e('Account Reference Prefix', 'bpmpesagateway'); ?></th>
                 <td>
                     <input type="text"
                         id="account_reference"
@@ -94,7 +94,7 @@ $options = get_option('bpmpesagateway_options');
 
             <!-- Transaction Reference -->
             <tr>
-                <th scope="row">Transaction Reference Label</th>
+                <th scope="row"><?php echo esc_html_e('Transaction Reference Label', 'bpmpesagateway'); ?></th>
                 <td>
                     <input type="text"
                         id="transaction_reference"
@@ -110,7 +110,7 @@ $options = get_option('bpmpesagateway_options');
 
             <!-- Amount -->
             <tr>
-                <th scope="row">Payment Amount</th>
+                <th scope="row"><?php echo esc_html_e('Payment Amount', 'bpmpesagateway'); ?></th>
                 <td>
                     <input type="number"
                         id="amount"
@@ -118,7 +118,7 @@ $options = get_option('bpmpesagateway_options');
                         min="1"
                         value="<?php echo esc_attr($options['amount'] ?? ''); ?>"
                         class="small-text">
-                    <p style="font-style: italic; margin-top: 5px;">Amount required to complete registration.</p>
+                    <p style="font-style: italic; margin-top: 5px;"><?php echo esc_html_e('Amount required to complete registration.', 'bpmpesagateway'); ?></p>
                 </td>
             </tr>
 
