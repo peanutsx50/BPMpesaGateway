@@ -38,7 +38,7 @@ class BPMGRegistration
      * included from a separate template file to keep markup organized.
      *
      * The template file path is constructed from the plugin's base path:
-     * BPMG_PLUGIN_PATH . 'includes/templates/registration-fields.php'
+     * BPMG_PUBLIC_PARTIALS_PATH . 'registration-fields.php'
      *
      * If the template file exists, it is included and its contents (HTML inputs, labels, etc.)
      * are rendered on the registration form. If the file does not exist, nothing is output.
@@ -52,7 +52,7 @@ class BPMGRegistration
 
     public function bpmg_add_custom_registration_fields()
     {
-        $template_path = BPMG_PLUGIN_PATH . 'includes/templates/registration-fields.php';
+        $template_path = BPMG_PUBLIC_PARTIALS_PATH . 'registration-fields.php';
         if (file_exists($template_path)) {
             include $template_path;
         }

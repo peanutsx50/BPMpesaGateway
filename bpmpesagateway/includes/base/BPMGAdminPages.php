@@ -30,7 +30,7 @@ class BPMGAdminPages
     public static function admin_index()
     {
         // Admin page content goes here
-        $template_path = BPMG_PLUGIN_PATH . 'includes/templates/admin-template.php';
+        $template_path = BPMG_ADMIN_PARTIALS_PATH . 'admin-template.php';
         if (file_exists($template_path)) {
             include $template_path;
         }

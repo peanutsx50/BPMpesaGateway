@@ -53,6 +53,9 @@ use BPMpesaGateway\Base\BPMGDeactivator;
 define('BPMG_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('BPMG_PLUGIN_PATH', plugin_dir_path(__FILE__));
 define('BPMG_BASENAME', plugin_basename(__FILE__));
+define('BPMG_ADMIN_PARTIALS_PATH', plugin_dir_path(__FILE__) . 'admin/partials/');
+define('BPMG_PUBLIC_PARTIALS_PATH', plugin_dir_path(__FILE__) . 'public/partials/');
+define('BPMG_TEXT_DOMAIN', 'bpmpesagateway');
 define('BPMG_VERSION', '1.0.0');
 
 
