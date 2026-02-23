@@ -123,7 +123,7 @@ class BPMGAdmin
             add_action('admin_notices', function () {
                 ?>
                     <div class="notice notice-error is-dismissible">
-                        <p style="color: black;"><?php esc_html_e('Warning: Your site is not using SSL. For secure M-Pesa transactions, please enable HTTPS on your website.', 'mpesapaywallpro'); ?></p>
+                        <p style="color: black;"><?php esc_html_e('Warning: Your site is not using SSL. For secure M-Pesa transactions, please enable HTTPS on your website.', 'bpmpesagateway'); ?></p>
                     </div>
                 <?php
             });

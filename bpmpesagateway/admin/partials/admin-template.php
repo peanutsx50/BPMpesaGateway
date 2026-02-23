@@ -27,7 +27,7 @@ $options = BPMGOptions::get_options(); // retrieve options to pre-fill form fiel
     <form method="post" action="options.php">
         <?php
 
-        // Output security fields for the registered setting "mpesapaywallpro_options"
+        // Output security fields for the registered setting "bpmpesagateway_options"
         settings_fields('bpmpesagateway_settings_group');
         ?>
         <table class="form-table" role="presentation">

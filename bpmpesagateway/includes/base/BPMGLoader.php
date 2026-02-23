@@ -6,8 +6,8 @@
  * @link       http://surgetech.co.ke
  * @since      1.0.0
  *
- * @package    MpesaPaywallPro
- * @subpackage MpesaPaywallPro/includes
+ * @package    BPMpesaGateway
+ * @subpackage BPMpesaGateway/includes
  */
 
 /**
@@ -17,8 +17,8 @@
  * the plugin, and register them with the WordPress API. Call the
  * run function to execute the list of actions and filters.
  *
- * @package    MpesaPaywallPro
- * @subpackage MpesaPaywallPro/includes
+ * @package    BPMpesaGateway
+ * @subpackage BPMpesaGateway/includes
  * @author     SurgeTech <admin@surgetech.co.ke>
  */
 

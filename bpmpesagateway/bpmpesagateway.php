@@ -19,7 +19,7 @@
  * Version:           1.0.0
  * Author:            SurgeTech
  * Author URI:        https://surgetech.co.ke/
- * License:           GNU General Public License v2
+ * License:           GPLv2 or later
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       bpmepesagateway
  * Domain Path:       /languages
@@ -36,8 +36,8 @@ if (! defined('ABSPATH')) {
 $autoload = __DIR__ . '/vendor/autoload.php';
 if (! file_exists($autoload)) {
     wp_die(
-        'MpesaPaywallPro requires Composer dependencies. Please run <code>composer install</code> in the plugin directory.',
-        'MpesaPaywallPro — Missing Dependencies',
+        'BPMpesaGateway requires Composer dependencies. Please run <code>composer install</code> in the plugin directory.',
+        'BPMpesaGateway — Missing Dependencies',
         array('exit_status' => 1)
     );
 }
