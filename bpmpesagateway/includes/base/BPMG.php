@@ -75,7 +75,7 @@ class BPMG
         $this->loader->add_action('admin_enqueue_scripts', $admin, 'enqueue_scripts');
         $this->loader->add_action('admin_enqueue_scripts', $admin, 'enqueue_styles');
         $this->loader->add_action('plugins_loaded', $admin, 'check_ssl');
-        $this->loader->add_action('plugins_loaded', $admin, 'load_textdomain');
+        $this->loader->add_action('plugins_loaded', $this, 'load_textdomain');
     }
 
     public function define_public_hooks() {
