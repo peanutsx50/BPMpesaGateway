@@ -1,6 +1,6 @@
 === BPMpesa Gateway ===
 Contributors: surgetech
-Tags: mpesa, payment, gateway, buddypress, registration, e-commerce, safaricom, mobile-money
+Tags: mpesa, payment, gateway, buddypress, registration
 Requires at least: 6.2.1
 Tested up to: 6.9
 Stable tag: 1.0.0
