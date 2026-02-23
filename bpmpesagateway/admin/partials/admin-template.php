@@ -18,10 +18,10 @@ $options = BPMGOptions::get_options(); // retrieve options to pre-fill form fiel
     <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
 
     <p class="description">
-        <?php echo esc_html_e('BPMpesaGateway allows you to control Mpesa payment requirements during BuddyPress registration.', 'bpmpesagateway'); ?>
+        <?php esc_html_e('BPMpesaGateway allows you to control Mpesa payment requirements during BuddyPress registration.', 'bpmpesagateway'); ?>
     </p>
     <p style="color: red;">
-        <strong><?php echo esc_html_e('Important:', 'bpmpesagateway'); ?></strong> <?php echo esc_html_e('Your M-Pesa credentials are strictly confidential. Never share them with anyone, including staff or third parties. Exposure of these credentials can result in unauthorized transactions and irreversible financial loss.', 'bpmpesagateway'); ?><br>
+        <strong><?php esc_html_e('Important:', 'bpmpesagateway'); ?></strong> <?php echo esc_html_e('Your M-Pesa credentials are strictly confidential. Never share them with anyone, including staff or third parties. Exposure of these credentials can result in unauthorized transactions and irreversible financial loss.', 'bpmpesagateway'); ?><br>
     </p>
 
     <form method="post" action="options.php">
@@ -33,7 +33,7 @@ $options = BPMGOptions::get_options(); // retrieve options to pre-fill form fiel
         <table class="form-table" role="presentation">
             <!-- Consumer Key -->
             <tr>
-                <th scope="row"><?php echo esc_html_e('Consumer Key', 'bpmpesagateway'); ?></th>
+                <th scope="row"><?php esc_html_e('Consumer Key', 'bpmpesagateway'); ?></th>
                 <td>
                     <input type="password"
                         id="consumer_key"
@@ -45,7 +45,7 @@ $options = BPMGOptions::get_options(); // retrieve options to pre-fill form fiel
 
             <!-- Consumer Secret -->
             <tr>
-                <th scope="row"><?php echo esc_html_e('Consumer Secret', 'bpmpesagateway'); ?></th>
+                <th scope="row"><?php esc_html_e('Consumer Secret', 'bpmpesagateway'); ?></th>
                 <td>
                     <input type="password"
                         id="consumer_secret"
@@ -57,7 +57,7 @@ $options = BPMGOptions::get_options(); // retrieve options to pre-fill form fiel
 
             <!-- Shortcode -->
             <tr>
-                <th scope="row"><?php echo esc_html_e('Shortcode', 'bpmpesagateway'); ?></th>
+                <th scope="row"><?php esc_html_e('Shortcode', 'bpmpesagateway'); ?></th>
                 <td>
                     <input type="password"
                         id="shortcode"
@@ -69,7 +69,7 @@ $options = BPMGOptions::get_options(); // retrieve options to pre-fill form fiel
 
             <!-- Passkey -->
             <tr>
-                <th scope="row"><?php echo esc_html_e('Passkey', 'bpmpesagateway'); ?></th>
+                <th scope="row"><?php esc_html_e('Passkey', 'bpmpesagateway'); ?></th>
                 <td>
                     <input type="password"
                         id="passkey"
@@ -81,7 +81,7 @@ $options = BPMGOptions::get_options(); // retrieve options to pre-fill form fiel
 
             <!-- M-Pesa Account Reference -->
             <tr>
-                <th scope="row"><?php echo esc_html_e('Account Reference Prefix', 'bpmpesagateway'); ?></th>
+                <th scope="row"><?php esc_html_e('Account Reference Prefix', 'bpmpesagateway'); ?></th>
                 <td>
                     <input type="text"
                         id="account_reference"
@@ -96,7 +96,7 @@ $options = BPMGOptions::get_options(); // retrieve options to pre-fill form fiel
 
             <!-- Transaction Reference -->
             <tr>
-                <th scope="row"><?php echo esc_html_e('Transaction Reference Label', 'bpmpesagateway'); ?></th>
+                <th scope="row"><?php esc_html_e('Transaction Reference Label', 'bpmpesagateway'); ?></th>
                 <td>
                     <input type="text"
                         id="transaction_reference"
@@ -112,7 +112,7 @@ $options = BPMGOptions::get_options(); // retrieve options to pre-fill form fiel
 
             <!-- Amount -->
             <tr>
-                <th scope="row"><?php echo esc_html_e('Payment Amount', 'bpmpesagateway'); ?></th>
+                <th scope="row"><?php esc_html_e('Payment Amount', 'bpmpesagateway'); ?></th>
                 <td>
                     <input type="number"
                         id="amount"
@@ -120,7 +120,7 @@ $options = BPMGOptions::get_options(); // retrieve options to pre-fill form fiel
                         min="1"
                         value="<?php echo esc_attr($options['amount'] ?? ''); ?>"
                         class="small-text">
-                    <p style="font-style: italic; margin-top: 5px;"><?php echo esc_html_e('Amount required to complete registration.', 'bpmpesagateway'); ?></p>
+                    <p style="font-style: italic; margin-top: 5px;"><?php esc_html_e('Amount required to complete registration.', 'bpmpesagateway'); ?></p>
                 </td>
             </tr>
 
