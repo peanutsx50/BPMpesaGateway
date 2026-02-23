@@ -10,3 +10,4 @@ node_modules/
 **/composer.lock
 **/phpcs-report.json
 package-lock.json
+WPORG_COMPLIANCE.md
