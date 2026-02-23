@@ -87,7 +87,7 @@ class BPMGPublic
         }
 
         // check request IP address from server
-        $raw_ip = $_SERVER['REMOTE_ADDR'] ?? 'UNKNOWN';
+        $raw_ip = sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR']) ?? 'UNKOWN'); // sanitize and validate IP address, default to UNKNOWN if not valid
         $client_ip = filter_var($raw_ip, FILTER_VALIDATE_IP) ? $raw_ip : 'UNKNOWN';
 
         // compare with expected IP addressess
@@ -139,7 +139,7 @@ class BPMGPublic
 
         //2. verify nonce
         $nonce = $request->get_header('X-WP-Nonce');
-        $raw_ip = $_SERVER['REMOTE_ADDR'] ?? '';
+        $raw_ip = sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR']) ?? 'UNKOWN'); // sanitize and validate IP address, default to UNKNOWN if not valid
         $ip = filter_var($raw_ip, FILTER_VALIDATE_IP) ? sanitize_text_field($raw_ip) : 'UNKNOWN';
         if (!wp_verify_nonce($nonce, 'wp_rest')) {
             return new WP_Error(
@@ -188,11 +188,11 @@ class BPMGPublic
     public function handle_mpesa_request()
     {
         // Check nonce for security
-        if (!isset($_POST['bpmg_nonce']) || !wp_verify_nonce($_POST['bpmg_nonce'], 'bpmg_mpesa_nonce')) {
+        if (!isset($_POST['bpmg_nonce']) || !wp_verify_nonce(wp_unslash($_POST['bpmg_nonce']), 'bpmg_mpesa_nonce')) {
             wp_send_json_error(['message' => 'Invalid request']); // deny request if nonce is invalid
             wp_die();
         }
-        $phone = sanitize_text_field($_POST['phone']); // this code receives phone number from ajax request via post
+        $phone = sanitize_text_field(wp_unslash($_POST['phone'])); // this code receives phone number from ajax request via post
         // send the request to mpesa api
         $BPMG_Mpesa = new BPMGMpesa();
         $payment_response = $BPMG_Mpesa->send_stk_push_request($phone);
