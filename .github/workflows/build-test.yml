@@ -89,7 +89,7 @@ jobs:
       - name: Copy plugin to WordPress
         run: |
           mkdir -p /tmp/wordpress/wp-content/plugins/bpmpesagateway
-          cp -r ./bpmpesagateway/* /tmp/wordpress/wp-content/plugins/bpmpesagateway/
+          cp -r ./bpmpesagateway/* /tmp/wordpress/wp-content/plugins/bpmpesagateway/ --ignore=vendor
 
       - name: Activate plugin
         run: |
@@ -98,7 +98,7 @@ jobs:
 
       - name: Run PHP Lint
         working-directory: ./bpmpesagateway
-        run: find . -name "*.php" -type f -exec php -l {} \;
+        run: find . -name "*.php" -type f -not -path "./vendor/*" -exec php -l {} \;
 
       - name: Run Composer validate
         working-directory: ./bpmpesagateway
@@ -106,9 +106,7 @@ jobs:
 
       - name: Check for syntax errors with PHPCS
         working-directory: ./bpmpesagateway
-        run: |
-          composer install --dev
-          ./vendor/bin/phpcs . --standard=PSR12 --extensions=php --ignore=vendor,node_modules || true
+        run: ./vendor/bin/phpcs . --standard=PSR12 --extensions=php --ignore=vendor,node_modules || true
 
       - name: Verify plugin loads without errors
         run: |
