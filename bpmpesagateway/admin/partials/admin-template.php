@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
 }
 
 use BPMpesaGateway\Core\BPMGOptions;
-$options = BPMGOptions::get_options(); // retrieve options to pre-fill form fields
+$bpmg_options = BPMGOptions::get_options(); // retrieve options to pre-fill form fields
 
 ?>
 
@@ -38,7 +38,7 @@ $options = BPMGOptions::get_options(); // retrieve options to pre-fill form fiel
                     <input type="password"
                         id="consumer_key"
                         name="bpmpesagateway_options[consumer_key]"
-                        value="<?php echo esc_attr($options['consumer_key'] ?? ''); ?>"
+                        value="<?php echo esc_attr($bpmg_options['consumer_key'] ?? ''); ?>"
                         class="regular-text noCopyPaste">
                 </td>
             </tr>
@@ -50,7 +50,7 @@ $options = BPMGOptions::get_options(); // retrieve options to pre-fill form fiel
                     <input type="password"
                         id="consumer_secret"
                         name="bpmpesagateway_options[consumer_secret]"
-                        value="<?php echo esc_attr($options['consumer_secret'] ?? ''); ?>"
+                        value="<?php echo esc_attr($bpmg_options['consumer_secret'] ?? ''); ?>"
                         class="regular-text noCopyPaste">
                 </td>
             </tr>
@@ -62,7 +62,7 @@ $options = BPMGOptions::get_options(); // retrieve options to pre-fill form fiel
                     <input type="password"
                         id="shortcode"
                         name="bpmpesagateway_options[shortcode]"
-                        value="<?php echo esc_attr($options['shortcode'] ?? ''); ?>"
+                        value="<?php echo esc_attr($bpmg_options['shortcode'] ?? ''); ?>"
                         class="regular-text noCopyPaste">
                 </td>
             </tr>
@@ -74,7 +74,7 @@ $options = BPMGOptions::get_options(); // retrieve options to pre-fill form fiel
                     <input type="password"
                         id="passkey"
                         name="bpmpesagateway_options[passkey]"
-                        value="<?php echo esc_attr($options['passkey'] ?? ''); ?>"
+                        value="<?php echo esc_attr($bpmg_options['passkey'] ?? ''); ?>"
                         class="regular-text noCopyPaste">
                 </td>
             </tr>
@@ -86,7 +86,7 @@ $options = BPMGOptions::get_options(); // retrieve options to pre-fill form fiel
                     <input type="text"
                         id="account_reference"
                         name="bpmpesagateway_options[account_reference]"
-                        value="<?php echo esc_attr($options['account_reference'] ?? ''); ?>"
+                        value="<?php echo esc_attr($bpmg_options['account_reference'] ?? ''); ?>"
                         class="regular-text">
                     <p style="margin-top: 5px; font-style: italic;">
                         Text shown as the Account Reference in M-Pesa. Appears on the user transaction details to help identify payments.Example: <code>Axios Tech Payment</code>
@@ -101,7 +101,7 @@ $options = BPMGOptions::get_options(); // retrieve options to pre-fill form fiel
                     <input type="text"
                         id="transaction_reference"
                         name="bpmpesagateway_options[transaction_reference]"
-                        value="<?php echo esc_attr($options['transaction_reference'] ?? ''); ?>"
+                        value="<?php echo esc_attr($bpmg_options['transaction_reference'] ?? ''); ?>"
                         class="regular-text">
                     <p style="margin-top: 5px; font-style: italic;">
                         Text shown on the customer’s M-Pesa statement to identify your business or payment purpose.
@@ -118,7 +118,7 @@ $options = BPMGOptions::get_options(); // retrieve options to pre-fill form fiel
                         id="amount"
                         name="bpmpesagateway_options[amount]"
                         min="1"
-                        value="<?php echo esc_attr($options['amount'] ?? ''); ?>"
+                        value="<?php echo esc_attr($bpmg_options['amount'] ?? ''); ?>"
                         class="small-text">
                     <p style="font-style: italic; margin-top: 5px;"><?php esc_html_e('Amount required to complete registration.', 'bpmpesagateway'); ?></p>
                 </td>

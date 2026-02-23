@@ -31,6 +31,7 @@ class BPMGPublic
     public function enqueue_scripts()
     {
         wp_enqueue_script($this->bpmpesagateway . '-public-script', BPMG_PUBLIC_JS_URL . 'BPMG-public.min.js', array('jquery'), $this->version, true);
+        wp_script_add_data($this->bpmpesagateway . '-public-script', 'defer', true);
     }
 
     public function localize_scripts()

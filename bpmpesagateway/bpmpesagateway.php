@@ -36,15 +36,15 @@ if (! defined('ABSPATH')) {
 }
 
 // Autoload dependencies using Composer
-$autoload = __DIR__ . '/vendor/autoload.php';
-if (! file_exists($autoload)) {
+$bpmg_autoload = __DIR__ . '/vendor/autoload.php';
+if (! file_exists($bpmg_autoload)) {
     wp_die(
         'BPMpesaGateway requires Composer dependencies. Please run <code>composer install</code> in the plugin directory.',
         'BPMpesaGateway — Missing Dependencies',
         array('exit_status' => 1)
     );
 }
-require_once $autoload;
+require_once $bpmg_autoload;
 
 // namespace Inc after autoload;
 use BPMpesaGateway\Base\BPMG;
