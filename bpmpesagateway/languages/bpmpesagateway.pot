@@ -1,0 +1,40 @@
+# Copyright (C) 2026 SurgeTech
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: BPMpesaGateway 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/bpmpesagateway\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-02-23T10:27:47+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: bpmepesagateway\n"
+
+#. Plugin Name of the plugin
+#: bpmpesagateway.php
+msgid "BPMpesaGateway"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: bpmpesagateway.php
+msgid "https://surgetech.co.ke/bpmepesagateway"
+msgstr ""
+
+#. Description of the plugin
+#: bpmpesagateway.php
+msgid "BPMpesaGateway is a WordPress plugin that turns your BuddyPress community into a paid membership site, requiring M-Pesa payment from visitors before they can join the community."
+msgstr ""
+
+#. Author of the plugin
+#: bpmpesagateway.php
+msgid "SurgeTech"
+msgstr ""
+
+#. Author URI of the plugin
+#: bpmpesagateway.php
+msgid "https://surgetech.co.ke/"
+msgstr ""
