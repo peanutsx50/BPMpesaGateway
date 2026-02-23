@@ -21,6 +21,9 @@
  * Author URI:        https://surgetech.co.ke/
  * License:           GPLv2 or later
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
+ * Requires at least: 6.2.1
+ * Requires PHP:      8.1
+ * Tested up to:      6.9
  * Text Domain:       bpmepesagateway
  * Domain Path:       /languages
  * Requires Plugins:  buddypress
