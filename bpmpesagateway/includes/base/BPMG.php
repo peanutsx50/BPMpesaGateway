@@ -101,7 +101,7 @@ class BPMG
         load_plugin_textdomain(
             BPMG_TEXT_DOMAIN,
             false,
-            dirname(plugin_basename(__FILE__)) . '/languages/'
+            dirname(BPMG_BASENAME) . '/languages/'
         );
     }
 }
