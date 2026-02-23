@@ -8,13 +8,13 @@
  * registers the activation and deactivation functions, and defines a function
  * that starts the plugin.
  *
- * @link              https://surgetech.co.ke/bpmepesagateway
+ * @link              https://surgetech.co.ke/bpmpesagateway
  * @since             1.0.0
  * @package           BPMpesaGateway
  *
  * @wordpress-plugin
  * Plugin Name:       BPMpesaGateway
- * Plugin URI:        https://surgetech.co.ke/bpmepesagateway
+ * Plugin URI:        https://surgetech.co.ke/bpmpesagateway
  * Description:       BPMpesaGateway is a WordPress plugin that turns your BuddyPress community into a paid membership site, requiring M-Pesa payment from visitors before they can join the community.
  * Version:           1.0.0
  * Author:            SurgeTech
@@ -24,7 +24,7 @@
  * Requires at least: 6.2.1
  * Requires PHP:      8.1
  * Tested up to:      6.9
- * Text Domain:       bpmepesagateway
+ * Text Domain:       bpmpesagateway
  * Domain Path:       /languages
  * Requires Plugins:  buddypress
  */
@@ -74,7 +74,7 @@ define('BPMG_VERSION', '1.0.0');
  * The code that runs during plugin activation.
  * This action is documented in includes/class-plugin-name-activator.php
  */
-function activate_bpmg_plugin()
+function bpmg_activate_plugin()
 {
     BPMGActivator::activate();
 }
@@ -83,14 +83,14 @@ function activate_bpmg_plugin()
  * The code that runs during plugin deactivation.
  * This action is documented in includes/class-plugin-name-deactivator.php
  */
-function deactivate_bpmg_plugin()
+function bpmg_deactivate_plugin()
 {
     BPMGDeactivator::deactivate();
 }
 
 // Register activation and deactivation hooks
-register_activation_hook(__FILE__, 'activate_bpmg_plugin');
-register_deactivation_hook(__FILE__, 'deactivate_bpmg_plugin');
+register_activation_hook(__FILE__, 'bpmg_activate_plugin');
+register_deactivation_hook(__FILE__, 'bpmg_deactivate_plugin');
 
 /**
  * Begins execution of the plugin.
@@ -101,10 +101,10 @@ register_deactivation_hook(__FILE__, 'deactivate_bpmg_plugin');
  *
  * @since    1.0.0
  */
-function run_bpmg_plugin()
+function bpmg_run_plugin()
 {
     $BPMG = new BPMG();
     $BPMG->run();
 }
 
-run_bpmg_plugin();
+bpmg_run_plugin();

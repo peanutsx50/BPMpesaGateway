@@ -21,8 +21,8 @@ msgstr "BPMpesaGateway"
 
 #. Plugin URI of the plugin
 #: bpmpesagateway.php
-msgid "https://surgetech.co.ke/bpmepesagateway"
-msgstr "https://surgetech.co.ke/bpmepesagateway"
+msgid "https://surgetech.co.ke/bpmpesagateway"
+msgstr "https://surgetech.co.ke/bpmpesagateway"
 
 #. Description of the plugin
 #: bpmpesagateway.php
