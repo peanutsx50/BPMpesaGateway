@@ -86,7 +86,7 @@ class BPMGAdmin
                     'passkey' => '',
                     'account_reference' => '',
                     'transaction_reference' => '',
-                    'amount' => 0,
+                    'amount' => 1,
                 ],
             ],
         );
@@ -103,6 +103,45 @@ class BPMGAdmin
         // Merge new options with existing ones (new values override existing)
         $options = array_merge($existing_options, $options);
 
+        // check if amount is less than 1 or greater than 150000
+        if (isset($options['amount']) && (absint($options['amount']) < 1 || absint($options['amount']) > 150000)) {
+            add_settings_error(
+                'bpmpesagateway_options',
+                'invalid_amount',
+                __('Amount must be between 1 and 150,000.', 'bpmpesagateway'),
+                'error'
+            );
+        }
+
+        // check if fields are empty
+        $required_fields = [
+            'consumer_key',
+            'consumer_secret',
+            'shortcode',
+            'passkey',
+        ];
+
+        $is_empty = false;
+
+        foreach ($required_fields as $field) {
+            if (empty($options[$field])) {
+                $is_empty = true;
+                add_settings_error(
+                    'bpmpesagateway_options',
+                    "empty_{$field}",
+                    sprintf(__('Required field %s is empty.', 'bpmpesagateway'), 
+                    str_replace('_', ' ', $field)),
+                    'error'
+                );
+            }
+        }
+
+        if ($is_empty) {
+            // If any required field is empty, return existing options to prevent saving invalid data
+            return $existing_options;
+        }
+
+        // Sanitize and return the options array
         return [
             'consumer_key' => sanitize_text_field($options['consumer_key']),
             'consumer_secret' => sanitize_text_field($options['consumer_secret']),

@@ -10,6 +10,7 @@ if (!defined('ABSPATH')) {
 }
 
 use BPMpesaGateway\Core\BPMGOptions;
+
 $bpmg_options = BPMGOptions::get_options(); // retrieve options to pre-fill form fields
 
 ?>
@@ -24,9 +25,11 @@ $bpmg_options = BPMGOptions::get_options(); // retrieve options to pre-fill form
         <strong><?php esc_html_e('Important:', 'bpmpesagateway'); ?></strong> <?php echo esc_html_e('Your M-Pesa credentials are strictly confidential. Never share them with anyone, including staff or third parties. Exposure of these credentials can result in unauthorized transactions and irreversible financial loss.', 'bpmpesagateway'); ?><br>
     </p>
 
+    <?php settings_errors(); // Display any settings errors 
+    ?>
+
     <form method="post" action="options.php">
         <?php
-
         // Output security fields for the registered setting "bpmpesagateway_options"
         settings_fields('bpmpesagateway_settings_group');
         ?>
@@ -39,7 +42,8 @@ $bpmg_options = BPMGOptions::get_options(); // retrieve options to pre-fill form
                         id="consumer_key"
                         name="bpmpesagateway_options[consumer_key]"
                         value="<?php echo esc_attr($bpmg_options['consumer_key'] ?? ''); ?>"
-                        class="regular-text noCopyPaste">
+                        class="regular-text noCopyPaste"
+                        required>
                 </td>
             </tr>
 
@@ -51,7 +55,8 @@ $bpmg_options = BPMGOptions::get_options(); // retrieve options to pre-fill form
                         id="consumer_secret"
                         name="bpmpesagateway_options[consumer_secret]"
                         value="<?php echo esc_attr($bpmg_options['consumer_secret'] ?? ''); ?>"
-                        class="regular-text noCopyPaste">
+                        class="regular-text noCopyPaste"
+                        required>
                 </td>
             </tr>
 
@@ -63,7 +68,8 @@ $bpmg_options = BPMGOptions::get_options(); // retrieve options to pre-fill form
                         id="shortcode"
                         name="bpmpesagateway_options[shortcode]"
                         value="<?php echo esc_attr($bpmg_options['shortcode'] ?? ''); ?>"
-                        class="regular-text noCopyPaste">
+                        class="regular-text noCopyPaste"
+                        required>
                 </td>
             </tr>
 
@@ -75,7 +81,8 @@ $bpmg_options = BPMGOptions::get_options(); // retrieve options to pre-fill form
                         id="passkey"
                         name="bpmpesagateway_options[passkey]"
                         value="<?php echo esc_attr($bpmg_options['passkey'] ?? ''); ?>"
-                        class="regular-text noCopyPaste">
+                        class="regular-text noCopyPaste"
+                        required>
                 </td>
             </tr>
 
@@ -87,7 +94,8 @@ $bpmg_options = BPMGOptions::get_options(); // retrieve options to pre-fill form
                         id="account_reference"
                         name="bpmpesagateway_options[account_reference]"
                         value="<?php echo esc_attr($bpmg_options['account_reference'] ?? ''); ?>"
-                        class="regular-text">
+                        class="regular-text"
+                        required>
                     <p style="margin-top: 5px; font-style: italic;">
                         Text shown as the Account Reference in M-Pesa. Appears on the user transaction details to help identify payments.Example: <code>Axios Tech Payment</code>
                     </p>
@@ -120,7 +128,8 @@ $bpmg_options = BPMGOptions::get_options(); // retrieve options to pre-fill form
                         min="1"
                         max="150000"
                         value="<?php echo esc_attr($bpmg_options['amount'] ?? ''); ?>"
-                        class="small-text">
+                        class="small-text"
+                        required>
                     <p style="font-style: italic; margin-top: 5px;"><?php esc_html_e('Amount required to complete registration.', 'bpmpesagateway'); ?></p>
                 </td>
             </tr>
