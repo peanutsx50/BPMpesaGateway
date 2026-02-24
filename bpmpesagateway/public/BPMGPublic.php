@@ -34,6 +34,22 @@ class BPMGPublic
         wp_script_add_data($this->bpmpesagateway . '-public-script', 'defer', true);
     }
 
+    /**
+     * Localize scripts with AJAX and REST API data.
+     *
+     * Passes essential configuration data to the frontend JavaScript via wp_localize_script(),
+     * including the WordPress AJAX handler URL, security nonce, and REST API endpoints for
+     * M-Pesa payment processing and callback handling.
+     *
+     * The localized data is accessible in JavaScript via the `bpmpesa_ajax` object.
+     *
+     * @return void
+     *
+     * @uses wp_localize_script()
+     * @uses admin_url()
+     * @uses wp_create_nonce()
+     * @uses rest_url()
+     */
     public function localize_scripts()
     {
         //wp localize script to pass ajax url
@@ -49,6 +65,27 @@ class BPMGPublic
         );
     }
 
+    /**
+     * Register M-Pesa REST API endpoints.
+     *
+     * Registers two custom REST API routes for M-Pesa payment processing:
+     * - `/bpmpesa/v1/callback`: Receives M-Pesa transaction callbacks from Safaricom servers.
+     *   Requires IP validation and authentication token. Handled by BPMGMpesa::handle_callback().
+     * - `/bpmpesa/v1/process-payment`: Initiates payment requests from the frontend.
+     *   Requires phone number validation, SSL, nonce verification, and rate limiting.
+     *   Handled by BPMGPublic::handle_mpesa_request().
+     *
+     * Both endpoints are hidden from the REST API index for security purposes.
+     *
+     * @return void
+     *
+     * @uses register_rest_route()
+     * @uses BPMGMpesa::handle_callback()
+     * @uses BPMGPublic::handle_mpesa_request()
+     * @uses BPMGPublic::validate_safaricom_IP()
+     * @uses BPMGPublic::validate_mpesa_request()
+     * @uses BPMGPublic::validate_phone_number()
+     */
     public function register_endpoints()
     {
         register_rest_route('bpmpesa/v1', '/callback', [
@@ -80,6 +117,27 @@ class BPMGPublic
         ]);
     }
 
+    /**
+     * Validate Safaricom IP address and authentication token.
+     *
+     * Verifies that incoming callback requests are from Safaricom servers by performing three checks:
+     * 1. SSL/HTTPS connection is active
+     * 2. Request IP is from known Safaricom IP ranges
+     * 3. Authentication token matches the site's NONCE_SALT hash
+     *
+     * @param WP_REST_Request $request The REST request object containing the callback data.
+     *
+     * @return true|WP_Error True if all validation checks pass, WP_Error with 403 status if validation fails.
+     *
+     * @uses is_ssl()
+     * @uses sanitize_text_field()
+     * @uses wp_unslash()
+     * @uses filter_var()
+     * @uses BPMGUtils::is_safaricom_ip()
+     * @uses wp_hash()
+     * @uses wp_salt()
+     * @uses hash_equals()
+     */
     public function validate_safaricom_IP(WP_REST_Request $request)
     {
         //check for ssl
@@ -110,6 +168,20 @@ class BPMGPublic
         return true;
     }
 
+    /**
+     * Validate phone number format for M-Pesa transactions.
+     *
+     * Validates that the provided phone number is in the correct format for M-Pesa payment processing.
+     * Expects Kenyan phone numbers in the format: 254XXXXXXXXX (country code + 9 digits).
+     *
+     * @param string          $phone   The phone number to validate.
+     * @param WP_REST_Request $request The REST request object (required by REST validation callback signature).
+     * @param string          $key     The parameter key (required by REST validation callback signature).
+     *
+     * @return true|WP_Error True if phone number is valid, WP_Error with 400 status if invalid.
+     *
+     * @uses BPMGUtils::check_phone_number()
+     */
     public function validate_phone_number($phone, $request, $key)
     {
 
@@ -127,6 +199,27 @@ class BPMGPublic
         return true;
     }
 
+    /**
+     * Validate M-Pesa payment request from the frontend.
+     *
+     * Performs comprehensive security checks before processing payment requests:
+     * 1. Verifies SSL/HTTPS connection is active for secure transactions
+     * 2. Validates WordPress REST nonce from the 'X-WP-Nonce' header
+     * 3. Checks if client IP has exceeded rate limits for the given phone number
+     *
+     * @param WP_REST_Request $request The REST request object containing payment details.
+     *
+     * @return true|WP_Error True if all validations pass, WP_Error otherwise.
+     *                        Returns 403 status for SSL or nonce failures,
+     *                        429 status for rate limit exceeded.
+     *
+     * @uses is_ssl()
+     * @uses sanitize_text_field()
+     * @uses wp_unslash()
+     * @uses filter_var()
+     * @uses wp_verify_nonce()
+     * @uses BPMGUtils::rate_limit_exceeded()
+     */
     public function validate_mpesa_request(WP_REST_Request $request)
     {
         //1. check for ssl and return error if not enabled
