@@ -97,11 +97,11 @@ $bpmg_options = BPMGOptions::get_options(); // retrieve options to pre-fill form
                         class="regular-text"
                         required>
                     <p style="margin-top: 5px; font-style: italic;">
-                        Text shown as the Account Reference in M-Pesa. Appears on the user transaction details to help identify payments.Example: <code>Axios Tech Payment</code>
+                        <?php esc_html_e('Text shown as the Account Reference in M-Pesa. Appears on the user transaction details to help identify payments.Example:', 'bpmpesagateway'); ?>
+                        <code>Axios Tech Payment</code>
                     </p>
                 </td>
             </tr>
-
             <!-- Transaction Reference -->
             <tr>
                 <th scope="row"><?php esc_html_e('Transaction Reference Label', 'bpmpesagateway'); ?></th>
@@ -112,8 +112,11 @@ $bpmg_options = BPMGOptions::get_options(); // retrieve options to pre-fill form
                         value="<?php echo esc_attr($bpmg_options['transaction_reference'] ?? ''); ?>"
                         class="regular-text">
                     <p style="margin-top: 5px; font-style: italic;">
-                        Text shown on the customer’s M-Pesa statement to identify your business or payment purpose.
-                        Example: <code>Community registration</code> or <code>Online Order</code>.
+                        <?php esc_html_e('Text shown on the customer\'s M-Pesa statement to identify your business or payment purpose.', 'bpmpesagateway'); ?>
+                        <?php esc_html_e('Example:', 'bpmpesagateway'); ?>
+                        <code><?php esc_html_e('Community registration', 'bpmpesagateway'); ?></code>
+                        <?php esc_html_e('or', 'bpmpesagateway'); ?>
+                        <code><?php esc_html_e('Online Order', 'bpmpesagateway'); ?></code>.
                     </p>
                 </td>
             </tr>
