@@ -78,31 +78,7 @@ class BPMGAdmin
             'bpmpesagateway_options', // option name
             [
                 'type' => 'array',
-                'sanitize_callback' => function ($options) {
-                    // return sanitized options array
-                    $options = is_array($options) ? $options : [];
-
-                    // Get existing options from database
-                    $existing_options = BPMGOptions::get_options();
-
-                    // Merge new options with existing ones (new values override existing)
-                    $options = array_merge($existing_options, $options);
-
-                    // encrypt consumer_key, consumer_secret, passkey before saving
-                    $consumer_key =  BPMGUtils::encrypt_credential(sanitize_text_field($options['consumer_key'] ?? ''));
-                    $consumer_secret = BPMGUtils::encrypt_credential(sanitize_text_field($options['consumer_secret'] ?? ''));
-                    $passkey = BPMGUtils::encrypt_credential(sanitize_text_field($options['passkey'] ?? ''));
-
-                    return [
-                        'consumer_key' => $consumer_key,
-                        'consumer_secret' => $consumer_secret,
-                        'shortcode' => sanitize_text_field($options['shortcode']),
-                        'passkey' => $passkey,
-                        'account_reference' => sanitize_text_field($options['account_reference']),
-                        'transaction_reference' => sanitize_text_field($options['transaction_reference']),
-                        'amount' => floatval($options['amount']),
-                    ];
-                },
+                'sanitize_callback' => [$this, 'santize_fields'],
                 'default' => [
                     'consumer_key' => '',
                     'consumer_secret' => '',
@@ -116,16 +92,38 @@ class BPMGAdmin
         );
     }
 
+    public function santize_fields($options)
+    {
+        // return sanitized options array
+        $options = is_array($options) ? $options : [];
+
+        // Get existing options from database
+        $existing_options = BPMGOptions::get_options();
+
+        // Merge new options with existing ones (new values override existing)
+        $options = array_merge($existing_options, $options);
+
+        return [
+            'consumer_key' => sanitize_text_field($options['consumer_key']),
+            'consumer_secret' => sanitize_text_field($options['consumer_secret']),
+            'shortcode' => sanitize_text_field($options['shortcode']),
+            'passkey' => sanitize_text_field($options['passkey']),
+            'account_reference' => sanitize_text_field($options['account_reference']),
+            'transaction_reference' => sanitize_text_field($options['transaction_reference']),
+            'amount' => absint($options['amount']),
+        ];
+    }
+
     public function check_ssl()
     {
         if (!is_ssl()) {
-            
+
             add_action('admin_notices', function () {
-                ?>
-                    <div class="notice notice-error is-dismissible">
-                        <p style="color: black;"><?php esc_html_e('Warning: Your site is not using SSL. For secure M-Pesa transactions, please enable HTTPS on your website.', 'bpmpesagateway'); ?></p>
-                    </div>
-                <?php
+?>
+                <div class="notice notice-error is-dismissible">
+                    <p style="color: black;"><?php esc_html_e('Warning: Your site is not using SSL. For secure M-Pesa transactions, please enable HTTPS on your website.', 'bpmpesagateway'); ?></p>
+                </div>
+<?php
             });
         }
     }

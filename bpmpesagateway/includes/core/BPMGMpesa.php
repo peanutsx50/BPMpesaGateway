@@ -44,17 +44,11 @@ class BPMGMpesa
         // retrive all the options from the database using BPMGOptions class
         $options = BPMGOptions::get_options();
 
-        // decrypt consumer key, consumer secret and passkey
-        $decrypted_consumer_key = BPMGUtils::decrypt_credential($options['consumer_key']);
-        $decrypted_consumer_secret = BPMGUtils::decrypt_credential($options['consumer_secret']);
-        $decrypted_passkey = BPMGUtils::decrypt_credential($options['passkey']);
-
-
         // Initialize Mpesa properties from settings
-        $this->consumer_key        = $decrypted_consumer_key;
-        $this->consumer_secret     = $decrypted_consumer_secret;
+        $this->consumer_key        = $$options['consumer_key'];
+        $this->consumer_secret     = $$options['consumer_secret'];
         $this->shortcode           = $options['shortcode'];
-        $this->passkey             = $decrypted_passkey;
+        $this->passkey             = $$options['passkey'];
 
         // Generate access token immediately upon initialization
         $this->access_token        = $this->generate_access_token();

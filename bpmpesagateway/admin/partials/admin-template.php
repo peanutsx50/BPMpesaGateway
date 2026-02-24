@@ -118,6 +118,7 @@ $bpmg_options = BPMGOptions::get_options(); // retrieve options to pre-fill form
                         id="amount"
                         name="bpmpesagateway_options[amount]"
                         min="1"
+                        max="150000"
                         value="<?php echo esc_attr($bpmg_options['amount'] ?? ''); ?>"
                         class="small-text">
                     <p style="font-style: italic; margin-top: 5px;"><?php esc_html_e('Amount required to complete registration.', 'bpmpesagateway'); ?></p>
