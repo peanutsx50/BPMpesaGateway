@@ -188,22 +188,29 @@ class BPMGPublic
 
     public function handle_mpesa_request()
     {
-        // Check nonce for security
-        if (!isset($_POST['bpmg_nonce']) || !wp_verify_nonce(wp_unslash($_POST['bpmg_nonce']), 'bpmg_mpesa_nonce')) {
-            wp_send_json_error(['message' => 'Invalid request']); // deny request if nonce is invalid
-            wp_die();
-        }
-        $phone = sanitize_text_field(wp_unslash($_POST['phone'])); // this code receives phone number from ajax request via post
+        $phone = sanitize_text_field(wp_unslash($_POST['phone']));
         // send the request to mpesa api
         $BPMG_Mpesa = new BPMGMpesa();
         $payment_response = $BPMG_Mpesa->send_stk_push_request($phone);
+        $checkout_request_id = $payment_response['response']['CheckoutRequestID'] ?? null;
         // handle the response
         if ($payment_response['status'] === 'success') {
             // send message saying we sent request 
-            wp_send_json_success(['message' => $payment_response['message'], 'response' => $payment_response['response']]); // send response back to ajax
+            $this->store_pending_transaction($checkout_request_id); // store pending transaction for later verification in callback
+            return wp_send_json_success(['message' => $payment_response['message']]); // send response back to ajax
         } else {
-            wp_send_json_error(['message' => $payment_response['message']]); // send error response back to ajax
+            return wp_send_json_error(['message' => $payment_response['message']]); // send error response back to ajax
         }
-        wp_die();
+    }
+
+    private function store_pending_transaction($checkout_request_id)
+    {
+        // store pending transaction in custom post type for later verification in callback
+        $transaction = get_transient('bpmg_pending_' . $checkout_request_id);
+        if ($transaction !== false) {
+            return;
+        }
+
+        return set_transient('bpmg_pending_' . $checkout_request_id, 1, 15 * MINUTE_IN_SECONDS); // 15 minutes timeout
     }
 }
