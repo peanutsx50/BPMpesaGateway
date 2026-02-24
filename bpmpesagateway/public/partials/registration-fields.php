@@ -5,10 +5,14 @@
  * @package    BPMpesaGateway
  * @subpackage BPMpesaGateway/includes/templates
  * */
+
+use BPMpesaGateway\Core\BPMGOptions;
+
 // Exit if accessed directly
 if (! defined('ABSPATH')) {
     exit;
 }
+$bpmg_options = BPMGOptions::get_options('amount', 1); // retrieve options to pre-fill form fields
 ?>
 
 <!-- Custom Registration Fields Start -->
@@ -16,7 +20,7 @@ if (! defined('ABSPATH')) {
     <h2><?php esc_html_e('Complete Registration with M-Pesa', 'bpmpesagateway'); ?></h2>
     <p><?php esc_html_e('Enter your phone number to receive a payment request', 'bpmpesagateway'); ?></p>
     <div class="bpmg_mpesa_amount">
-        <strong><?php esc_html_e('Amount to pay:', 'bpmpesagateway'); ?></strong> <?php echo esc_attr(get_option('bpmpesa_amount') ?: 0); ?>
+        <strong><?php esc_html_e('Amount to pay:', 'bpmpesagateway'); ?></strong> <?php echo esc_html_e($bpmg_options); ?>
     </div>
     <div class="bpmg_mpesa_form">
         <label for="bpmg_mpesa_phone"><?php esc_html_e('Enter M-Pesa Phone Number:', 'bpmpesagateway'); ?></label>
