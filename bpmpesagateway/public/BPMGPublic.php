@@ -11,6 +11,7 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
 
+//TODO: WHEN SENDING WP_ERROR RESPONSE, THE JS DOSENT SEEM TO RECEIVE THE ERROR MESSAGE, CHECK IF THIS IS A PROBLEM WITH THE JS
 class BPMGPublic
 {
     private $bpmpesagateway;
