@@ -86,7 +86,7 @@ function bpmg_send_mpesa_request(button, phoneNumber) {
 		credentials: "same-origin",
 		headers: {
 			"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-			"X-WP-Nonce": bpmpesa_ajax.nonce, // pass the security nonce in header for better security
+			"X-Wp-Nonce": bpmpesa_ajax.nonce, // pass the security nonce in header for better security
 		},
 		body: new URLSearchParams({
 			phone_number: phoneNumber, // data for function

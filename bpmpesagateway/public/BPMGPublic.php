@@ -204,7 +204,7 @@ class BPMGPublic
      *
      * Performs comprehensive security checks before processing payment requests:
      * 1. Verifies SSL/HTTPS connection is active for secure transactions
-     * 2. Validates WordPress REST nonce from the 'X-WP-Nonce' header
+     * 2. Validates WordPress REST nonce from the 'X-Wp-Nonce' header
      * 3. Checks if client IP has exceeded rate limits for the given phone number
      *
      * @param WP_REST_Request $request The REST request object containing payment details.
@@ -232,10 +232,8 @@ class BPMGPublic
         }
 
         //2. verify nonce
-        $nonce = $request->get_header('X-WP-Nonce');
-        $raw_ip = sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR']) ?? 'UNKOWN'); // sanitize and validate IP address, default to UNKNOWN if not valid
-        $ip = filter_var($raw_ip, FILTER_VALIDATE_IP) ? sanitize_text_field($raw_ip) : 'UNKNOWN';
-        if (!wp_verify_nonce($nonce, 'wp_rest')) {
+        $nonce = $request->get_header('X-Wp-Nonce');
+        if (!wp_verify_nonce($nonce, 'bpmg_mpesa_nonce')) {
             return new WP_Error(
                 'invalid_nonce',
                 'Invalid request',
@@ -245,6 +243,8 @@ class BPMGPublic
 
         //3. rate limit check
         $phone_number = $request->get_param('phone_number');
+        $raw_ip = sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR']) ?? 'UNKOWN'); // sanitize and validate IP address, default to UNKNOWN if not valid
+        $ip = filter_var($raw_ip, FILTER_VALIDATE_IP) ? sanitize_text_field($raw_ip) : 'UNKNOWN';
         if (BPMGUtils::rate_limit_exceeded($ip, $phone_number)) {
             return new WP_Error(
                 'rate_limit_exceeded',
