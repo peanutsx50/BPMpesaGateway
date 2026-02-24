@@ -64,7 +64,7 @@ $bpmg_options = BPMGOptions::get_options(); // retrieve options to pre-fill form
             <tr>
                 <th scope="row"><?php esc_html_e('Shortcode', 'bpmpesagateway'); ?></th>
                 <td>
-                    <input type="password"
+                    <input type="text"
                         id="shortcode"
                         name="bpmpesagateway_options[shortcode]"
                         value="<?php echo esc_attr($bpmg_options['shortcode'] ?? ''); ?>"
