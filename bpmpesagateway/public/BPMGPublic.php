@@ -41,8 +41,10 @@ class BPMGPublic
     if ( ! function_exists( 'bp_is_register_page' ) || ! bp_is_register_page() ) {
         return;
     }
-        wp_enqueue_script($this->bpmpesagateway . '-public-script', BPMG_PUBLIC_JS_URL . 'BPMG-public.min.js', array('jquery'), $this->version, true);
-        wp_script_add_data($this->bpmpesagateway . '-public-script', 'defer', true);
+        wp_enqueue_script($this->bpmpesagateway . '-public-script', BPMG_PUBLIC_JS_URL . 'BPMG-public.min.js', array('jquery'), $this->version, array(
+            'strategy'  => 'defer',
+            'in_footer' => true,
+        ));
     }
 
     /**
