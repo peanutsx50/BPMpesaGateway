@@ -287,23 +287,13 @@ class BPMGMpesa
         $status = ($resultCode === 0) ? 'success' : 'failed';
 
         // Duplicate check for exisiting checkoutId to prevent replay attacks
-        $existing_posts = get_posts(array(
-            'post_type'  => 'bpmg_payment',
-            'meta_query' => array(
-                array(
-                    'key'   => 'checkout_id',
-                    'value' => $checkoutId,
-                ),
-            ),
-            'posts_per_page' => 1,
-            'fields'         => 'ids',
-        ));
-
+        $existing_post = get_page_by_path( $checkoutId, OBJECT, 'bpmg_payment' );
+        
         // prevent duplicate entries for the same checkoutId which can happen if M-Pesa retries the callback or if someone tries to spoof callbacks with the same checkoutId.
         if (! empty($existing_posts)) {
             return rest_ensure_response(array(
                 'status'    => 'ok',
-                'post_id'   => $existing_posts[0],
+                'post_id'   => $existing_post->ID,
                 'duplicate' => true,
             ), 200);
         }
@@ -313,6 +303,7 @@ class BPMGMpesa
             'post_type'   => 'bpmg_payment',
             'post_status' => 'publish',
             'post_title'  => 'Mpesa STK ' . $checkoutId,
+            'post_name'   => sanitize_title($checkoutId), // use checkoutId as unique slug
         ), true);
 
         if (is_wp_error($post_id)) {
