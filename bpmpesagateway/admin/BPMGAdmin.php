@@ -46,12 +46,12 @@ class BPMGAdmin
 
     public function enqueue_scripts()
     {
-        wp_enqueue_script($this->bpmpesagateway . '-admin-script', BPMG_PUBLIC_JS_URL . 'BPMG-admin.min.js', array('jquery'), $this->version, true);
+        wp_enqueue_script($this->bpmpesagateway . '-admin-script', BPMG_ADMIN_JS_URL . 'BPMG-admin.min.js', array('jquery'), $this->version, true);
     }
 
     public function enqueue_styles()
     {
-        wp_enqueue_style($this->bpmpesagateway . '-admin-style', BPMG_PUBLIC_CSS_URL . 'BPMG-admin.css', array(), $this->version, 'all');
+        wp_enqueue_style($this->bpmpesagateway . '-admin-style', BPMG_ADMIN_CSS_URL . 'BPMG-admin.css', array(), $this->version, 'all');
     }
 
     public function admin_page_content()

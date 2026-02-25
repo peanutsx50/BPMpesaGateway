@@ -31,7 +31,7 @@ class BPMGPublic
 
     public function enqueue_scripts()
     {
-        wp_enqueue_script($this->bpmpesagateway . '-public-script', BPMG_PUBLIC_JS_URL . 'BPMG-public.min.js', array('jquery'), $this->version, true);
+        wp_enqueue_script($this->bpmpesagateway . '-public-script', BPMG_PUBLIC_JS_URL . 'BPMG-public.min.js', array('jquery'), false, true);
         wp_script_add_data($this->bpmpesagateway . '-public-script', 'defer', true);
     }
 
@@ -59,9 +59,11 @@ class BPMGPublic
             'bpmpesa_ajax',
             [ // script : matches the handle used in wp_enqueue_script
                 'ajax_url' => admin_url('admin-ajax.php'), // core wordpress ajax handler
-                'nonce'    => wp_create_nonce('bpmg_mpesa_nonce'), // security nonce
+                'nonce'    => wp_create_nonce('wp_rest'), // security nonce
                 'callback_url' => rest_url('bpmpesa/v1/callback'), // callback url
+                'confirm_payment_url' => rest_url('bpmpesa/v1/confirm-payment'), // endpoint to confirm payment from frontend
                 'process_payment_url' => rest_url('bpmpesa/v1/process-payment'), // endpoint to initiate payment from frontend
+                'phone_pattern' => '/^254(7(?:[0129][0-9]|4[0-3568]|5[7-9]|6[89])|11[0-5])\d{6}$/', // regex pattern for validating Kenyan phone numbers in the format 254XXXXXXXXX
             ]
         );
     }
@@ -116,6 +118,19 @@ class BPMGPublic
                 ],
             ],
         ]);
+
+        register_rest_route('bpmpesa/v1', '/confirm-payment', [
+			'methods' => 'POST',
+			'callback' => [$this, 'confirm_payment'],
+			'permission_callback' => [$this, 'validate_confirm_payment'], // validate nonce and SSL
+			'args'                => [
+				'checkout_id' => [
+					'required'          => true,
+					'type'              => 'string',
+					'sanitize_callback' => 'sanitize_text_field',
+				],
+			]
+		]);
     }
 
     /**
@@ -232,17 +247,7 @@ class BPMGPublic
             );
         }
 
-        //2. verify nonce
-        $nonce = $request->get_header('X-Wp-Nonce');
-        if (!wp_verify_nonce($nonce, 'bpmg_mpesa_nonce')) {
-            return new WP_Error(
-                'invalid_nonce',
-                'Invalid request',
-                ['status' => 403]
-            );
-        }
-
-        //3. rate limit check
+        //2. rate limit check
         $phone_number = $request->get_param('phone_number');
         $raw_ip = sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR']) ?? 'UNKOWN'); // sanitize and validate IP address, default to UNKNOWN if not valid
         $ip = filter_var($raw_ip, FILTER_VALIDATE_IP) ? sanitize_text_field($raw_ip) : 'UNKNOWN';
@@ -280,9 +285,9 @@ class BPMGPublic
      * @return void Outputs JSON response and terminates execution.
      */
 
-    public function handle_mpesa_request()
+    public function handle_mpesa_request($request)
     {
-        $phone = sanitize_text_field(wp_unslash($_POST['phone']));
+        $phone = $request->get_param('phone_number');
         // send the request to mpesa api
         $BPMG_Mpesa = new BPMGMpesa();
         $payment_response = $BPMG_Mpesa->send_stk_push_request($phone);
