@@ -66,7 +66,7 @@ class BPMGMpesa
         $this->callbackurl = add_query_arg(
             'bpmg_auth',
             $secret_key,
-            rest_url('bpmpesagateway/v1/callback')
+            rest_url('bpmpesa/v1/callback')
         );
 
         // Set the appropriate M-Pesa API endpoint URL based on environment
