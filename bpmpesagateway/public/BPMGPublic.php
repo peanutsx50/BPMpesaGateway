@@ -26,11 +26,21 @@ class BPMGPublic
 
     public function enqueue_styles()
     {
+        // load style only on registration page to avoid unnecessary css files
+        /** @disregard */
+    if ( ! function_exists( 'bp_is_register_page' ) || ! bp_is_register_page() ) {
+        return;
+    }
         wp_enqueue_style($this->bpmpesagateway . '-public-style', BPMG_PUBLIC_CSS_URL . 'BPMG-public.css', array(), $this->version, 'all');
     }
 
     public function enqueue_scripts()
     {
+        //load script only on registration page to avoid uncessary js files
+        /** @disregard */
+    if ( ! function_exists( 'bp_is_register_page' ) || ! bp_is_register_page() ) {
+        return;
+    }
         wp_enqueue_script($this->bpmpesagateway . '-public-script', BPMG_PUBLIC_JS_URL . 'BPMG-public.min.js', array('jquery'), $this->version, true);
         wp_script_add_data($this->bpmpesagateway . '-public-script', 'defer', true);
     }
@@ -120,17 +130,17 @@ class BPMGPublic
         ]);
 
         register_rest_route('bpmpesa/v1', '/confirm-payment', [
-			'methods' => 'POST',
-			'callback' => [$this, 'confirm_payment'],
-			'permission_callback' => [$this, 'validate_confirm_payment'], // validate nonce and SSL
-			'args'                => [
-				'checkout_id' => [
-					'required'          => true,
-					'type'              => 'string',
-					'sanitize_callback' => 'sanitize_text_field',
-				],
-			]
-		]);
+            'methods' => 'POST',
+            'callback' => [$this, 'confirm_payment'],
+            'permission_callback' => [$this, 'validate_confirm_payment'], // validate nonce and SSL
+            'args'                => [
+                'checkout_id' => [
+                    'required'          => true,
+                    'type'              => 'string',
+                    'sanitize_callback' => 'sanitize_text_field',
+                ],
+            ]
+        ]);
     }
 
     /**
