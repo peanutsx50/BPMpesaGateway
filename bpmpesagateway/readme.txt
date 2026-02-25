@@ -9,7 +9,7 @@ Requires Plugins: buddypress
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.txt
 
-Accept M-Pesa payments on your WordPress site with BuddyPress integration. Enable paid registration and premium community access via Kenya's most popular mobile money solution.
+Accept M-Pesa payments with BuddyPress integration. Enable paid registration and premium community access via M-Pesa.
 
 == Description ==
 
