@@ -287,84 +287,54 @@ class BPMGMpesa
         $status = ($resultCode === 0) ? 'success' : 'failed';
 
         // Duplicate check for exisiting checkoutId to prevent replay attacks
-        global $wpdb;
-        $existing_post_id = $wpdb->get_var($wpdb->prepare(
-            "SELECT post_id FROM {$wpdb->postmeta} 
-         WHERE meta_key = 'checkout_id' 
-         AND meta_value = %s 
-         LIMIT 1",
-            $checkoutId
+        $existing_posts = get_posts(array(
+            'post_type'  => 'bpmg_payment',
+            'meta_query' => array(
+                array(
+                    'key'   => 'checkout_id',
+                    'value' => $checkoutId,
+                ),
+            ),
+            'posts_per_page' => 1,
+            'fields'         => 'ids',
         ));
 
-        if ($existing_post_id) {
-            return rest_ensure_response(['status' => 'ok', 'post_id' => $existing_post_id, 'duplicate' => true], 200);
+        // prevent duplicate entries for the same checkoutId which can happen if M-Pesa retries the callback or if someone tries to spoof callbacks with the same checkoutId.
+        if (! empty($existing_posts)) {
+            return rest_ensure_response(array(
+                'status'    => 'ok',
+                'post_id'   => $existing_posts[0],
+                'duplicate' => true,
+            ), 200);
         }
 
-        // ULTRA-OPTIMIZED Single database transaction
-        $current_time = current_time('mysql'); // get local time for post
-        $gmt_time = get_gmt_from_date($current_time); // gets UTC time for consistency in storage
+        // Insert post using wp_insert_post
+        $post_id = wp_insert_post(array(
+            'post_type'   => 'bpmg_payment',
+            'post_status' => 'publish',
+            'post_title'  => 'Mpesa STK ' . $checkoutId,
+        ), true);
 
-        // Start transaction for atomic insert
-        $wpdb->query('START TRANSACTION');
-
-        // Insert post
-        $wpdb->query($wpdb->prepare(
-            "INSERT INTO {$wpdb->posts} 
-        (post_type, post_status, post_title, post_date, post_date_gmt, post_modified, post_modified_gmt) 
-        VALUES (%s, %s, %s, %s, %s, %s, %s)",
-            'mpesa', // custom post type for M-Pesa transactions
-            'publish', // publish immediately for visibility in admin
-            'Mpesa STK ' . $checkoutId, // title with checkout ID for easy identification
-            $current_time, // local time for post_date
-            $gmt_time, // UTC time for post_date_gmt
-            $current_time, // local time for post_modified
-            $gmt_time // UTC time for post_modified_gmt
-        ));
-
-        // get id of newly inserted post
-        $post_id = $wpdb->insert_id;
-
-        if (!$post_id) {
-            $wpdb->query('ROLLBACK');
-            return rest_ensure_response(['status' => 'error', 'message' => 'Database error'], 500);
+        if (is_wp_error($post_id)) {
+            return rest_ensure_response(['status' => 'error', 'message' => $post_id->get_error_message()], 500);
         }
 
-        // Build meta values
-        $meta_rows = [
-            [$post_id, 'checkout_id', $checkoutId],
-            [$post_id, 'merchant_request_id', $merchantRequestId],
-            [$post_id, 'status', $status],
-            [$post_id, 'result_code', (string)$resultCode],
-            [$post_id, 'result_desc', $resultDesc],
-            [$post_id, 'date', $current_time],
-            [$post_id, 'content_post_id', $content_post_id],
-        ];
+        // Store core meta
+        update_post_meta($post_id, 'checkout_id', $checkoutId);
+        update_post_meta($post_id, 'merchant_request_id', $merchantRequestId);
+        update_post_meta($post_id, 'status', $status);
+        update_post_meta($post_id, 'result_code', (string) $resultCode);
+        update_post_meta($post_id, 'result_desc', $resultDesc);
+        update_post_meta($post_id, 'date', current_time('mysql'));
+        update_post_meta($post_id, 'content_post_id', $content_post_id);
 
-        // add more meta if transaction was successful
+        // Store additional meta for successful transactions
         if ($resultCode === 0) {
-            $meta_rows[] = [$post_id, 'amount', (string)$amount];
-            $meta_rows[] = [$post_id, 'mpesa_receipt_number', $mpesaReceipt];
-            $meta_rows[] = [$post_id, 'phone_number', $phoneNumber];
-            $meta_rows[] = [$post_id, 'transaction_date', $transactionDate];
+            update_post_meta($post_id, 'amount', (string) $amount);
+            update_post_meta($post_id, 'mpesa_receipt_number', $mpesaReceipt);
+            update_post_meta($post_id, 'phone_number', $phoneNumber);
+            update_post_meta($post_id, 'transaction_date', $transactionDate);
         }
-
-        // Single bulk insert for all meta
-        $placeholders = implode(', ', array_fill(0, count($meta_rows), '(%d, %s, %s)')); // build placeholders for prepared statement
-        $values = [];
-        foreach ($meta_rows as $row) {
-            $values = array_merge($values, $row);
-        }
-
-        $wpdb->query($wpdb->prepare(
-            "INSERT INTO {$wpdb->postmeta} (post_id, meta_key, meta_value) VALUES {$placeholders}",
-            ...$values
-        ));
-
-        // Commit transaction
-        $wpdb->query('COMMIT');
-
-        // Clean cache
-        clean_post_cache($post_id);
 
         return rest_ensure_response(['status' => 'ok', 'post_id' => $post_id], 200);
     }
