@@ -46,12 +46,12 @@ class BPMGAdmin
 
     public function enqueue_scripts()
     {
-        wp_enqueue_script($this->bpmpesagateway . '-admin-script', BPMG_PUBLIC_JS_URL . 'BPMG-admin.min.js', array('jquery'), $this->version, true);
+        wp_enqueue_script($this->bpmpesagateway . '-admin-script', BPMG_ADMIN_JS_URL . 'BPMG-admin.min.js', array('jquery'), $this->version, true);
     }
 
     public function enqueue_styles()
     {
-        wp_enqueue_style($this->bpmpesagateway . '-admin-style', BPMG_PUBLIC_CSS_URL . 'BPMG-admin.css', array(), $this->version, 'all');
+        wp_enqueue_style($this->bpmpesagateway . '-admin-style', BPMG_ADMIN_CSS_URL . 'BPMG-admin.css', array(), $this->version, 'all');
     }
 
     public function admin_page_content()
@@ -78,31 +78,7 @@ class BPMGAdmin
             'bpmpesagateway_options', // option name
             [
                 'type' => 'array',
-                'sanitize_callback' => function ($options) {
-                    // return sanitized options array
-                    $options = is_array($options) ? $options : [];
-
-                    // Get existing options from database
-                    $existing_options = BPMGOptions::get_options();
-
-                    // Merge new options with existing ones (new values override existing)
-                    $options = array_merge($existing_options, $options);
-
-                    // encrypt consumer_key, consumer_secret, passkey before saving
-                    $consumer_key =  BPMGUtils::encrypt_credential(sanitize_text_field($options['consumer_key'] ?? ''));
-                    $consumer_secret = BPMGUtils::encrypt_credential(sanitize_text_field($options['consumer_secret'] ?? ''));
-                    $passkey = BPMGUtils::encrypt_credential(sanitize_text_field($options['passkey'] ?? ''));
-
-                    return [
-                        'consumer_key' => $consumer_key,
-                        'consumer_secret' => $consumer_secret,
-                        'shortcode' => sanitize_text_field($options['shortcode']),
-                        'passkey' => $passkey,
-                        'account_reference' => sanitize_text_field($options['account_reference']),
-                        'transaction_reference' => sanitize_text_field($options['transaction_reference']),
-                        'amount' => floatval($options['amount']),
-                    ];
-                },
+                'sanitize_callback' => [$this, 'santize_fields'],
                 'default' => [
                     'consumer_key' => '',
                     'consumer_secret' => '',
@@ -110,22 +86,86 @@ class BPMGAdmin
                     'passkey' => '',
                     'account_reference' => '',
                     'transaction_reference' => '',
-                    'amount' => 0,
+                    'amount' => 1,
                 ],
             ],
         );
     }
 
+    public function santize_fields($options)
+    {
+        // return sanitized options array
+        $options = is_array($options) ? $options : [];
+
+        // Get existing options from database
+        $existing_options = BPMGOptions::get_options();
+
+        // Merge new options with existing ones (new values override existing)
+        $options = array_merge($existing_options, $options);
+
+        // check if amount is less than 1 or greater than 150000
+        if (isset($options['amount']) && (absint($options['amount']) < 1 || absint($options['amount']) > 150000)) {
+            add_settings_error(
+                'bpmpesagateway_options',
+                'invalid_amount',
+                __('Amount must be between 1 and 150,000.', 'bpmpesagateway'),
+                'error'
+            );
+        }
+
+        // check if fields are empty
+        $required_fields = [
+            'consumer_key',
+            'consumer_secret',
+            'shortcode',
+            'passkey',
+        ];
+
+        $is_empty = false;
+
+        foreach ($required_fields as $field) {
+            if (empty($options[$field])) {
+                $is_empty = true;
+                add_settings_error(
+                    'bpmpesagateway_options',
+                    "empty_{$field}",
+                    sprintf(
+                        /* translators: %s: field Name */
+                        esc_html__('Required field %s is empty.', 'bpmpesagateway'),
+                        str_replace('_', ' ', $field)
+                    ),
+                    'error'
+                );
+            }
+        }
+
+        if ($is_empty) {
+            // If any required field is empty, return existing options to prevent saving invalid data
+            return $existing_options;
+        }
+
+        // Sanitize and return the options array
+        return [
+            'consumer_key' => sanitize_text_field($options['consumer_key']),
+            'consumer_secret' => sanitize_text_field($options['consumer_secret']),
+            'shortcode' => sanitize_text_field($options['shortcode']),
+            'passkey' => sanitize_text_field($options['passkey']),
+            'account_reference' => sanitize_text_field($options['account_reference']),
+            'transaction_reference' => sanitize_text_field($options['transaction_reference']),
+            'amount' => absint($options['amount']),
+        ];
+    }
+
     public function check_ssl()
     {
         if (!is_ssl()) {
-            
+
             add_action('admin_notices', function () {
-                ?>
-                    <div class="notice notice-error is-dismissible">
-                        <p style="color: black;"><?php esc_html_e('Warning: Your site is not using SSL. For secure M-Pesa transactions, please enable HTTPS on your website.', 'mpesapaywallpro'); ?></p>
-                    </div>
-                <?php
+?>
+                <div class="notice notice-error is-dismissible">
+                    <p style="color: black;"><?php esc_html_e('Warning: Your site is not using SSL. For secure M-Pesa transactions, please enable HTTPS on your website.', 'bpmpesagateway'); ?></p>
+                </div>
+<?php
             });
         }
     }

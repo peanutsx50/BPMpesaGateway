@@ -17,7 +17,7 @@ foreach ($posts as $post) {
 }
 
 // 2. Delete all plugin settings/options
-$settings_keys = [
+$bpmg_settings_keys = [
     'bpmpesa_allow_payments',
     'bpmpesa_save_transactions',
     'bpmg_consumer_key',
@@ -33,6 +33,6 @@ $settings_keys = [
     'bpmpesa_amount'
 ];
 
-foreach ($settings_keys as $key) {
-    delete_option($key); // if option dosent exist it returns false
+foreach ($bpmg_settings_keys as $bpmg_key) {
+    delete_option($bpmg_key); // if option dosent exist it returns false
 }

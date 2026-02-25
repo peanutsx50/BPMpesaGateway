@@ -8,4 +8,6 @@ node_modules/
 **/**/dist/
 **/vendor/
 **/composer.lock
+**/phpcs-report.json
 package-lock.json
+WPORG_COMPLIANCE.md

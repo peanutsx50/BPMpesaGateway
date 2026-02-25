@@ -1,6 +1,6 @@
-=== BPMpesa Gateway ===
+=== BPMpesaGateway ===
 Contributors: surgetech
-Tags: mpesa, payment, gateway, buddypress, registration, e-commerce, safaricom, mobile-money
+Tags: mpesa, payment, gateway, buddypress, registration
 Requires at least: 6.2.1
 Tested up to: 6.9
 Stable tag: 1.0.0
@@ -9,11 +9,11 @@ Requires Plugins: buddypress
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.txt
 
-Accept M-Pesa payments on your WordPress site with BuddyPress integration. Enable paid registration and premium community access via Kenya's most popular mobile money solution.
+Accept M-Pesa payments with BuddyPress integration. Enable paid registration and premium community access via M-Pesa.
 
 == Description ==
 
-**BPMpesa Gateway** is a WordPress plugin that turns your BuddyPress community into a paid membership site, requiring M-Pesa payment from visitors before they can join the community. Seamlessly integrate Safaricom's M-Pesa payment processing with BuddyPress member registration to control access and monetize your community.
+**BPMpesaGateway** BPMpesaGateway is a WordPress plugin that turns your BuddyPress community into a paid membership site, requiring M-Pesa payment from visitors before they can join the community.
 
 This plugin provides a complete payment solution for WordPress sites powered by BuddyPress, allowing you to require payment before account creation, control member registration, and manage all payments directly from your WordPress dashboard.
 
@@ -64,8 +64,8 @@ This plugin provides a complete payment solution for WordPress sites powered by 
 
 1. Download and extract the BPMpesaGateway plugin
 2. Upload the `BPMpesaGateway` folder to `/wp-content/plugins/` directory
-3. Navigate to **Plugins** in WordPress Admin and activate **BPMpesa Gateway**
-4. Go to **BPMpesa Gateway** menu in the admin sidebar
+3. Navigate to **Plugins** in WordPress Admin and activate **BPMpesaGateway**
+4. Go to **BPMpesaGateway** menu in the admin sidebar
 5. Enter your M-Pesa API credentials (obtained from Safaricom Developer Portal)
 6. Configure payment amount and transaction details
 7. Test with sandbox credentials first before going live

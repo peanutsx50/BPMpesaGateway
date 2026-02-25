@@ -1,0 +1,112 @@
+# Copyright (C) 2026 SurgeTech
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: BPMpesaGateway 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/bpmpesagateway\n"
+"Last-Translator: SurgeTech <info@surgetech.co.ke>\n"
+"Language-Team: Swahili <sw@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-02-23T10:46:06+00:00\n"
+"PO-Revision-Date: 2026-02-23 14:00+0300\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: bpmpesagateway\n"
+
+#. Plugin Name of the plugin
+#: bpmpesagateway.php
+msgid "BPMpesaGateway"
+msgstr "BPMpesaGateway"
+
+#. Plugin URI of the plugin
+#: bpmpesagateway.php
+msgid "https://surgetech.co.ke/bpmpesagateway"
+msgstr "https://surgetech.co.ke/bpmpesagateway"
+
+#. Description of the plugin
+#: bpmpesagateway.php
+msgid "BPMpesaGateway is a WordPress plugin that turns your BuddyPress community into a paid membership site, requiring M-Pesa payment from visitors before they can join the community."
+msgstr "BPMpesaGateway ni programu jalizi ya WordPress inayogeuza jumuiya yako ya BuddyPress kuwa tovuti ya uanachama wa kulipia, ikihitaji malipo ya M-Pesa kutoka kwa wageni kabla ya kujiunga na jumuiya."
+
+#. Author of the plugin
+#: bpmpesagateway.php
+msgid "SurgeTech"
+msgstr "SurgeTech"
+
+#. Author URI of the plugin
+#: bpmpesagateway.php
+msgid "https://surgetech.co.ke/"
+msgstr "https://surgetech.co.ke/"
+
+#: admin/BPMGAdmin.php:126
+msgid "Warning: Your site is not using SSL. For secure M-Pesa transactions, please enable HTTPS on your website."
+msgstr "Onyo: Tovuti yako haitumii SSL. Kwa miamala salama ya M-Pesa, tafadhali wezesha HTTPS kwenye tovuti yako."
+
+#: admin/partials/admin-template.php:21
+msgid "BPMpesaGateway allows you to control Mpesa payment requirements during BuddyPress registration."
+msgstr "BPMpesaGateway hukuruhusu kudhibiti mahitaji ya malipo ya Mpesa wakati wa usajili wa BuddyPress."
+
+#: admin/partials/admin-template.php:24
+msgid "Important:"
+msgstr "Muhimu:"
+
+#: admin/partials/admin-template.php:24
+msgid "Your M-Pesa credentials are strictly confidential. Never share them with anyone, including staff or third parties. Exposure of these credentials can result in unauthorized transactions and irreversible financial loss."
+msgstr "Siri zako za M-Pesa (credentials) ni siri kuu. Usizishiriki kamwe na mtu yeyote, ikijumuisha wafanyakazi au wahusika wengine. Kufichuliwa kwa siri hizi kunaweza kusababisha miamala isiyoidhinishwa na hasara ya kifedha isiyoweza kurekebishika."
+
+#: admin/partials/admin-template.php:36
+msgid "Consumer Key"
+msgstr "Consumer Key"
+
+#: admin/partials/admin-template.php:48
+msgid "Consumer Secret"
+msgstr "Consumer Secret"
+
+#: admin/partials/admin-template.php:60
+msgid "Shortcode"
+msgstr "Nambari ya Biashara (Shortcode)"
+
+#: admin/partials/admin-template.php:72
+msgid "Passkey"
+msgstr "Passkey"
+
+#: admin/partials/admin-template.php:84
+msgid "Account Reference Prefix"
+msgstr "Kiambishi awali cha Marejeleo ya Akaunti"
+
+#: admin/partials/admin-template.php:99
+msgid "Transaction Reference Label"
+msgstr "Lebo ya Marejeleo ya Muamala"
+
+#: admin/partials/admin-template.php:115
+msgid "Payment Amount"
+msgstr "Kiasi cha Malipo"
+
+#: admin/partials/admin-template.php:123
+msgid "Amount required to complete registration."
+msgstr "Kiasi kinachohitajika ili kukamilisha usajili."
+
+#: public/partials/registration-fields.php:16
+msgid "Complete Registration with M-Pesa"
+msgstr "Kamilisha Usajili kwa M-Pesa"
+
+#: public/partials/registration-fields.php:17
+msgid "Enter your phone number to receive a payment request"
+msgstr "Weka nambari yako ya simu ili kupokea ombi la malipo"
+
+#: public/partials/registration-fields.php:19
+msgid "Amount to pay:"
+msgstr "Kiasi cha kulipa:"
+
+#: public/partials/registration-fields.php:22
+msgid "Enter M-Pesa Phone Number:"
+msgstr "Weka Nambari ya Simu ya M-Pesa:"
+
+#: public/partials/registration-fields.php:26
+msgid "Payment request will be sent. Enter your M-Pesa PIN to complete registration."
+msgstr "Ombi la malipo litatumwa. Weka PIN yako ya M-Pesa ili kukamilisha usajili."
+
+#: public/partials/registration-fields.php:30
+msgid "Send M-Pesa Payment Request"
+msgstr "Tuma Ombi la Malipo la M-Pesa"

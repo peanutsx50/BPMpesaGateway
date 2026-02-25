@@ -20,6 +20,14 @@
 	],
 	"config": {
 		"optimize-autoloader": true,
-		"sort-packages": true
+		"sort-packages": true,
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	},
+	"require-dev": {
+		"gin0115/buddypress-stubs": "^11.1",
+		"squizlabs/php_codesniffer": "^3.13",
+		"wp-coding-standards/wpcs": "^3.3"
 	}
 }
