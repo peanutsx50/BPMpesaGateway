@@ -129,8 +129,8 @@ class BPMGAdmin
                 add_settings_error(
                     'bpmpesagateway_options',
                     "empty_{$field}",
-                    /* translators: %s: field Name */
                     sprintf(
+                        /* translators: %s: field Name */
                         esc_html__('Required field %s is empty.', 'bpmpesagateway'),
                         str_replace('_', ' ', $field)
                     ),
