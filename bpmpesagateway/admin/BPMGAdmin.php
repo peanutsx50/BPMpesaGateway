@@ -126,12 +126,14 @@ class BPMGAdmin
         foreach ($required_fields as $field) {
             if (empty($options[$field])) {
                 $is_empty = true;
-                /* translators: %s: field Name */
                 add_settings_error(
                     'bpmpesagateway_options',
                     "empty_{$field}",
-                    sprintf(esc_html__('Required field %s is empty.', 'bpmpesagateway'), 
-                    str_replace('_', ' ', $field)),
+                    /* translators: %s: field Name */
+                    sprintf(
+                        esc_html__('Required field %s is empty.', 'bpmpesagateway'),
+                        str_replace('_', ' ', $field)
+                    ),
                     'error'
                 );
             }
