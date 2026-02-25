@@ -45,10 +45,10 @@ class BPMGMpesa
         $options = BPMGOptions::get_options();
 
         // Initialize Mpesa properties from settings
-        $this->consumer_key        = $$options['consumer_key'];
-        $this->consumer_secret     = $$options['consumer_secret'];
+        $this->consumer_key        = $options['consumer_key'];
+        $this->consumer_secret     = $options['consumer_secret'];
         $this->shortcode           = $options['shortcode'];
-        $this->passkey             = $$options['passkey'];
+        $this->passkey             = $options['passkey'];
 
         // Generate access token immediately upon initialization
         $this->access_token        = $this->generate_access_token();
@@ -217,7 +217,7 @@ class BPMGMpesa
             if (empty($this->$field)) {
                 return [
                     'status' => 'error',
-                    'message' => 'Missing required Mpesa configuration details',
+                    'message' => 'Missing required Mpesa configuration details ' . $field,
                 ];
             }
         }

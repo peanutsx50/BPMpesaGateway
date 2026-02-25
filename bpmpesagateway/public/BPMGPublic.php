@@ -220,8 +220,7 @@ class BPMGPublic
      *
      * Performs comprehensive security checks before processing payment requests:
      * 1. Verifies SSL/HTTPS connection is active for secure transactions
-     * 2. Validates WordPress REST nonce from the 'X-Wp-Nonce' header
-     * 3. Checks if client IP has exceeded rate limits for the given phone number
+     * 2. Checks if client IP has exceeded rate limits for the given phone number
      *
      * @param WP_REST_Request $request The REST request object containing payment details.
      *
