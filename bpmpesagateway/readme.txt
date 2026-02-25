@@ -13,7 +13,7 @@ Accept M-Pesa payments on your WordPress site with BuddyPress integration. Enabl
 
 == Description ==
 
-**BPMpesaGateway** is a WordPress plugin that turns your BuddyPress community into a paid membership site, requiring M-Pesa payment from visitors before they can join the community. Seamlessly integrate Safaricom's M-Pesa payment processing with BuddyPress member registration to control access and monetize your community.
+**BPMpesaGateway** BPMpesaGateway is a WordPress plugin that turns your BuddyPress community into a paid membership site, requiring M-Pesa payment from visitors before they can join the community.
 
 This plugin provides a complete payment solution for WordPress sites powered by BuddyPress, allowing you to require payment before account creation, control member registration, and manage all payments directly from your WordPress dashboard.
 
