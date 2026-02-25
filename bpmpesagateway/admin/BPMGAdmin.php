@@ -126,6 +126,7 @@ class BPMGAdmin
         foreach ($required_fields as $field) {
             if (empty($options[$field])) {
                 $is_empty = true;
+                // Translators: %s = field name
                 add_settings_error(
                     'bpmpesagateway_options',
                     "empty_{$field}",
