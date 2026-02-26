@@ -82,7 +82,6 @@ function bpmg_send_mpesa_request(button, phoneNumber, errorDiv) {
 				bpmg_start_mpesa_polling(
 					data.data.checkout_id,
 					button,
-					phoneNumber,
 				);
 			} else {
 				bpmg_reset_button(button);
@@ -101,9 +100,20 @@ function bpmg_send_mpesa_request(button, phoneNumber, errorDiv) {
 
 /**
  * Poll the server for payment status until confirmed, failed, or timed out.
- * Polls every 6 seconds for up to 2 minutes (20 polls).
+ * Uses async/await with exponential backoff and consecutive error tracking.
+ *
+ * @param {string} checkoutId     - The M-Pesa CheckoutRequestID to poll for
+ * @param {HTMLElement} button    - The STK push button element
+ * @param {string} phoneNumber    - The phone number used for payment (unused but kept for API consistency)
+ * @param {number} maxAttempts    - Maximum number of poll attempts (default: 20)
+ * @param {number} pollInterval   - Initial interval in ms between polls (default: 6000)
  */
-function bpmg_start_mpesa_polling(checkoutId, button, phoneNumber) {
+async function bpmg_start_mpesa_polling(
+	checkoutId,
+	button,
+	maxAttempts = 20,
+	pollInterval = 6000,
+) {
 	const errorDiv = document.getElementById("bpmg_error_message");
 
 	if (!checkoutId) {
@@ -113,73 +123,95 @@ function bpmg_start_mpesa_polling(checkoutId, button, phoneNumber) {
 	}
 
 	let pollCount = 0;
-	const maxPolls = 20; // 20 polls
-	const pollInterval = 6000; // every 6 seconds = ~2 minutes total
+	let continuePolling = true;
+	let consecutiveErrors = 0;
+	const maxConsecutiveErrors = 3;
 
 	button.textContent = "Waiting for payment confirmation...";
 
-	const interval = setInterval(() => {
+	while (pollCount < maxAttempts && continuePolling) {
 		pollCount++;
 
-		if (pollCount > maxPolls) {
-			clearInterval(interval);
-			button.disabled = false;
-			button.textContent = "Payment timeout. Please try again.";
-			button.style.backgroundColor = "#ff9800";
-			return;
-		}
+		try {
+			const response = await fetch(bpmpesa_ajax.confirm_payment_url, {
+				method: "POST",
+				credentials: "same-origin",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+					"X-WP-Nonce": bpmpesa_ajax.nonce,
+				},
+				body: new URLSearchParams({ checkout_id: checkoutId }),
+			});
 
-		fetch(bpmpesa_ajax.confirm_payment_url, {
-			method: "POST",
-			credentials: "same-origin",
-			headers: {
-				"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-				"X-WP-Nonce": bpmpesa_ajax.nonce, // WordPress checks this automatically
-			},
-			body: new URLSearchParams({ checkout_id: checkoutId }),
-		})
-			.then((res) => res.json())
-			.then((data) => {
-				const status = data.status;
+			// 1. Check if the server actually responded with a 200-level status
+			if (!response.ok) throw new Error(`Server error: ${response.status}`);
+			consecutiveErrors = 0; // Reset on any successful HTTP response
 
-				if (status === "success") {
-					clearInterval(interval);
-					document.cookie = "payment=paid; path=/; SameSite=Lax; Secure";
-					bpmg_mark_payment_success(
-						button,
-						document.getElementById("bpmg_mpesa_phone"),
-					);
+			// 2. Parse JSON
+			const data = await response.json();
 
-					// Unblock form submission
-					if (window.bpmg_submitBtn && window.bpmg_submitClickHandler) {
-						window.bpmg_submitBtn.removeEventListener(
-							"click",
-							window.bpmg_submitClickHandler,
-							true,
-						);
-					}
-				} else if (status === "failed") {
-					clearInterval(interval);
-					bpmg_reset_button(button);
-					button.textContent = "Payment failed. Try again.";
-					bpmg_show_error(
-						errorDiv,
-						data.message || "Payment was not completed. Please try again.",
+			if (data.status === "success") {
+				document.cookie = "payment=paid; path=/; SameSite=Lax; Secure";
+				bpmg_mark_payment_success(
+					button,
+					document.getElementById("bpmg_mpesa_phone"),
+				);
+
+				// Unblock form submission
+				if (window.bpmg_submitBtn && window.bpmg_submitClickHandler) {
+					window.bpmg_submitBtn.removeEventListener(
+						"click",
+						window.bpmg_submitClickHandler,
+						true,
 					);
 				}
-				// Any other status (e.g. "pending") — keep polling
-			})
-			.catch((err) => {
-				console.error("Polling error:", err);
-				clearInterval(interval);
+
+				continuePolling = false;
+				return;
+			}
+
+			if (data.status === "failed") {
 				bpmg_reset_button(button);
 				button.textContent = "Payment failed. Try again.";
 				bpmg_show_error(
 					errorDiv,
+					data.message || "Payment was not completed. Please try again.",
+				);
+				continuePolling = false;
+				return;
+			}
+
+			// Any other status (e.g. "pending") — fall through to wait and retry
+
+		} catch (error) {
+			consecutiveErrors++;
+			console.error(`Polling error (${consecutiveErrors}/${maxConsecutiveErrors}):`, error);
+
+			if (consecutiveErrors >= maxConsecutiveErrors) {
+				bpmg_reset_button(button);
+				button.textContent = "Connection lost. Please check your payment and try again.";
+				bpmg_show_error(
+					errorDiv,
 					"A network error occurred while confirming payment. Please try again.",
 				);
-			});
-	}, pollInterval);
+				continuePolling = false;
+				return;
+			}
+		}
+
+		// Wait before next attempt (only if we're going to poll again)
+		if (pollCount < maxAttempts && continuePolling) {
+			await new Promise((resolve) => setTimeout(resolve, pollInterval));
+			pollInterval = Math.min(pollInterval * 1.2, 10000); // Backoff, cap at 10s
+		}
+	}
+
+	// Only reached if max attempts exceeded without success or failure
+	if (continuePolling) {
+		bpmg_reset_button(button);
+		button.textContent = "Payment timeout. Please try again.";
+		button.style.backgroundColor = "#ff9800";
+	}
 }
 
 /**

@@ -317,7 +317,6 @@ class BPMGMpesa
         update_post_meta($post_id, 'result_code', (string) $resultCode);
         update_post_meta($post_id, 'result_desc', $resultDesc);
         update_post_meta($post_id, 'date', current_time('mysql'));
-        update_post_meta($post_id, 'content_post_id', $content_post_id);
 
         // Store additional meta for successful transactions
         if ($resultCode === 0) {
