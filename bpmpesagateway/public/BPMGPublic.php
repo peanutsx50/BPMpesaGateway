@@ -336,7 +336,6 @@ class BPMGPublic
         $BPMG_Mpesa = new BPMGMpesa();
         $payment_response = $BPMG_Mpesa->send_stk_push_request($phone);
         $checkout_request_id = $payment_response['response']['CheckoutRequestID'] ?? null;
-        error_log('Payment response: ' . print_r($payment_response, true)); // log the payment response for debugging
         
         // handle the response
         if ($payment_response['status'] === 'success') {

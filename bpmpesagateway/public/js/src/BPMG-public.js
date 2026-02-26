@@ -78,8 +78,9 @@ function bpmg_send_mpesa_request(button, phoneNumber, errorDiv) {
 		.then((response) => response.json())
 		.then((data) => {
 			if (data.success) {
+				console.log("M-Pesa request initiated successfully:", data);
 				bpmg_start_mpesa_polling(
-					data.checkout_id,
+					data.data.checkout_id,
 					button,
 					phoneNumber,
 				);
