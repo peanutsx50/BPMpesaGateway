@@ -79,7 +79,7 @@ function bpmg_send_mpesa_request(button, phoneNumber, errorDiv) {
 		.then((data) => {
 			if (data.success) {
 				bpmg_start_mpesa_polling(
-					data.data?.response?.CheckoutRequestID,
+					data.checkout_id,
 					button,
 					phoneNumber,
 				);

@@ -336,11 +336,13 @@ class BPMGPublic
         $BPMG_Mpesa = new BPMGMpesa();
         $payment_response = $BPMG_Mpesa->send_stk_push_request($phone);
         $checkout_request_id = $payment_response['response']['CheckoutRequestID'] ?? null;
+        error_log('Payment response: ' . print_r($payment_response, true)); // log the payment response for debugging
+        
         // handle the response
         if ($payment_response['status'] === 'success') {
             // send message saying we sent request 
             $this->store_pending_transaction($checkout_request_id); // store pending transaction for later verification in callback
-            return wp_send_json_success(['message' => $payment_response['message']]); // send response back to ajax
+            return wp_send_json_success(['message' => $payment_response['message'], 'checkout_id' => $checkout_request_id]); // send response back to ajax
         } else {
             return wp_send_json_error(['message' => $payment_response['message']]); // send error response back to ajax
         }
