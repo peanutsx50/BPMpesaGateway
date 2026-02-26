@@ -290,7 +290,7 @@ class BPMGMpesa
         $existing_post = get_page_by_path( $checkoutId, OBJECT, 'bpmg_payment' );
         
         // prevent duplicate entries for the same checkoutId which can happen if M-Pesa retries the callback or if someone tries to spoof callbacks with the same checkoutId.
-        if (! empty($existing_posts)) {
+        if (! empty($existing_post)) {
             return rest_ensure_response(array(
                 'status'    => 'ok',
                 'post_id'   => $existing_post->ID,
