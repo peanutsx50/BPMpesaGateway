@@ -28,9 +28,9 @@ class BPMGPublic
     {
         // load style only on registration page to avoid unnecessary css files
         /** @disregard */
-    if ( ! function_exists( 'bp_is_register_page' ) || ! bp_is_register_page() ) {
-        return;
-    }
+        if (! function_exists('bp_is_register_page') || ! bp_is_register_page()) {
+            return;
+        }
         wp_enqueue_style($this->bpmpesagateway . '-public-style', BPMG_PUBLIC_CSS_URL . 'BPMG-public.css', array(), $this->version, 'all');
     }
 
@@ -38,9 +38,9 @@ class BPMGPublic
     {
         //load script only on registration page to avoid uncessary js files
         /** @disregard */
-    if ( ! function_exists( 'bp_is_register_page' ) || ! bp_is_register_page() ) {
-        return;
-    }
+        if (! function_exists('bp_is_register_page') || ! bp_is_register_page()) {
+            return;
+        }
         wp_enqueue_script($this->bpmpesagateway . '-public-script', BPMG_PUBLIC_JS_URL . 'BPMG-public.min.js', array('jquery'), $this->version, array(
             'strategy'  => 'defer',
             'in_footer' => true,
@@ -134,7 +134,7 @@ class BPMGPublic
         register_rest_route('bpmpesa/v1', '/confirm-payment', [
             'methods' => 'POST',
             'callback' => [$this, 'confirm_payment'],
-            'permission_callback' => [$this, 'validate_confirm_payment'], // validate nonce and SSL
+            'permission_callback' => [$this, 'validate_confirm_payment'], // validate SSL
             'args'                => [
                 'checkout_id' => [
                     'required'          => true,
@@ -174,7 +174,7 @@ class BPMGPublic
         }
 
         // check request IP address from server
-        $raw_ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : ''; // sanitize and validate IP address, default to UNKNOWN if not valid
+        $raw_ip = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : ''; // sanitize and validate IP address, default to UNKNOWN if not valid
         $client_ip = filter_var($raw_ip, FILTER_VALIDATE_IP) ? $raw_ip : 'UNKNOWN';
 
         // compare with expected IP addressess
@@ -260,13 +260,27 @@ class BPMGPublic
 
         //2. rate limit check
         $phone_number = $request->get_param('phone_number');
-        $raw_ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : ''; // sanitize and validate IP address, default to UNKNOWN if not valid
+        $raw_ip = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : ''; // sanitize and validate IP address, default to UNKNOWN if not valid
         $ip = filter_var($raw_ip, FILTER_VALIDATE_IP) ? sanitize_text_field($raw_ip) : 'UNKNOWN';
         if (BPMGUtils::rate_limit_exceeded($ip, $phone_number)) {
             return new WP_Error(
                 'rate_limit_exceeded',
                 'Too many requests. Please try again later.',
                 ['status' => 429]
+            );
+        }
+
+        return true;
+    }
+
+    public function validate_confirm_payment()
+    {
+        //1. check for ssl and return error if not enabled
+        if (!is_ssl()) {
+            return new WP_Error(
+                'ssl_required',
+                'SSL is not enabled on this site, transactions cannot be processed securely',
+                ['status' => 403]
             );
         }
 
@@ -296,7 +310,7 @@ class BPMGPublic
      * @return void Outputs JSON response and terminates execution.
      */
 
-    public function handle_mpesa_request($request)
+    public function handle_mpesa_request(WP_REST_Request $request)
     {
         $phone = $request->get_param('phone_number');
         // send the request to mpesa api
@@ -322,5 +336,69 @@ class BPMGPublic
         }
 
         return set_transient('bpmg_pending_' . $checkout_request_id, 1, 15 * MINUTE_IN_SECONDS); // 15 minutes timeout
+    }
+
+    public function confirm_payment(WP_REST_Request $request)
+    {
+        // WordPress already sanitized these via args validation
+        $checkoutId = $request->get_param('checkout_id');      // Already sanitized
+        $content_post_id = $request->get_param('locked_post_id'); // Already absint()
+
+        // Find the payment record
+        global $wpdb;
+        $post_id = $wpdb->get_var($wpdb->prepare(
+            "SELECT post_id FROM {$wpdb->postmeta} 
+         WHERE meta_key = 'checkout_id' 
+         AND meta_value = %s 
+         LIMIT 1",
+            $checkoutId
+        ));
+
+        if (!$post_id) {
+            return rest_ensure_response([
+                'status'  => 'pending',
+                'message' => 'Waiting for payment confirmation',
+            ]);
+        }
+
+        // Get payment status
+        $status = get_post_meta($post_id, 'status', true);
+        $result_desc = get_post_meta($post_id, 'result_desc', true);
+        $mpesa_receipt = get_post_meta($post_id, 'mpesa_receipt_number', true);
+        $paid_content_id = get_post_meta($post_id, 'content_post_id', true);
+
+        // Verify the payment was made for this specific post
+        if ((int)$paid_content_id !== (int)$content_post_id) {
+            return rest_ensure_response([
+                'status'  => 'failed',
+                'message' => 'Payment was not made for this content',
+            ]);
+        }
+
+        // Handle failed payment
+        if ($status === 'failed') {
+            return rest_ensure_response([
+                'status'      => 'failed',
+                'message'     => $result_desc ?: 'Payment was cancelled or failed',
+                'result_desc' => $result_desc,
+            ]);
+        }
+
+        // Handle successful payment
+        if ($status === 'success') {
+            return rest_ensure_response([
+                'status'          => 'success',
+                'message'         => $result_desc ?: 'Payment successful',
+                'mpesa_receipt'   => $mpesa_receipt,
+                'result_desc'     => $result_desc,
+                'content_post_id' => $content_post_id,
+            ]);
+        }
+
+        // Still pending
+        return rest_ensure_response([
+            'status'  => 'pending',
+            'message' => 'Waiting for payment confirmation',
+        ]);
     }
 }
