@@ -340,21 +340,13 @@ class BPMGPublic
 
     public function confirm_payment(WP_REST_Request $request)
     {
-        // WordPress already sanitized these via args validation
-        $checkoutId = $request->get_param('checkout_id');      // Already sanitized
-        $content_post_id = $request->get_param('locked_post_id'); // Already absint()
+        // get the checkout id from the request
+        $checkoutId = $request->get_param('checkout_id');
 
         // Find the payment record
-        global $wpdb;
-        $post_id = $wpdb->get_var($wpdb->prepare(
-            "SELECT post_id FROM {$wpdb->postmeta} 
-         WHERE meta_key = 'checkout_id' 
-         AND meta_value = %s 
-         LIMIT 1",
-            $checkoutId
-        ));
+        $existing_record = get_page_by_path( $checkoutId, OBJECT, 'bpmg_payment' );
 
-        if (!$post_id) {
+        if (!$existing_record) {
             return rest_ensure_response([
                 'status'  => 'pending',
                 'message' => 'Waiting for payment confirmation',
@@ -362,25 +354,15 @@ class BPMGPublic
         }
 
         // Get payment status
+        $post_id = $existing_record->ID;
         $status = get_post_meta($post_id, 'status', true);
         $result_desc = get_post_meta($post_id, 'result_desc', true);
-        $mpesa_receipt = get_post_meta($post_id, 'mpesa_receipt_number', true);
-        $paid_content_id = get_post_meta($post_id, 'content_post_id', true);
-
-        // Verify the payment was made for this specific post
-        if ((int)$paid_content_id !== (int)$content_post_id) {
-            return rest_ensure_response([
-                'status'  => 'failed',
-                'message' => 'Payment was not made for this content',
-            ]);
-        }
 
         // Handle failed payment
         if ($status === 'failed') {
             return rest_ensure_response([
                 'status'      => 'failed',
                 'message'     => $result_desc ?: 'Payment was cancelled or failed',
-                'result_desc' => $result_desc,
             ]);
         }
 
@@ -389,9 +371,6 @@ class BPMGPublic
             return rest_ensure_response([
                 'status'          => 'success',
                 'message'         => $result_desc ?: 'Payment successful',
-                'mpesa_receipt'   => $mpesa_receipt,
-                'result_desc'     => $result_desc,
-                'content_post_id' => $content_post_id,
             ]);
         }
 
