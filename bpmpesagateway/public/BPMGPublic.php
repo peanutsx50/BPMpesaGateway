@@ -341,7 +341,7 @@ class BPMGPublic
         // handle the response
         if ($payment_response['status'] === 'success') {
             // send message saying we sent request 
-            return rest_ensure_response (new WP_REST_Response([
+            return rest_ensure_response(new WP_REST_Response([
                 'message'     => $payment_response['message'],
                 'checkout_id' => $checkout_request_id,
             ], 200)); // send response back to ajax
@@ -390,10 +390,10 @@ class BPMGPublic
         $existing_record = get_page_by_path($checkoutId, OBJECT, 'bpmg_payment');
 
         if (!$existing_record) {
-            return rest_ensure_response([
+            return rest_ensure_response(new WP_REST_Response([
                 'status'  => 'pending',
                 'message' => 'Waiting for payment confirmation',
-            ]);
+            ], 200));
         }
 
         // Get payment status
@@ -403,24 +403,24 @@ class BPMGPublic
 
         // Handle failed payment
         if ($status === 'failed') {
-            return rest_ensure_response([
-                'status'      => 'failed',
-                'message'     => $result_desc ?: 'Payment was cancelled or failed',
-            ]);
+            return rest_ensure_response(new WP_REST_Response([
+                'status'  => 'failed',
+                'message' => $result_desc ?: 'Payment was cancelled or failed',
+            ], 200));
         }
 
         // Handle successful payment
         if ($status === 'success') {
-            return rest_ensure_response([
+            return rest_ensure_response(new WP_REST_Response([
                 'status'          => 'success',
                 'message'         => $result_desc ?: 'Payment successful',
-            ]);
+            ], 200));
         }
 
         // Still pending
-        return rest_ensure_response([
+        return rest_ensure_response(new WP_REST_Response([
             'status'  => 'pending',
             'message' => 'Waiting for payment confirmation',
-        ]);
+        ], 200));
     }
 }

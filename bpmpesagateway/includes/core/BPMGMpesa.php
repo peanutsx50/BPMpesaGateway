@@ -10,6 +10,8 @@ namespace BPMpesaGateway\Core;
 
 use WP_REST_Request;
 use DateTimeZone;
+use WP_Error;
+use WP_REST_Response;
 
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
@@ -230,8 +232,13 @@ class BPMGMpesa
         $stk    = $params['Body']['stkCallback'] ?? null;
 
         if (!$stk) {
-            return rest_ensure_response(['status' => 'ignored']);
+            return new WP_Error(
+                'stk_failed',                 // Unique error code
+                'M-Pesa request was ignored', // Message for the user
+                ['status' => 400]             // This sets the HTTP status code
+            );
         }
+
 
         return self::store_details_meta($stk);
     }
@@ -247,7 +254,11 @@ class BPMGMpesa
 
         // This should never happen if M-Pesa is working correctly, but we check just in case to prevent processing invalid callbacks
         if (empty($checkoutId)) {
-            return rest_ensure_response(['status' => 'error', 'message' => 'Missing checkout ID'], 400);
+            return new WP_Error(
+                'missing_checkout_id',
+                'Missing checkout ID',
+                ['status' => 400] // This forces the HTTP 400 code
+            );
         }
 
         // Extract transaction metadata
@@ -277,15 +288,15 @@ class BPMGMpesa
         $status = ($resultCode === 0) ? 'success' : 'failed';
 
         // Duplicate check for exisiting checkoutId to prevent replay attacks
-        $existing_post = get_page_by_path( $checkoutId, OBJECT, 'bpmg_payment' );
-        
+        $existing_post = get_page_by_path($checkoutId, OBJECT, 'bpmg_payment');
+
         // prevent duplicate entries for the same checkoutId which can happen if M-Pesa retries the callback or if someone tries to spoof callbacks with the same checkoutId.
         if (! empty($existing_post)) {
-            return rest_ensure_response(array(
+            return rest_ensure_response(new WP_REST_Response([
                 'status'    => 'ok',
                 'post_id'   => $existing_post->ID,
                 'duplicate' => true,
-            ), 200);
+            ], 200));
         }
 
         // Insert post using wp_insert_post
@@ -297,7 +308,10 @@ class BPMGMpesa
         ), true);
 
         if (is_wp_error($post_id)) {
-            return rest_ensure_response(['status' => 'error', 'message' => $post_id->get_error_message()], 500);
+            return rest_ensure_response(new WP_REST_Response([
+                'status' => 'error',
+                'message' => $post_id->get_error_message()
+            ], 500));
         }
 
         // Store core meta
@@ -316,6 +330,9 @@ class BPMGMpesa
             update_post_meta($post_id, 'transaction_date', $transactionDate);
         }
 
-        return rest_ensure_response(['status' => 'ok', 'post_id' => $post_id], 200);
+        return rest_ensure_response(new WP_REST_Response([
+            'status' => 'ok',
+            'post_id' => $post_id
+        ], 200));
     }
 }
