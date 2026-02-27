@@ -290,7 +290,7 @@ class BPMGMpesa
         // Duplicate check for exisiting checkoutId to prevent replay attacks
         $existing_post = get_page_by_path($checkoutId, OBJECT, 'bpmg_payment');
 
-        // prevent duplicate entries for the same checkoutId which can happen if M-Pesa retries the callback or if someone tries to spoof callbacks with the same checkoutId.
+        // prevent duplicate entries for the same checkoutId which can happen if M-Pesa retries the callback.
         if (! empty($existing_post)) {
             return rest_ensure_response(new WP_REST_Response([
                 'status'    => 'ok',
