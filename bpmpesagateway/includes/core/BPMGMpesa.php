@@ -249,16 +249,6 @@ class BPMGMpesa
         if (empty($checkoutId)) {
             return rest_ensure_response(['status' => 'error', 'message' => 'Missing checkout ID'], 400);
         }
-        // check for pending transaction
-        $pending_status = get_transient('bpmg_pending_' . $checkoutId);
-
-        // Security: If no pending transaction found, reject the callback attempted callback spoofing
-        if (!$pending_status) {
-            return rest_ensure_response(['status' => 'error', 'message' => 'Unknown transaction'], 400);
-        }
-
-        // Clean up the transient
-        delete_transient('bpmg_pending_' . $checkoutId);
 
         // Extract transaction metadata
         $amount = 0;
