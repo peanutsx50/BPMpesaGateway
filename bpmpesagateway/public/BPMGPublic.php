@@ -6,6 +6,7 @@ use BPMpesaGateway\Core\BPMGMpesa;
 use BPMpesaGateway\Core\BPMGUtils;
 use WP_Error;
 use WP_REST_Request;
+use WP_REST_Response;
 
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
@@ -336,14 +337,21 @@ class BPMGPublic
         $BPMG_Mpesa = new BPMGMpesa();
         $payment_response = $BPMG_Mpesa->send_stk_push_request($phone);
         $checkout_request_id = $payment_response['response']['CheckoutRequestID'] ?? null;
-        
+
         // handle the response
         if ($payment_response['status'] === 'success') {
             // send message saying we sent request 
             $this->store_pending_transaction($checkout_request_id); // store pending transaction for later verification in callback
-            return wp_send_json_success(['message' => $payment_response['message'], 'checkout_id' => $checkout_request_id]); // send response back to ajax
+            return rest_ensure_response (new WP_REST_Response([
+                'message'     => $payment_response['message'],
+                'checkout_id' => $checkout_request_id,
+            ], 200)); // send response back to ajax
         } else {
-            return wp_send_json_error(['message' => $payment_response['message']]); // send error response back to ajax
+            return new WP_Error(
+                'mpesa_request_failed',
+                $payment_response['message'],
+                ['status' => 400]
+            );
         }
     }
 

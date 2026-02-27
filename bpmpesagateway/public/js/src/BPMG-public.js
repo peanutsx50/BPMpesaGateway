@@ -75,14 +75,20 @@ function bpmg_send_mpesa_request(button, phoneNumber, errorDiv) {
 		},
 		body: new URLSearchParams({ phone_number: phoneNumber }),
 	})
-		.then((response) => response.json())
+		.then((response) => {
+			// 1. Check if the HTTP status is in the 200-299 range
+			if (!response.ok) {
+				// If not, parse the error JSON to get the WP_Error message
+				return response.json().then((err) => {
+					throw new Error(err.message || "Server Error");
+				});
+			}
+			return response.json();
+		})
 		.then((data) => {
 			if (data.success) {
 				console.log("M-Pesa request initiated successfully:", data);
-				bpmg_start_mpesa_polling(
-					data.data.checkout_id,
-					button,
-				);
+				bpmg_start_mpesa_polling(data.data.checkout_id, button);
 			} else {
 				bpmg_reset_button(button);
 				bpmg_show_error(
@@ -111,8 +117,8 @@ function bpmg_send_mpesa_request(button, phoneNumber, errorDiv) {
 async function bpmg_start_mpesa_polling(
 	checkoutId,
 	button,
-	maxAttempts = 20,
-	pollInterval = 6000,
+	maxAttempts = 30,
+	pollInterval = 500,
 ) {
 	const errorDiv = document.getElementById("bpmg_error_message");
 
@@ -182,14 +188,17 @@ async function bpmg_start_mpesa_polling(
 			}
 
 			// Any other status (e.g. "pending") — fall through to wait and retry
-
 		} catch (error) {
 			consecutiveErrors++;
-			console.error(`Polling error (${consecutiveErrors}/${maxConsecutiveErrors}):`, error);
+			console.error(
+				`Polling error (${consecutiveErrors}/${maxConsecutiveErrors}):`,
+				error,
+			);
 
 			if (consecutiveErrors >= maxConsecutiveErrors) {
 				bpmg_reset_button(button);
-				button.textContent = "Connection lost. Please check your payment and try again.";
+				button.textContent =
+					"Connection lost. Please check your payment and try again.";
 				bpmg_show_error(
 					errorDiv,
 					"A network error occurred while confirming payment. Please try again.",
@@ -237,7 +246,7 @@ function cleanPhoneNumber(phone) {
 
 	// Validate Kenyan number format
 	const phonePattern =
-		/^254(7(?:[0129][0-9]|4[0-3568]|5[7-9]|6[89])|11[0-5])\d{6}$/; // Get pattern from localized script
+		/^254(7(?:[0129][0-9]|4[0-3568]|5[7-9]|6[89])|11[0-5])\d{6}$/; // Hardcoded regex for Kenyan mobile numbers
 
 	if (!phonePattern.test(cleaned)) {
 		return false;
