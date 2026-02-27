@@ -341,7 +341,6 @@ class BPMGPublic
         // handle the response
         if ($payment_response['status'] === 'success') {
             // send message saying we sent request 
-            $this->store_pending_transaction($checkout_request_id); // store pending transaction for later verification in callback
             return rest_ensure_response (new WP_REST_Response([
                 'message'     => $payment_response['message'],
                 'checkout_id' => $checkout_request_id,
@@ -353,17 +352,6 @@ class BPMGPublic
                 ['status' => 400]
             );
         }
-    }
-
-    private function store_pending_transaction($checkout_request_id)
-    {
-        // store pending transaction in custom post type for later verification in callback
-        $transaction = get_transient('bpmg_pending_' . $checkout_request_id);
-        if ($transaction !== false) {
-            return;
-        }
-
-        return set_transient('bpmg_pending_' . $checkout_request_id, 1, 15 * MINUTE_IN_SECONDS); // 15 minutes timeout
     }
 
     /**
