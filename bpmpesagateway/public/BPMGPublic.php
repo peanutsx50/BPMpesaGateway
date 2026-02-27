@@ -339,9 +339,10 @@ class BPMGPublic
 
         // 1. Handle WP_Error response from the payment processing method
         if (is_wp_error($payment_response)) {
-            return $payment_response; 
+            return $payment_response;
         }
-
+        
+        $payment_response = $payment_response->get_data(); // Extract data from WP_REST_Response if it's a success response
         // 2. Handle failure based on your custom 'status' key
         if (isset($payment_response['status']) && $payment_response['status'] !== 'success') {
             return new WP_Error(
@@ -353,10 +354,10 @@ class BPMGPublic
 
         // 3. Handle Success
         $checkout_request_id = $payment_response['response']['CheckoutRequestID'] ?? null;
-        return new WP_REST_Response([
+        return rest_ensure_response(new WP_REST_Response([
             'message'     => $payment_response['message'],
             'checkout_id' => $checkout_request_id,
-        ]);
+        ], 200));
     }
 
     /**
