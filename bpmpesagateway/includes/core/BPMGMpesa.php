@@ -236,7 +236,7 @@ class BPMGMpesa
                 );
             }
         }
-        return ['status' => 'success', 'message' => 'Mpesa configuration is valid'];
+        return true;
     }
 
     public static function handle_callback(WP_REST_Request $request)
