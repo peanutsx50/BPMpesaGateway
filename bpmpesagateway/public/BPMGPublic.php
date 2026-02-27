@@ -354,10 +354,10 @@ class BPMGPublic
 
         // 3. Handle Success
         $checkout_request_id = $payment_response['response']['CheckoutRequestID'] ?? null;
-        return rest_ensure_response(new WP_REST_Response([
+        return new WP_REST_Response([
             'message'     => $payment_response['message'],
             'checkout_id' => $checkout_request_id,
-        ], 200));
+        ]);
     }
 
     /**
@@ -381,7 +381,6 @@ class BPMGPublic
      *
      * @uses get_page_by_path() To find the payment record by its checkout ID slug.
      * @uses get_post_meta() To retrieve the payment status and result description.
-     * @uses rest_ensure_response() To wrap the response in a REST-friendly format.
      *
      * @return WP_REST_Response Response object containing:
      *                          - 'status': string (pending|success|failed)
@@ -396,10 +395,10 @@ class BPMGPublic
         $existing_record = get_page_by_path($checkoutId, OBJECT, 'bpmg_payment');
 
         if (!$existing_record) {
-            return rest_ensure_response(new WP_REST_Response([
+            return new WP_REST_Response([
                 'status'  => 'pending',
                 'message' => 'Waiting for payment confirmation',
-            ], 200));
+            ]);
         }
 
         // Get payment status
@@ -409,24 +408,24 @@ class BPMGPublic
 
         // Handle failed payment
         if ($status === 'failed') {
-            return rest_ensure_response(new WP_REST_Response([
+            return new WP_REST_Response([
                 'status'  => 'failed',
                 'message' => $result_desc ?: 'Payment was cancelled or failed',
-            ], 200));
+            ]);
         }
 
         // Handle successful payment
         if ($status === 'success') {
-            return rest_ensure_response(new WP_REST_Response([
+            return new WP_REST_Response([
                 'status'          => 'success',
                 'message'         => $result_desc ?: 'Payment successful',
-            ], 200));
+            ]);
         }
 
         // Still pending
-        return rest_ensure_response(new WP_REST_Response([
+        return new WP_REST_Response([
             'status'  => 'pending',
             'message' => 'Waiting for payment confirmation',
-        ], 200));
+        ]);
     }
 }

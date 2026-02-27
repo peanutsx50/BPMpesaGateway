@@ -146,11 +146,11 @@ class BPMGMpesa
             }
 
             // Return success response with payment details for client-side tracking
-            return rest_ensure_response(new WP_REST_Response([
+            return new WP_REST_Response([
                 'status'   => 'success',
                 'message'  => 'Payment request sent. Enter your M-Pesa PIN.',
                 'response' => $decoded_response,
-            ], 200));
+            ]);
         } catch (\Exception $e) {
             return new WP_Error(
                 'payment_exception',
@@ -305,11 +305,11 @@ class BPMGMpesa
 
         // prevent duplicate entries for the same checkoutId which can happen if M-Pesa retries the callback.
         if (! empty($existing_post)) {
-            return rest_ensure_response(new WP_REST_Response([
+            return new WP_REST_Response([
                 'status'    => 'ok',
                 'post_id'   => $existing_post->ID,
                 'duplicate' => true,
-            ], 200));
+            ]);
         }
 
         // Insert post using wp_insert_post
@@ -321,10 +321,11 @@ class BPMGMpesa
         ), true);
 
         if (is_wp_error($post_id)) {
-            return rest_ensure_response(new WP_REST_Response([
-                'status' => 'error',
-                'message' => $post_id->get_error_message()
-            ], 500));
+            return new WP_Error(
+                'insert_post_failed',
+                $post_id->get_error_message(),
+                ['status' => 500]
+            );
         }
 
         // Store core meta
@@ -343,9 +344,9 @@ class BPMGMpesa
             update_post_meta($post_id, 'transaction_date', $transactionDate);
         }
 
-        return rest_ensure_response(new WP_REST_Response([
+        return new WP_REST_Response([
             'status' => 'ok',
             'post_id' => $post_id
-        ], 200));
+        ]);
     }
 }
