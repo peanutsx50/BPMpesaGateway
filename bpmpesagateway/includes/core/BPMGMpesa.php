@@ -82,7 +82,7 @@ class BPMGMpesa
     {
         // check if consumer_key, consumer_secret, shortcode, passkey is empty
         $validation_result = $this->validate_config();
-        if ($validation_result['status'] === 'error') {
+        if (is_wp_error($validation_result)) {
             return $validation_result;
         }
 
@@ -114,37 +114,49 @@ class BPMGMpesa
             ]);
 
             if (is_wp_error($response)) {
-                return [
-                    'status' => 'error',
-                    'message' => 'HTTP Request failed: ' . $response->get_error_message(),
-                ];
+                return new WP_Error(
+                    'http_request_failed',
+                    'Connection to M-Pesa failed: ' . $response->get_error_message(),
+                    ['status' => 503] // 503 Service Unavailable is often used for API timeouts
+                );
             }
-
             $body = wp_remote_retrieve_body($response);
             $decoded_response = json_decode($body, true);
 
-            // Check if M-Pesa API returned an error code
+            // 1. Check if the JSON is empty or invalid
+            if (empty($decoded_response)) {
+                return new WP_Error(
+                    'mpesa_invalid_response',
+                    'Received an empty or invalid response from M-Pesa.',
+                    ['status' => 502] // Bad Gateway
+                );
+            }
+
+            // 2. Check for M-Pesa Global Error Codes (e.g., Auth failure, Invalid request)
             if (isset($decoded_response['errorCode'])) {
-                return [
-                    'status' => 'error',
-                    'message' => $decoded_response['errorMessage'] ?? 'M-Pesa API Error',
-                    'error_code' => $decoded_response['errorCode'],
-                    'response' => $decoded_response
-                ];
+                return new WP_Error(
+                    'mpesa_api_error',
+                    $decoded_response['errorMessage'] ?? 'M-Pesa API Error',
+                    [
+                        'status'     => 400,
+                        'error_code' => $decoded_response['errorCode'],
+                        'raw'        => $decoded_response
+                    ]
+                );
             }
 
             // Return success response with payment details for client-side tracking
-            return [
-                'status' => 'success',
-                'message' => 'Payment request sent. Enter your M-Pesa PIN.',
+            return rest_ensure_response(new WP_REST_Response([
+                'status'   => 'success',
+                'message'  => 'Payment request sent. Enter your M-Pesa PIN.',
                 'response' => $decoded_response,
-            ];
+            ], 200));
         } catch (\Exception $e) {
-            $this->err = $e->getMessage();
-            return [
-                'status' => 'error',
-                'message' => 'Exception: ' . $this->err
-            ];
+            return new WP_Error(
+                'payment_exception',
+                'message: ' . $e->getMessage(),
+                ['status' => 500]
+            );
         }
 
         // return ['status' => 'success'];
@@ -217,10 +229,11 @@ class BPMGMpesa
 
         foreach ($required_fields as $field) {
             if (empty($this->$field)) {
-                return [
-                    'status' => 'error',
-                    'message' => 'Missing required Mpesa configuration details ' . $field,
-                ];
+                return new WP_Error(
+                    'rest_mpesa_config_error',
+                    'Missing required M-Pesa configuration: ' . $field,
+                    ['status' => 500] // Triggers !response.ok in your JS fetch
+                );
             }
         }
         return ['status' => 'success', 'message' => 'Mpesa configuration is valid'];

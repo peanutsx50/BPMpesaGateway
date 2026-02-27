@@ -336,22 +336,27 @@ class BPMGPublic
         // send the request to mpesa api
         $BPMG_Mpesa = new BPMGMpesa();
         $payment_response = $BPMG_Mpesa->send_stk_push_request($phone);
-        $checkout_request_id = $payment_response['response']['CheckoutRequestID'] ?? null;
 
-        // handle the response
-        if ($payment_response['status'] === 'success') {
-            // send message saying we sent request 
-            return rest_ensure_response(new WP_REST_Response([
-                'message'     => $payment_response['message'],
-                'checkout_id' => $checkout_request_id,
-            ], 200)); // send response back to ajax
-        } else {
+        // 1. Handle WP_Error response from the payment processing method
+        if (is_wp_error($payment_response)) {
+            return $payment_response; 
+        }
+
+        // 2. Handle failure based on your custom 'status' key
+        if (isset($payment_response['status']) && $payment_response['status'] !== 'success') {
             return new WP_Error(
                 'mpesa_request_failed',
-                $payment_response['message'],
-                ['status' => 400]
+                $payment_response['message'] ?? 'Payment request failed',
+                ['status' => 400] // Triggers !response.ok in your JS fetch
             );
         }
+
+        // 3. Handle Success
+        $checkout_request_id = $payment_response['response']['CheckoutRequestID'] ?? null;
+        return new WP_REST_Response([
+            'message'     => $payment_response['message'],
+            'checkout_id' => $checkout_request_id,
+        ]);
     }
 
     /**

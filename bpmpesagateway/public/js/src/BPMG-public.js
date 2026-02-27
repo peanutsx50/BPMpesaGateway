@@ -64,8 +64,6 @@ document.addEventListener("DOMContentLoaded", function () {
  * Send the STK push request to the server.
  */
 function bpmg_send_mpesa_request(button, phoneNumber, errorDiv) {
-	errorDiv = errorDiv || document.getElementById("bpmg_error_message");
-
 	fetch(bpmpesa_ajax.process_payment_url, {
 		method: "POST",
 		credentials: "same-origin",
@@ -75,32 +73,25 @@ function bpmg_send_mpesa_request(button, phoneNumber, errorDiv) {
 		},
 		body: new URLSearchParams({ phone_number: phoneNumber }),
 	})
-		.then((response) => {
+		.then(async (response) => {
 			// 1. Check if the HTTP status is in the 200-299 range
 			if (!response.ok) {
 				// If not, parse the error JSON to get the WP_Error message
-				return response.json().then((err) => {
-					throw new Error(err.message || "Server Error");
-				});
+				const err = await response.json();
+				throw new Error(err.message || "Server Error");
 			}
 			return response.json();
 		})
 		.then((data) => {
-			if (data.success) {
-				console.log("M-Pesa request initiated successfully:", data);
-				bpmg_start_mpesa_polling(data.data.checkout_id, button);
-			} else {
-				bpmg_reset_button(button);
-				bpmg_show_error(
-					errorDiv,
-					data.data?.message || "Failed to initiate M-Pesa request.",
-				);
-			}
+			bpmg_start_mpesa_polling(data.checkout_id, button);
 		})
 		.catch((error) => {
 			console.error("M-Pesa request error:", error);
 			bpmg_reset_button(button);
-			bpmg_show_error(errorDiv, "A network error occurred. Please try again.");
+			bpmg_show_error(
+				errorDiv,
+				"An error processing your request occurred. Please try again.",
+			);
 		});
 }
 
