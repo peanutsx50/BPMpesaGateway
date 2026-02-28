@@ -46,6 +46,14 @@ class BPMGMpesa
         // retrive all the options from the database using BPMGOptions class
         $options = BPMGOptions::get_options();
 
+        // Decrypt credentials if they are encrypted, otherwise use as is
+        $credentials = ['consumer_key', 'consumer_secret', 'passkey'];
+        foreach ($credentials as $credential) {
+            if (BPMGUtils::is_encrypted($options[$credential])) {
+                $options[$credential] = BPMGUtils::decrypt_credential($options[$credential]);
+            }
+        }
+
         // Initialize Mpesa properties from settings
         $this->consumer_key        = $options['consumer_key'];
         $this->consumer_secret     = $options['consumer_secret'];
