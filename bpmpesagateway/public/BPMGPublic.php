@@ -432,4 +432,26 @@ class BPMGPublic
             'message' => 'Waiting for payment confirmation',
         ]);
     }
+
+    public function validate_token_before_signup()
+    {
+        global $bp;
+        // get token
+        $token = isset($_COOKIE['bpmg_payment']) ? sanitize_text_field(wp_unslash($_COOKIE['bpmg_payment'])) : '';
+        $valid_checkout_id = get_transient('bpmg_paid_' . $token);
+        // validate if real
+        if (!$valid_checkout_id) {
+            $bp->signup->errors['bpmg_payment'] = 'Payment confirmation is required to complete registration.';
+            return;
+        }
+    }
+
+    public function cleanup_payment_token_after_signup($user_id)
+    {
+        if (isset($_COOKIE['bpmg_payment'])) {
+            $token = sanitize_text_field(wp_unslash($_COOKIE['bpmg_payment']));
+            delete_transient('bpmg_paid_' . $token);
+            setcookie('bpmg_payment', '', time() - 3600, '/');
+        }
+    }
 }

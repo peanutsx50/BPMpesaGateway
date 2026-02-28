@@ -258,17 +258,6 @@ function bpmg_mark_payment_success(button, phoneInput, token="") {
 	button.style.backgroundColor = "#4CAF50";
 	button.style.borderColor = "#4CAF50";
 	if (phoneInput) phoneInput.disabled = true;
-
-	// inject hidden input to receive token as value on form submit, so we can verify payment on server side before creating user
-	let tokenInput = document.getElementById("bpmg_payment_token");
-	if (!tokenInput) {
-		tokenInput = document.createElement("input");
-		tokenInput.type = "hidden";
-		tokenInput.id = "bpmg_payment_token";
-		tokenInput.name = "bpmg_payment_token";
-		document.getElementById("signup-form").appendChild(tokenInput);
-	}
-	tokenInput.value = token;
 }
 
 function bpmg_reset_button(button) {
