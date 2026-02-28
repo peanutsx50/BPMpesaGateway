@@ -107,6 +107,7 @@ class BPMGPublic
             'methods' => ['POST', 'GET'],
             'callback' => [BPMGMpesa::class, 'handle_callback'],
             'permission_callback' => [$this, 'validate_safaricom_IP'],
+            //'permission_callback' => '__return_true', // Temporarily allow all request for testing
             'show_in_index' => false, // Hide from REST API index
             'args'                => [
                 'bpmg_auth' => [
