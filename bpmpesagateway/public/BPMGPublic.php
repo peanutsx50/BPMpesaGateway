@@ -342,7 +342,7 @@ class BPMGPublic
         if (is_wp_error($payment_response)) {
             return $payment_response;
         }
-        
+
         $payment_response = $payment_response->get_data(); // Extract data from WP_REST_Response if it's a success response
         // 2. Handle failure based on your custom 'status' key
         if (isset($payment_response['status']) && $payment_response['status'] !== 'success') {
@@ -417,9 +417,12 @@ class BPMGPublic
 
         // Handle successful payment
         if ($status === 'success') {
+            $token = wp_generate_password(32, false); // random token
+            set_transient('bpmg_paid_' . $token, $checkoutId, 30 * MINUTE_IN_SECONDS); // store token with checkoutId for 30 minutes
             return new WP_REST_Response([
                 'status'          => 'success',
                 'message'         => $result_desc ?: 'Payment successful',
+                'token'           => $token
             ]);
         }
 

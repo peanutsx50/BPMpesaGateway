@@ -7,15 +7,17 @@ document.addEventListener("DOMContentLoaded", function () {
 	// Guard: required elements must exist before proceeding
 	if (!button || !phoneInput || !errorDiv || !submitBtn) return;
 
-	if (bpmg_get_cookie("payment") === "paid") {
-		bpmg_mark_payment_success(button, phoneInput);
+	// check token from cookie
+	let paymentToken = bpmg_get_cookie("bpmg_payment");
+	if (paymentToken) {
+		bpmg_mark_payment_success(button, phoneInput, paymentToken);
 		return; // Do NOT allow STK push again
 	}
 
 	// Block form submission until payment is confirmed
 	const submitClickHandler = function (e) {
-		// Re-read cookie at click time rather than relying on stale closure value
-		if (bpmg_get_cookie("payment") !== "paid") {
+		if (!paymentToken) {
+			// we use cookie for UX blocking, not actual payment confirmation logic
 			e.preventDefault();
 			e.stopImmediatePropagation();
 			bpmg_show_error(
@@ -148,10 +150,11 @@ async function bpmg_start_mpesa_polling(
 			const data = await response.json();
 
 			if (data.status === "success") {
-				document.cookie = "payment=paid; path=/; SameSite=Lax; Secure";
+				document.cookie = `bpmg_payment=${data.token}; path=/; max-age=1800; SameSite=Lax; Secure`;
 				bpmg_mark_payment_success(
 					button,
 					document.getElementById("bpmg_mpesa_phone"),
+					data.token
 				);
 
 				// Unblock form submission
@@ -249,12 +252,23 @@ function cleanPhoneNumber(phone) {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function bpmg_mark_payment_success(button, phoneInput) {
+function bpmg_mark_payment_success(button, phoneInput, token="") {
 	button.disabled = true;
 	button.textContent = "Payment successful. Continue registration.";
 	button.style.backgroundColor = "#4CAF50";
 	button.style.borderColor = "#4CAF50";
 	if (phoneInput) phoneInput.disabled = true;
+
+	// inject hidden input to receive token as value on form submit, so we can verify payment on server side before creating user
+	let tokenInput = document.getElementById("bpmg_payment_token");
+	if (!tokenInput) {
+		tokenInput = document.createElement("input");
+		tokenInput.type = "hidden";
+		tokenInput.id = "bpmg_payment_token";
+		tokenInput.name = "bpmg_payment_token";
+		document.getElementById("signup-form").appendChild(tokenInput);
+	}
+	tokenInput.value = token;
 }
 
 function bpmg_reset_button(button) {
