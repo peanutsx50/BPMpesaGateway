@@ -66,7 +66,11 @@ class BPMGAdmin
     // save settings
     public function register_settings()
     {
-        // NOW it's safe to save settings
+        // check if nonce is set in POST request
+        if (!isset($_POST['bpmpesagateway_settings_group_nonce'])) {
+            return;  // Prevent processing without nonce
+        }
+        // check if user has permission to manage options
         if (!current_user_can('manage_options')) {
             wp_die('Unauthorized');
         }
