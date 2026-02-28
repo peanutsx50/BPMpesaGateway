@@ -154,7 +154,6 @@ async function bpmg_start_mpesa_polling(
 				bpmg_mark_payment_success(
 					button,
 					document.getElementById("bpmg_mpesa_phone"),
-					data.token
 				);
 
 				// Unblock form submission
@@ -252,7 +251,7 @@ function cleanPhoneNumber(phone) {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function bpmg_mark_payment_success(button, phoneInput, token="") {
+function bpmg_mark_payment_success(button, phoneInput) {
 	button.disabled = true;
 	button.textContent = "Payment successful. Continue registration.";
 	button.style.backgroundColor = "#4CAF50";
