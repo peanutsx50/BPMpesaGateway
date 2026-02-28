@@ -10,6 +10,8 @@ namespace BPMpesaGateway\Core;
 
 use WP_REST_Request;
 use DateTimeZone;
+use WP_Error;
+use WP_REST_Response;
 
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
@@ -80,7 +82,7 @@ class BPMGMpesa
     {
         // check if consumer_key, consumer_secret, shortcode, passkey is empty
         $validation_result = $this->validate_config();
-        if ($validation_result['status'] === 'error') {
+        if (is_wp_error($validation_result)) {
             return $validation_result;
         }
 
@@ -112,37 +114,49 @@ class BPMGMpesa
             ]);
 
             if (is_wp_error($response)) {
-                return [
-                    'status' => 'error',
-                    'message' => 'HTTP Request failed: ' . $response->get_error_message(),
-                ];
+                return new WP_Error(
+                    'http_request_failed',
+                    'Connection to M-Pesa failed: ' . $response->get_error_message(),
+                    ['status' => 503] // 503 Service Unavailable is often used for API timeouts
+                );
             }
-
             $body = wp_remote_retrieve_body($response);
             $decoded_response = json_decode($body, true);
 
-            // Check if M-Pesa API returned an error code
+            // 1. Check if the JSON is empty or invalid
+            if (empty($decoded_response)) {
+                return new WP_Error(
+                    'mpesa_invalid_response',
+                    'Received an empty or invalid response from M-Pesa.',
+                    ['status' => 502] // Bad Gateway
+                );
+            }
+
+            // 2. Check for M-Pesa Global Error Codes (e.g., Auth failure, Invalid request)
             if (isset($decoded_response['errorCode'])) {
-                return [
-                    'status' => 'error',
-                    'message' => $decoded_response['errorMessage'] ?? 'M-Pesa API Error',
-                    'error_code' => $decoded_response['errorCode'],
-                    'response' => $decoded_response
-                ];
+                return new WP_Error(
+                    'mpesa_api_error',
+                    $decoded_response['errorMessage'] ?? 'M-Pesa API Error',
+                    [
+                        'status'     => 400,
+                        'error_code' => $decoded_response['errorCode'],
+                        'raw'        => $decoded_response
+                    ]
+                );
             }
 
             // Return success response with payment details for client-side tracking
-            return [
-                'status' => 'success',
-                'message' => 'Payment request sent. Enter your M-Pesa PIN.',
+            return new WP_REST_Response([
+                'status'   => 'success',
+                'message'  => 'Payment request sent. Enter your M-Pesa PIN.',
                 'response' => $decoded_response,
-            ];
+            ]);
         } catch (\Exception $e) {
-            $this->err = $e->getMessage();
-            return [
-                'status' => 'error',
-                'message' => 'Exception: ' . $this->err
-            ];
+            return new WP_Error(
+                'payment_exception',
+                'message: ' . $e->getMessage(),
+                ['status' => 500]
+            );
         }
 
         // return ['status' => 'success'];
@@ -215,13 +229,14 @@ class BPMGMpesa
 
         foreach ($required_fields as $field) {
             if (empty($this->$field)) {
-                return [
-                    'status' => 'error',
-                    'message' => 'Missing required Mpesa configuration details ' . $field,
-                ];
+                return new WP_Error(
+                    'rest_mpesa_config_error',
+                    'Missing required M-Pesa configuration: ' . $field,
+                    ['status' => 500] // Triggers !response.ok in your JS fetch
+                );
             }
         }
-        return ['status' => 'success', 'message' => 'Mpesa configuration is valid'];
+        return true;
     }
 
     public static function handle_callback(WP_REST_Request $request)
@@ -230,8 +245,13 @@ class BPMGMpesa
         $stk    = $params['Body']['stkCallback'] ?? null;
 
         if (!$stk) {
-            return rest_ensure_response(['status' => 'ignored']);
+            return new WP_Error(
+                'stk_failed',                 // Unique error code
+                'M-Pesa request was ignored', // Message for the user
+                ['status' => 400]             // This sets the HTTP status code
+            );
         }
+
 
         return self::store_details_meta($stk);
     }
@@ -247,18 +267,12 @@ class BPMGMpesa
 
         // This should never happen if M-Pesa is working correctly, but we check just in case to prevent processing invalid callbacks
         if (empty($checkoutId)) {
-            return rest_ensure_response(['status' => 'error', 'message' => 'Missing checkout ID'], 400);
+            return new WP_Error(
+                'missing_checkout_id',
+                'Missing checkout ID',
+                ['status' => 400] // This forces the HTTP 400 code
+            );
         }
-        // check for pending transaction
-        $content_post_id = get_transient('bpmg_pending_' . $checkoutId);
-
-        // Security: If no pending transaction found, reject the callback attempted callback spoofing
-        if (!$content_post_id) {
-            return rest_ensure_response(['status' => 'error', 'message' => 'Unknown transaction'], 400);
-        }
-
-        // Clean up the transient
-        delete_transient('bpmg_pending_' . $checkoutId);
 
         // Extract transaction metadata
         $amount = 0;
@@ -287,15 +301,15 @@ class BPMGMpesa
         $status = ($resultCode === 0) ? 'success' : 'failed';
 
         // Duplicate check for exisiting checkoutId to prevent replay attacks
-        $existing_post = get_page_by_path( $checkoutId, OBJECT, 'bpmg_payment' );
-        
-        // prevent duplicate entries for the same checkoutId which can happen if M-Pesa retries the callback or if someone tries to spoof callbacks with the same checkoutId.
-        if (! empty($existing_posts)) {
-            return rest_ensure_response(array(
+        $existing_post = get_page_by_path($checkoutId, OBJECT, 'bpmg_payment');
+
+        // prevent duplicate entries for the same checkoutId which can happen if M-Pesa retries the callback.
+        if (! empty($existing_post)) {
+            return new WP_REST_Response([
                 'status'    => 'ok',
                 'post_id'   => $existing_post->ID,
                 'duplicate' => true,
-            ), 200);
+            ]);
         }
 
         // Insert post using wp_insert_post
@@ -307,7 +321,11 @@ class BPMGMpesa
         ), true);
 
         if (is_wp_error($post_id)) {
-            return rest_ensure_response(['status' => 'error', 'message' => $post_id->get_error_message()], 500);
+            return new WP_Error(
+                'insert_post_failed',
+                $post_id->get_error_message(),
+                ['status' => 500]
+            );
         }
 
         // Store core meta
@@ -317,7 +335,6 @@ class BPMGMpesa
         update_post_meta($post_id, 'result_code', (string) $resultCode);
         update_post_meta($post_id, 'result_desc', $resultDesc);
         update_post_meta($post_id, 'date', current_time('mysql'));
-        update_post_meta($post_id, 'content_post_id', $content_post_id);
 
         // Store additional meta for successful transactions
         if ($resultCode === 0) {
@@ -327,6 +344,9 @@ class BPMGMpesa
             update_post_meta($post_id, 'transaction_date', $transactionDate);
         }
 
-        return rest_ensure_response(['status' => 'ok', 'post_id' => $post_id], 200);
+        return new WP_REST_Response([
+            'status' => 'ok',
+            'post_id' => $post_id
+        ]);
     }
 }

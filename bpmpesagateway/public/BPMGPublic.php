@@ -6,6 +6,7 @@ use BPMpesaGateway\Core\BPMGMpesa;
 use BPMpesaGateway\Core\BPMGUtils;
 use WP_Error;
 use WP_REST_Request;
+use WP_REST_Response;
 
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
@@ -28,9 +29,9 @@ class BPMGPublic
     {
         // load style only on registration page to avoid unnecessary css files
         /** @disregard */
-    if ( ! function_exists( 'bp_is_register_page' ) || ! bp_is_register_page() ) {
-        return;
-    }
+        if (! function_exists('bp_is_register_page') || ! bp_is_register_page()) {
+            return;
+        }
         wp_enqueue_style($this->bpmpesagateway . '-public-style', BPMG_PUBLIC_CSS_URL . 'BPMG-public.css', array(), $this->version, 'all');
     }
 
@@ -38,9 +39,9 @@ class BPMGPublic
     {
         //load script only on registration page to avoid uncessary js files
         /** @disregard */
-    if ( ! function_exists( 'bp_is_register_page' ) || ! bp_is_register_page() ) {
-        return;
-    }
+        if (! function_exists('bp_is_register_page') || ! bp_is_register_page()) {
+            return;
+        }
         wp_enqueue_script($this->bpmpesagateway . '-public-script', BPMG_PUBLIC_JS_URL . 'BPMG-public.min.js', array('jquery'), $this->version, array(
             'strategy'  => 'defer',
             'in_footer' => true,
@@ -48,20 +49,22 @@ class BPMGPublic
     }
 
     /**
-     * Localize scripts with AJAX and REST API data.
+     * Localizes the public script with REST API endpoints.
      *
-     * Passes essential configuration data to the frontend JavaScript via wp_localize_script(),
-     * including the WordPress AJAX handler URL, security nonce, and REST API endpoints for
-     * M-Pesa payment processing and callback handling.
+     * This function passes necessary server-side data to the localized JavaScript object
+     * for making REST API calls from the frontend. It includes the
+     * WordPress security nonce, and various M-Pesa payment endpoints.
      *
-     * The localized data is accessible in JavaScript via the `bpmpesa_ajax` object.
+     * The localized data is attached to the 'bpmpesa_ajax' JavaScript object and includes:
+     * - Nonce for REST API security verification
+     * - Callback URL for M-Pesa payment notifications
+     * - Payment confirmation endpoint
+     * - Payment initiation endpoint
+     *
+     * @since 1.0.0
+     * @access public
      *
      * @return void
-     *
-     * @uses wp_localize_script()
-     * @uses admin_url()
-     * @uses wp_create_nonce()
-     * @uses rest_url()
      */
     public function localize_scripts()
     {
@@ -70,36 +73,33 @@ class BPMGPublic
             $this->bpmpesagateway . '-public-script',
             'bpmpesa_ajax',
             [ // script : matches the handle used in wp_enqueue_script
-                'ajax_url' => admin_url('admin-ajax.php'), // core wordpress ajax handler
                 'nonce'    => wp_create_nonce('wp_rest'), // security nonce
                 'callback_url' => rest_url('bpmpesa/v1/callback'), // callback url
                 'confirm_payment_url' => rest_url('bpmpesa/v1/confirm-payment'), // endpoint to confirm payment from frontend
                 'process_payment_url' => rest_url('bpmpesa/v1/process-payment'), // endpoint to initiate payment from frontend
-                'phone_pattern' => '/^254(7(?:[0129][0-9]|4[0-3568]|5[7-9]|6[89])|11[0-5])\d{6}$/', // regex pattern for validating Kenyan phone numbers in the format 254XXXXXXXXX
             ]
         );
     }
 
     /**
-     * Register M-Pesa REST API endpoints.
+     * Registers REST API endpoints for M-Pesa payment processing.
      *
-     * Registers two custom REST API routes for M-Pesa payment processing:
-     * - `/bpmpesa/v1/callback`: Receives M-Pesa transaction callbacks from Safaricom servers.
-     *   Requires IP validation and authentication token. Handled by BPMGMpesa::handle_callback().
-     * - `/bpmpesa/v1/process-payment`: Initiates payment requests from the frontend.
-     *   Requires phone number validation, SSL, nonce verification, and rate limiting.
-     *   Handled by BPMGPublic::handle_mpesa_request().
+     * This method registers three custom REST API endpoints for handling M-Pesa
+     * payment operations:
+     * 
+     * - /callback: Endpoint for Safaricom to send payment callbacks
+     * - /process-payment: Endpoint to initiate M-Pesa STK push requests
+     * - /confirm-payment: Endpoint to verify payment status from frontend
      *
-     * Both endpoints are hidden from the REST API index for security purposes.
+     * Each endpoint includes appropriate permission callbacks, argument validation,
+     * and sanitization to ensure secure payment processing.
+     *
+     * @since 1.0.0
+     * @access public
+     *
+     * @uses register_rest_route() To register the custom endpoints with WordPress REST API
      *
      * @return void
-     *
-     * @uses register_rest_route()
-     * @uses BPMGMpesa::handle_callback()
-     * @uses BPMGPublic::handle_mpesa_request()
-     * @uses BPMGPublic::validate_safaricom_IP()
-     * @uses BPMGPublic::validate_mpesa_request()
-     * @uses BPMGPublic::validate_phone_number()
      */
     public function register_endpoints()
     {
@@ -107,6 +107,7 @@ class BPMGPublic
             'methods' => ['POST', 'GET'],
             'callback' => [BPMGMpesa::class, 'handle_callback'],
             'permission_callback' => [$this, 'validate_safaricom_IP'],
+            //'permission_callback' => '__return_true', // Temporarily allow all request for testing
             'show_in_index' => false, // Hide from REST API index
             'args'                => [
                 'bpmg_auth' => [
@@ -134,7 +135,7 @@ class BPMGPublic
         register_rest_route('bpmpesa/v1', '/confirm-payment', [
             'methods' => 'POST',
             'callback' => [$this, 'confirm_payment'],
-            'permission_callback' => [$this, 'validate_confirm_payment'], // validate nonce and SSL
+            'permission_callback' => [$this, 'validate_confirm_payment'], // validate SSL
             'args'                => [
                 'checkout_id' => [
                     'required'          => true,
@@ -146,25 +147,30 @@ class BPMGPublic
     }
 
     /**
-     * Validate Safaricom IP address and authentication token.
+     * Validates incoming callback requests from Safaricom M-Pesa API.
      *
-     * Verifies that incoming callback requests are from Safaricom servers by performing three checks:
-     * 1. SSL/HTTPS connection is active
-     * 2. Request IP is from known Safaricom IP ranges
-     * 3. Authentication token matches the site's NONCE_SALT hash
+     * This permission callback performs three layers of security validation:
+     * 1. SSL/TLS verification - Ensures the request is encrypted
+     * 2. IP whitelist validation - Confirms the request originates from Safaricom's IP ranges
+     * 3. Token authentication - Verifies a unique URL parameter matches the expected hash
      *
-     * @param WP_REST_Request $request The REST request object containing the callback data.
+     * These security measures ensure that only legitimate Safaricom callback requests
+     * are processed, preventing unauthorized access to the callback endpoint.
      *
-     * @return true|WP_Error True if all validation checks pass, WP_Error with 403 status if validation fails.
+     * @since 1.0.0
+     * @access public
      *
-     * @uses is_ssl()
-     * @uses sanitize_text_field()
-     * @uses wp_unslash()
-     * @uses filter_var()
-     * @uses BPMGUtils::is_safaricom_ip()
-     * @uses wp_hash()
-     * @uses wp_salt()
-     * @uses hash_equals()
+     * @param WP_REST_Request $request The REST API request object containing parameters and headers.
+     *
+     * @uses is_ssl() To check if the request is using SSL/TLS.
+     * @uses wp_salt() To generate the nonce salt for the authentication token.
+     * @uses wp_hash() To create a unique hash based on the nonce salt.
+     * @uses hash_equals() For timing-safe string comparison of the tokens.
+     *
+     * @return bool|WP_Error True if validation passes, WP_Error with appropriate message and status code on failure.
+     *                      - Returns 403 error if SSL is not enabled
+     *                      - Returns 403 error if IP is not from Safaricom's ranges
+     *                      - Returns 403 error if authentication token is invalid
      */
     public function validate_safaricom_IP(WP_REST_Request $request)
     {
@@ -174,7 +180,7 @@ class BPMGPublic
         }
 
         // check request IP address from server
-        $raw_ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : ''; // sanitize and validate IP address, default to UNKNOWN if not valid
+        $raw_ip = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : ''; // sanitize and validate IP address, default to UNKNOWN if not valid
         $client_ip = filter_var($raw_ip, FILTER_VALIDATE_IP) ? $raw_ip : 'UNKNOWN';
 
         // compare with expected IP addressess
@@ -206,9 +212,9 @@ class BPMGPublic
      * @param WP_REST_Request $request The REST request object (required by REST validation callback signature).
      * @param string          $key     The parameter key (required by REST validation callback signature).
      *
-     * @return true|WP_Error True if phone number is valid, WP_Error with 400 status if invalid.
-     *
      * @uses BPMGUtils::check_phone_number()
+     * 
+     * @return true|WP_Error True if phone number is valid, WP_Error with 400 status if invalid.
      */
     public function validate_phone_number($phone, $request, $key)
     {
@@ -235,17 +241,19 @@ class BPMGPublic
      * 2. Checks if client IP has exceeded rate limits for the given phone number
      *
      * @param WP_REST_Request $request The REST request object containing payment details.
-     *
-     * @return true|WP_Error True if all validations pass, WP_Error otherwise.
-     *                        Returns 403 status for SSL or nonce failures,
-     *                        429 status for rate limit exceeded.
-     *
+     * 
+     * 
      * @uses is_ssl()
      * @uses sanitize_text_field()
      * @uses wp_unslash()
      * @uses filter_var()
      * @uses wp_verify_nonce()
      * @uses BPMGUtils::rate_limit_exceeded()
+     *
+     * @return true|WP_Error True if all validations pass, WP_Error otherwise.
+     *                        Returns 403 status for SSL or nonce failures,
+     *                        429 status for rate limit exceeded.
+     *
      */
     public function validate_mpesa_request(WP_REST_Request $request)
     {
@@ -260,13 +268,41 @@ class BPMGPublic
 
         //2. rate limit check
         $phone_number = $request->get_param('phone_number');
-        $raw_ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : ''; // sanitize and validate IP address, default to UNKNOWN if not valid
+        $raw_ip = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : ''; // sanitize and validate IP address, default to UNKNOWN if not valid
         $ip = filter_var($raw_ip, FILTER_VALIDATE_IP) ? sanitize_text_field($raw_ip) : 'UNKNOWN';
         if (BPMGUtils::rate_limit_exceeded($ip, $phone_number)) {
             return new WP_Error(
                 'rate_limit_exceeded',
                 'Too many requests. Please try again later.',
                 ['status' => 429]
+            );
+        }
+
+        return true;
+    }
+
+    /**
+     * Validates SSL requirement for payment confirmation requests.
+     *
+     * This permission callback ensures that payment confirmation requests are made
+     * over a secure HTTPS connection.
+     *
+     * @since 1.0.0
+     * @access public
+     *
+     * @uses is_ssl() To verify the request is using SSL/TLS encryption.
+     *
+     * @return bool|WP_Error Returns true if SSL is enabled, WP_Error with 403 status
+     *                       and descriptive message if SSL is not enabled.
+     */
+    public function validate_confirm_payment()
+    {
+        //1. check for ssl and return error if not enabled
+        if (!is_ssl()) {
+            return new WP_Error(
+                'ssl_required',
+                'SSL is not enabled on this site, transactions cannot be processed securely',
+                ['status' => 403]
             );
         }
 
@@ -282,11 +318,10 @@ class BPMGPublic
     }
 
     /**
-     * Handle AJAX request to initiate an M-Pesa payment.
+     * Handle REST API request to initiate an M-Pesa payment.
      *
-     * This method is called via WordPress AJAX when a user submits their phone number
-     * on the BuddyPress registration form. It validates the request using a nonce,
-     * sanitizes the input, sends the payment request to the M-Pesa API, and returns
+     * This method is called when a user submits their phone number
+     * on the BuddyPress registration form. It sends the payment request to the M-Pesa API, and returns
      * a JSON response indicating success or failure.
      *
      * Hooks:
@@ -296,31 +331,102 @@ class BPMGPublic
      * @return void Outputs JSON response and terminates execution.
      */
 
-    public function handle_mpesa_request($request)
+    public function handle_mpesa_request(WP_REST_Request $request)
     {
         $phone = $request->get_param('phone_number');
         // send the request to mpesa api
         $BPMG_Mpesa = new BPMGMpesa();
         $payment_response = $BPMG_Mpesa->send_stk_push_request($phone);
-        $checkout_request_id = $payment_response['response']['CheckoutRequestID'] ?? null;
-        // handle the response
-        if ($payment_response['status'] === 'success') {
-            // send message saying we sent request 
-            $this->store_pending_transaction($checkout_request_id); // store pending transaction for later verification in callback
-            return wp_send_json_success(['message' => $payment_response['message']]); // send response back to ajax
-        } else {
-            return wp_send_json_error(['message' => $payment_response['message']]); // send error response back to ajax
+
+        // 1. Handle WP_Error response from the payment processing method
+        if (is_wp_error($payment_response)) {
+            return $payment_response;
         }
+        
+        $payment_response = $payment_response->get_data(); // Extract data from WP_REST_Response if it's a success response
+        // 2. Handle failure based on your custom 'status' key
+        if (isset($payment_response['status']) && $payment_response['status'] !== 'success') {
+            return new WP_Error(
+                'mpesa_request_failed',
+                $payment_response['message'] ?? 'Payment request failed',
+                ['status' => 400] // Triggers !response.ok in your JS fetch
+            );
+        }
+
+        // 3. Handle Success
+        $checkout_request_id = $payment_response['response']['CheckoutRequestID'] ?? null;
+        return new WP_REST_Response([
+            'message'     => $payment_response['message'],
+            'checkout_id' => $checkout_request_id,
+        ]);
     }
 
-    private function store_pending_transaction($checkout_request_id)
+    /**
+     * Confirms the status of an M-Pesa payment by checking the stored payment record.
+     *
+     * This endpoint handler is called by frontend JavaScript to poll the status of a
+     * payment after the STK push has been initiated. It queries the custom post type
+     * 'bpmg_payment' using the checkout ID to determine if the payment has been
+     * completed, failed, or is still pending.
+     *
+     * The method returns standardized responses that the frontend can use to update
+     * the user interface accordingly:
+     * - 'pending': Payment is still being processed by M-Pesa
+     * - 'success': Payment was completed successfully
+     * - 'failed': Payment failed or was cancelled by the user
+     *
+     * @since 1.0.0
+     * @access public
+     *
+     * @param WP_REST_Request $request The REST API request object containing the checkout_id parameter.
+     *
+     * @uses get_page_by_path() To find the payment record by its checkout ID slug.
+     * @uses get_post_meta() To retrieve the payment status and result description.
+     *
+     * @return WP_REST_Response Response object containing:
+     *                          - 'status': string (pending|success|failed)
+     *                          - 'message': Human-readable status description
+     */
+    public function confirm_payment(WP_REST_Request $request)
     {
-        // store pending transaction in custom post type for later verification in callback
-        $transaction = get_transient('bpmg_pending_' . $checkout_request_id);
-        if ($transaction !== false) {
-            return;
+        // get the checkout id from the request
+        $checkoutId = $request->get_param('checkout_id');
+
+        // Find the payment record
+        $existing_record = get_page_by_path($checkoutId, OBJECT, 'bpmg_payment');
+
+        if (!$existing_record) {
+            return new WP_REST_Response([
+                'status'  => 'pending',
+                'message' => 'Waiting for payment confirmation',
+            ]);
         }
 
-        return set_transient('bpmg_pending_' . $checkout_request_id, 1, 15 * MINUTE_IN_SECONDS); // 15 minutes timeout
+        // Get payment status
+        $post_id = $existing_record->ID;
+        $status = get_post_meta($post_id, 'status', true);
+        $result_desc = get_post_meta($post_id, 'result_desc', true);
+
+        // Handle failed payment
+        if ($status === 'failed') {
+            return new WP_REST_Response([
+                'status'  => 'failed',
+                'message' => $result_desc ?: 'Payment was cancelled or failed',
+            ]);
+        }
+
+        // Handle successful payment
+        if ($status === 'success') {
+            return new WP_REST_Response([
+                'status'          => 'success',
+                'message'         => $result_desc ?: 'Payment successful',
+            ]);
+        }
+
+        // Still pending
+        return new WP_REST_Response([
+            'status'  => 'pending',
+            'message' => 'Waiting for payment confirmation',
+        ]);
     }
 }
