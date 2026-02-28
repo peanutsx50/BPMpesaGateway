@@ -32,11 +32,20 @@ class BPMGPostTypes
                 'not_found'          => 'No transactions found',
                 'not_found_in_trash' => 'No transactions found in Trash',
             ],
-            'public'        => true,
+            'public'        => false,
             'show_ui'       => true,
-            'show_in_rest'  => true,
+            'show_in_rest'  => false,
             'menu_icon'     => 'dashicons-money-alt',
-            'can_export'    => true,
+            'can_export'    => false,
+            'capabilities' => [
+                'create_posts'  => 'manage_options',
+                'read_post'     => 'manage_options',
+                'read_posts'    => 'manage_options',
+                'edit_posts'    => 'manage_options',
+                'edit_post'     => 'manage_options',
+                'delete_posts'  => 'manage_options',
+                'delete_post'   => 'manage_options',
+            ],
             'supports'      => ['custom-fields'],
         ]);
     }

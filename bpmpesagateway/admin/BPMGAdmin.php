@@ -70,6 +70,12 @@ class BPMGAdmin
         if (!isset($_POST['bpmpesagateway_settings_group_nonce'])) {
             return;  // Prevent processing without nonce
         }
+
+        // verify nonce for security
+        if (!wp_verify_nonce($_POST['bpmpesagateway_settings_group_nonce'], 'bpmpesagateway_settings_group')) {
+            wp_die('Security check failed');
+        }
+        
         // check if user has permission to manage options
         if (!current_user_can('manage_options')) {
             wp_die('Unauthorized');
