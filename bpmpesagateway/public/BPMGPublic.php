@@ -12,7 +12,6 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
 
-//TODO: WHEN SENDING WP_ERROR RESPONSE, THE JS DOSENT SEEM TO RECEIVE THE ERROR MESSAGE, CHECK IF THIS IS A PROBLEM WITH THE JS
 class BPMGPublic
 {
     private $bpmpesagateway;
@@ -207,6 +206,9 @@ class BPMGPublic
      *
      * Validates that the provided phone number is in the correct format for M-Pesa payment processing.
      * Expects Kenyan phone numbers in the format: 254XXXXXXXXX (country code + 9 digits).
+     * 
+     * @since 1.0.0
+     * @access public
      *
      * @param string          $phone   The phone number to validate.
      * @param WP_REST_Request $request The REST request object (required by REST validation callback signature).
@@ -239,6 +241,9 @@ class BPMGPublic
      * Performs comprehensive security checks before processing payment requests:
      * 1. Verifies SSL/HTTPS connection is active for secure transactions
      * 2. Checks if client IP has exceeded rate limits for the given phone number
+     * 
+     * @since 1.0.0
+     * @access public
      *
      * @param WP_REST_Request $request The REST request object containing payment details.
      * 
@@ -327,6 +332,9 @@ class BPMGPublic
      * Hooks:
      * - wp_ajax_bpmg_send_mpesa_request       (for logged-in users)
      * - wp_ajax_nopriv_bpmg_send_mpesa_request (for guests)
+     * 
+     * @since 1.0.0
+     * @access public
      *
      * @return void Outputs JSON response and terminates execution.
      */
