@@ -12,13 +12,25 @@ class BPMGUtils
     public static function encrypt_credential($value)
     {
         if (empty($value)) return '';
-        return base64_encode(openssl_encrypt($value, 'AES-256-CBC', wp_salt('auth'), 0, substr(wp_salt('nonce'), 0, 16)));
+        $encrypted = base64_encode(openssl_encrypt($value, 'AES-256-CBC', wp_salt('auth'), 0, substr(wp_salt('nonce'), 0, 16)));
+        return 'enc::' . $encrypted;
     }
 
     public static function decrypt_credential($value)
     {
         if (empty($value)) return '';
+
+        if (strpos($value, 'enc::') === 0) {
+            $value = substr($value, 5); // Remove 'enc::' prefix
+        } else {
+            return $value; // Not encrypted, return as is
+        }
         return openssl_decrypt(base64_decode($value), 'AES-256-CBC', wp_salt('auth'), 0, substr(wp_salt('nonce'), 0, 16));
+    }
+
+    public static function is_encyrpted($value)
+    {
+        return strpos($value, 'enc::') === 0;
     }
 
     /**
