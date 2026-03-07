@@ -103,7 +103,7 @@ class BPMGPublic
     public function register_endpoints()
     {
         register_rest_route('bpmpesa/v1', '/callback', [
-            'methods' => ['POST', 'GET'],
+            'methods' => 'POST',
             'callback' => [BPMGMpesa::class, 'handle_callback'],
             'permission_callback' => [$this, 'validate_safaricom_IP'],
             //'permission_callback' => '__return_true', // Temporarily allow all request for testing
@@ -117,7 +117,7 @@ class BPMGPublic
         ]);
 
         register_rest_route('bpmpesa/v1', '/process-payment', [
-            'methods' => ['POST', 'GET'],
+            'methods' => 'POST',
             'callback' => [$this, 'handle_mpesa_request'],
             'permission_callback' => [$this, 'validate_mpesa_request'],
             'show_in_index' => false, // Hide from REST API index

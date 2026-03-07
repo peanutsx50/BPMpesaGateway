@@ -20,7 +20,7 @@ class BPMGPostTypes
 {
     public static function register_custom_post_type()
     {
-        register_post_type('mpesa', [
+        register_post_type('bpmg_payment', [
             'labels' => [
                 'name'               => 'Mpesa Payments',
                 'singular_name'      => 'Mpesa Payment',

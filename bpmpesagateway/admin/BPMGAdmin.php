@@ -66,11 +66,6 @@ class BPMGAdmin
     // save settings
     public function register_settings()
     {
-        // check if nonce is set in POST request
-        if (!isset($_POST['bpmpesagateway_settings_group_nonce'])) {
-            return;  // Prevent processing without nonce
-        }
-
         // verify nonce for security
         if (!wp_verify_nonce($_POST['bpmpesagateway_settings_group_nonce'], 'bpmpesagateway_settings_group')) {
             wp_die('Security check failed');
