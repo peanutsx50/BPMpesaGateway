@@ -66,13 +66,12 @@ class BPMGAdmin
     // save settings
     public function register_settings()
     {
-        // NOW it's safe to save settings
+        // check if user has permission to manage options
         if (!current_user_can('manage_options')) {
             wp_die('Unauthorized');
         }
 
         // register settings from options[array_key]
-
         register_setting(
             'bpmpesagateway_settings_group', // option group
             'bpmpesagateway_options', // option name
@@ -144,14 +143,30 @@ class BPMGAdmin
             return $existing_options;
         }
 
+        // sanitize options
+        $fields = ['consumer_key', 'consumer_secret', 'shortcode', 'passkey', 'account_reference', 'transaction_reference'];
+        foreach ($fields as $field) {
+            if (isset($options[$field])) {
+                $options[$field] = sanitize_text_field($options[$field]);
+            }
+        }
+
+        // check if consumer key, consumer secret and passkey are encrypted, if not encrypt them before saving
+        $credentials = ['consumer_key', 'consumer_secret', 'passkey'];
+        foreach ($credentials as $credential) {
+            if (!BPMGUtils::is_encrypted($options[$credential])) {
+                $options[$credential] = BPMGUtils::encrypt_credential($options[$credential]);
+            }
+        }
+
         // Sanitize and return the options array
         return [
-            'consumer_key' => sanitize_text_field($options['consumer_key']),
-            'consumer_secret' => sanitize_text_field($options['consumer_secret']),
-            'shortcode' => sanitize_text_field($options['shortcode']),
-            'passkey' => sanitize_text_field($options['passkey']),
-            'account_reference' => sanitize_text_field($options['account_reference']),
-            'transaction_reference' => sanitize_text_field($options['transaction_reference']),
+            'consumer_key' => $options['consumer_key'],
+            'consumer_secret' => $options['consumer_secret'],
+            'shortcode' => $options['shortcode'],
+            'passkey' => $options['passkey'],
+            'account_reference' => $options['account_reference'],
+            'transaction_reference' => $options['transaction_reference'],
             'amount' => absint($options['amount']),
         ];
     }

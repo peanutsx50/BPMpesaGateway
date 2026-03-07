@@ -7,15 +7,17 @@ document.addEventListener("DOMContentLoaded", function () {
 	// Guard: required elements must exist before proceeding
 	if (!button || !phoneInput || !errorDiv || !submitBtn) return;
 
-	if (bpmg_get_cookie("payment") === "paid") {
-		bpmg_mark_payment_success(button, phoneInput);
+	// check token from cookie
+	let paymentToken = bpmg_get_cookie("bpmg_payment");
+	if (paymentToken) {
+		bpmg_mark_payment_success(button, phoneInput, paymentToken);
 		return; // Do NOT allow STK push again
 	}
 
 	// Block form submission until payment is confirmed
 	const submitClickHandler = function (e) {
-		// Re-read cookie at click time rather than relying on stale closure value
-		if (bpmg_get_cookie("payment") !== "paid") {
+		if (!paymentToken) {
+			// we use cookie for UX blocking, not actual payment confirmation logic
 			e.preventDefault();
 			e.stopImmediatePropagation();
 			bpmg_show_error(
@@ -148,7 +150,7 @@ async function bpmg_start_mpesa_polling(
 			const data = await response.json();
 
 			if (data.status === "success") {
-				document.cookie = "payment=paid; path=/; SameSite=Lax; Secure";
+				document.cookie = `bpmg_payment=${data.token}; path=/; max-age=1800; SameSite=Lax; Secure`;
 				bpmg_mark_payment_success(
 					button,
 					document.getElementById("bpmg_mpesa_phone"),

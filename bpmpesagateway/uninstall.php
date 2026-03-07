@@ -7,7 +7,7 @@ if (! defined('WP_UNINSTALL_PLUGIN')) {
 
 // Remove custom post type on uninstall
 $posts = get_posts(array(
-    'post_type' => 'mpesa',
+    'post_type' => 'bpmg_payment',
     'numberposts' => -1,
     'post_status' => 'any'
 ));
@@ -17,22 +17,4 @@ foreach ($posts as $post) {
 }
 
 // 2. Delete all plugin settings/options
-$bpmg_settings_keys = [
-    'bpmpesa_allow_payments',
-    'bpmpesa_save_transactions',
-    'bpmg_consumer_key',
-    'bpmg_consumer_secret',
-    'bpmg_shortcode',
-    'bpmg_passkey',
-    'bpmpesa_account_reference',
-    'bpmpesa_transaction_reference',
-    'bpmpesa_show_paybill',
-    'bpmpesa_payment_type',
-    'bpmpesa_paybill',
-    'bpmpesa_account',
-    'bpmpesa_amount'
-];
-
-foreach ($bpmg_settings_keys as $bpmg_key) {
-    delete_option($bpmg_key); // if option dosent exist it returns false
-}
+delete_option('bpmpesagateway_options');

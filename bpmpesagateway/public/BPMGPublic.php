@@ -12,7 +12,6 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
 
-//TODO: WHEN SENDING WP_ERROR RESPONSE, THE JS DOSENT SEEM TO RECEIVE THE ERROR MESSAGE, CHECK IF THIS IS A PROBLEM WITH THE JS
 class BPMGPublic
 {
     private $bpmpesagateway;
@@ -104,7 +103,7 @@ class BPMGPublic
     public function register_endpoints()
     {
         register_rest_route('bpmpesa/v1', '/callback', [
-            'methods' => ['POST', 'GET'],
+            'methods' => 'POST',
             'callback' => [BPMGMpesa::class, 'handle_callback'],
             'permission_callback' => [$this, 'validate_safaricom_IP'],
             //'permission_callback' => '__return_true', // Temporarily allow all request for testing
@@ -118,7 +117,7 @@ class BPMGPublic
         ]);
 
         register_rest_route('bpmpesa/v1', '/process-payment', [
-            'methods' => ['POST', 'GET'],
+            'methods' => 'POST',
             'callback' => [$this, 'handle_mpesa_request'],
             'permission_callback' => [$this, 'validate_mpesa_request'],
             'show_in_index' => false, // Hide from REST API index
@@ -207,6 +206,9 @@ class BPMGPublic
      *
      * Validates that the provided phone number is in the correct format for M-Pesa payment processing.
      * Expects Kenyan phone numbers in the format: 254XXXXXXXXX (country code + 9 digits).
+     * 
+     * @since 1.0.0
+     * @access public
      *
      * @param string          $phone   The phone number to validate.
      * @param WP_REST_Request $request The REST request object (required by REST validation callback signature).
@@ -239,6 +241,9 @@ class BPMGPublic
      * Performs comprehensive security checks before processing payment requests:
      * 1. Verifies SSL/HTTPS connection is active for secure transactions
      * 2. Checks if client IP has exceeded rate limits for the given phone number
+     * 
+     * @since 1.0.0
+     * @access public
      *
      * @param WP_REST_Request $request The REST request object containing payment details.
      * 
@@ -266,7 +271,17 @@ class BPMGPublic
             );
         }
 
-        //2. rate limit check
+        /** @disregard */
+        // 2. check if user is on registration page to prevent abuse of this endpoint outside of intended context
+        if (! function_exists('bp_is_register_page') || ! bp_is_register_page()) {
+            return new WP_Error(
+                'invalid_context',
+                'This endpoint is only available during registration',
+                ['status' => 403]
+            );
+        }
+
+        //3. rate limit check
         $phone_number = $request->get_param('phone_number');
         $raw_ip = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : ''; // sanitize and validate IP address, default to UNKNOWN if not valid
         $ip = filter_var($raw_ip, FILTER_VALIDATE_IP) ? sanitize_text_field($raw_ip) : 'UNKNOWN';
@@ -327,6 +342,9 @@ class BPMGPublic
      * Hooks:
      * - wp_ajax_bpmg_send_mpesa_request       (for logged-in users)
      * - wp_ajax_nopriv_bpmg_send_mpesa_request (for guests)
+     * 
+     * @since 1.0.0
+     * @access public
      *
      * @return void Outputs JSON response and terminates execution.
      */
@@ -342,7 +360,7 @@ class BPMGPublic
         if (is_wp_error($payment_response)) {
             return $payment_response;
         }
-        
+
         $payment_response = $payment_response->get_data(); // Extract data from WP_REST_Response if it's a success response
         // 2. Handle failure based on your custom 'status' key
         if (isset($payment_response['status']) && $payment_response['status'] !== 'success') {
@@ -417,9 +435,12 @@ class BPMGPublic
 
         // Handle successful payment
         if ($status === 'success') {
+            $token = wp_generate_password(32, false); // random token
+            set_transient('bpmg_paid_' . $token, $checkoutId, 30 * MINUTE_IN_SECONDS); // store token with checkoutId for 30 minutes
             return new WP_REST_Response([
                 'status'          => 'success',
                 'message'         => $result_desc ?: 'Payment successful',
+                'token'           => $token
             ]);
         }
 
@@ -428,5 +449,27 @@ class BPMGPublic
             'status'  => 'pending',
             'message' => 'Waiting for payment confirmation',
         ]);
+    }
+
+    public function validate_token_before_signup()
+    {
+        global $bp;
+        // get token
+        $token = isset($_COOKIE['bpmg_payment']) ? sanitize_text_field(wp_unslash($_COOKIE['bpmg_payment'])) : '';
+        $valid_checkout_id = get_transient('bpmg_paid_' . $token);
+        // validate if real
+        if (!$valid_checkout_id) {
+            $bp->signup->errors['bpmg_payment'] = 'Payment confirmation is required to complete registration.';
+            return;
+        }
+    }
+
+    public function cleanup_payment_token_after_signup($user_id)
+    {
+        if (isset($_COOKIE['bpmg_payment'])) {
+            $token = sanitize_text_field(wp_unslash($_COOKIE['bpmg_payment']));
+            delete_transient('bpmg_paid_' . $token);
+            setcookie('bpmg_payment', '', time() - 3600, '/');
+        }
     }
 }

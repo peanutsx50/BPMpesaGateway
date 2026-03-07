@@ -86,6 +86,8 @@ class BPMG
         $this->loader->add_action('wp_enqueue_scripts', $public, 'localize_scripts');
         $this->loader->add_action('bp_before_registration_submit_buttons', $public, 'bpmg_add_custom_registration_fields');
         $this->loader->add_action('rest_api_init', $public, 'register_endpoints');
+        $this->loader->add_action('bp_signup_validate', $public, 'validate_token_before_signup'); // runs before the actual signup
+        $this->loader->add_action('bp_core_signup_user', $public, 'cleanup_payment_token_after_signup'); // runs after user is created
 
     }
 
