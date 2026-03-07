@@ -270,8 +270,8 @@ class BPMGPublic
                 ['status' => 403]
             );
         }
-        
-        //3. rate limit check
+
+        //2. rate limit check
         $phone_number = $request->get_param('phone_number');
         $raw_ip = isset($_SERVER['REMOTE_ADDR']) ? sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR'])) : ''; // sanitize and validate IP address, default to UNKNOWN if not valid
         $ip = filter_var($raw_ip, FILTER_VALIDATE_IP) ? sanitize_text_field($raw_ip) : 'UNKNOWN';
