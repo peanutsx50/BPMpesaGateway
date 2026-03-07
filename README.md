@@ -102,6 +102,8 @@ if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROT
 
 Replace `XXXX` with your actual ngrok subdomain.
 
+**NB** Incase you are having trouble using ngrok with wordpress i.e. Localhost redirects, i'd suggest you use [localwp](https://localwp.com/)
+
 3. **restart apache2**: once you add the code to your wp-config, you need to restart apache2 for changes to take effect
 ```bash
 sudo systemctl restart apache2
