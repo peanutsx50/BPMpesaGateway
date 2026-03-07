@@ -14,6 +14,7 @@
  *
  * @wordpress-plugin
  * Plugin Name:       BPMpesaGateway
+ * Plugin Slug:       bpmpesagateway
  * Plugin URI:        https://surgetech.co.ke/bpmpesagateway
  * Description:       BPMpesaGateway is a WordPress plugin that turns your BuddyPress community into a paid membership site, requiring M-Pesa payment from visitors before they can join the community.
  * Version:           1.0.0
