@@ -66,18 +66,12 @@ class BPMGAdmin
     // save settings
     public function register_settings()
     {
-        // verify nonce for security
-        if (!wp_verify_nonce($_POST['bpmpesagateway_settings_group_nonce'], 'bpmpesagateway_settings_group')) {
-            wp_die('Security check failed');
-        }
-
         // check if user has permission to manage options
         if (!current_user_can('manage_options')) {
             wp_die('Unauthorized');
         }
 
         // register settings from options[array_key]
-
         register_setting(
             'bpmpesagateway_settings_group', // option group
             'bpmpesagateway_options', // option name
