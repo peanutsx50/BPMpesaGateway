@@ -12,7 +12,7 @@
 
 namespace BPMpesaGateway\Base;
 
-if (!defined('ABSPATH')) {
+if (! defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
 
@@ -21,7 +21,7 @@ class BPMGPostTypes
     public static function register_custom_post_type()
     {
         register_post_type('bpmg_payment', [
-            'labels' => [
+            'labels'       => [
                 'name'               => 'Mpesa Payments',
                 'singular_name'      => 'Mpesa Payment',
                 'add_new_item'       => 'New Transaction', // changes title of the page
@@ -32,21 +32,21 @@ class BPMGPostTypes
                 'not_found'          => 'No transactions found',
                 'not_found_in_trash' => 'No transactions found in Trash',
             ],
-            'public'        => false,
-            'show_ui'       => true,
-            'show_in_rest'  => false,
-            'menu_icon'     => 'dashicons-money-alt',
-            'can_export'    => false,
+            'public'       => false,
+            'show_ui'      => true,
+            'show_in_rest' => false,
+            'menu_icon'    => 'dashicons-money-alt',
+            'can_export'   => false,
             'capabilities' => [
-                'create_posts'  => 'manage_options',
-                'read_post'     => 'manage_options',
-                'read_posts'    => 'manage_options',
-                'edit_posts'    => 'manage_options',
-                'edit_post'     => 'manage_options',
-                'delete_posts'  => 'manage_options',
-                'delete_post'   => 'manage_options',
+                'create_posts' => 'manage_options',
+                'read_post'    => 'manage_options',
+                'read_posts'   => 'manage_options',
+                'edit_posts'   => 'manage_options',
+                'edit_post'    => 'manage_options',
+                'delete_posts' => 'manage_options',
+                'delete_post'  => 'manage_options',
             ],
-            'supports'      => ['custom-fields'],
+            'supports'     => ['custom-fields'],
         ]);
     }
 
@@ -55,12 +55,12 @@ class BPMGPostTypes
     {
         unset($columns['date']);
         unset($columns['title']);
-        $columns['account_ref'] = 'Transaction Ref';
+        $columns['checkout_id']  = 'Transaction Ref';
         $columns['phone_number'] = 'Phone Number';
-        $columns['amount'] = 'Amount';
-        $columns['status'] = 'Status';
-        $columns['result_desc'] = 'Description';
-        $columns['date'] = 'Date';
+        $columns['amount']       = 'Amount';
+        $columns['status']       = 'Status';
+        $columns['result_desc']  = 'Description';
+        $columns['date']         = 'Date';
         return $columns;
     }
 
@@ -94,14 +94,26 @@ class BPMGPostTypes
     {
         $columns['amount'] = 'amount';
         $columns['status'] = 'status';
-        $columns['date'] = 'date';
+        $columns['date']   = 'date';
         return $columns;
     }
 
     //handle sorting by meta value
     public static function handle_sorting_by_meta_value($query)
     {
-        if (!is_admin() || !$query->is_main_query()) return;
+        if (! is_admin() || ! $query->is_main_query()) {
+            return;
+        }
+
+        // Only affect your CPT admin list.
+        $post_type = $query->get('post_type');
+        if ($post_type !== 'bpmg_payment') {
+            return;
+        }
+
+        // Show only successful transactions.
+        $query->set('meta_key', 'status');
+        $query->set('meta_value', 'success');
 
         if ($query->get('orderby') == 'amount') {
             $query->set('meta_key', 'amount');
