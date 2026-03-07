@@ -20,7 +20,7 @@ namespace BPMpesaGateway\Base;
 use BPMpesaGateway\Admin\BPMGAdmin;
 use BPMpesaGateway\Public\BPMGPublic;
 
-if (!defined('ABSPATH')) {
+if (! defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
 
@@ -52,16 +52,15 @@ class BPMG
         $this->loader = new BPMGLoader();
     }
 
-
     public function define_post_types()
     {
         $postTypes = new BPMGPostTypes();
 
         // Loader ($hook, $component, $callback, $priority = 10, $accepted_args = 1)
         $this->loader->add_action('init', $postTypes, 'register_custom_post_type');
-        $this->loader->add_filter('manage_mpesa_posts_columns', $postTypes, 'set_custom_edit_mpesacolumns');
-        $this->loader->add_action('manage_mpesa_posts_custom_column', $postTypes, 'custom_mpesacolumns', 10, 2);
-        $this->loader->add_filter('manage_edit-mpesa_sortable_columns', $postTypes, 'sortable_columns');
+        $this->loader->add_filter('manage_bpmg_payment_posts_columns', $postTypes, 'set_custom_edit_mpesacolumns');
+        $this->loader->add_action('manage_bpmg_payment_posts_custom_column', $postTypes, 'custom_mpesacolumns', 10, 2);
+        $this->loader->add_filter('manage_edit-bpmg_payment_sortable_columns', $postTypes, 'sortable_columns');
         $this->loader->add_action('pre_get_posts', $postTypes, 'handle_sorting_by_meta_value');
     }
 
@@ -77,7 +76,8 @@ class BPMG
         $this->loader->add_action('plugins_loaded', $admin, 'check_ssl');
     }
 
-    public function define_public_hooks() {
+    public function define_public_hooks()
+    {
         $public = new BPMGPublic($this->bpmpesagateway, $this->version);
 
         // Loader ($hook, $component, $callback, $priority = 10, $accepted_args = 1)
@@ -86,7 +86,7 @@ class BPMG
         $this->loader->add_action('wp_enqueue_scripts', $public, 'localize_scripts');
         $this->loader->add_action('bp_before_registration_submit_buttons', $public, 'bpmg_add_custom_registration_fields');
         $this->loader->add_action('rest_api_init', $public, 'register_endpoints');
-        $this->loader->add_action('bp_signup_validate', $public, 'validate_token_before_signup'); // runs before the actual signup
+        $this->loader->add_action('bp_signup_validate', $public, 'validate_token_before_signup');        // runs before the actual signup
         $this->loader->add_action('bp_core_signup_user', $public, 'cleanup_payment_token_after_signup'); // runs after user is created
 
     }
