@@ -68,8 +68,8 @@ class BPMGPostTypes
     public static function custom_mpesacolumns($column, $post_id)
     {
         switch ($column) {
-            case 'account_ref':
-                echo esc_html(get_post_meta($post_id, 'account_ref', true));
+            case 'checkout_id':
+                echo esc_html(get_post_meta($post_id, 'checkout_id', true));
                 break;
             case 'phone_number':
                 echo esc_html(get_post_meta($post_id, 'phone_number', true));
